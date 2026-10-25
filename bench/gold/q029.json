@@ -1,0 +1,47 @@
+{
+  "expect": "rows",
+  "id": "q029",
+  "result": {
+    "columns": [
+      "wochentag_nr",
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        1,
+        "95.101402"
+      ],
+      [
+        2,
+        "98.908974"
+      ],
+      [
+        3,
+        "100.258396"
+      ],
+      [
+        4,
+        "94.357475"
+      ],
+      [
+        5,
+        "92.351225"
+      ],
+      [
+        6,
+        "76.517692"
+      ],
+      [
+        7,
+        "67.547900"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "962d583ff1bfdac99b0b98b2c5fa9e4fdadaa7c5d4151d5e45b4c1b93dd1fb9c"
+}

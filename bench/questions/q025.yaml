@@ -1,0 +1,25 @@
+id: q025
+split: test
+tier: T2
+tags: [kapazitaet, bundesland, anzahl, synonym]
+de: "Wie viele Photovoltaik-Anlagen wurden 2025 in Bayern neu in Betrieb genommen?"
+en: "How many solar PV units were newly commissioned in Bavaria in 2025?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(k.anzahl_zubau) AS anzahl_zubau
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE b.name_de = N'Bayern'
+    AND e.name_de = N'Photovoltaik'
+    AND k.datum_key BETWEEN 20250101 AND 20251201
+check_sql: |
+  SELECT SUM(v.anzahl_zubau) AS summe
+  FROM rpt.v_kapazitaet v
+  WHERE v.jahr_monat LIKE '2025-%'
+    AND v.bundesland_key = 2
+    AND v.energietraeger_key = 1
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Anzahl (anzahl_zubau), nicht MW; Bavaria = Bayern. Wert 2026-10-25: 157401."

@@ -1,0 +1,27 @@
+id: q028
+split: test
+tier: T2
+tags: [last, monat, gruppierung]
+de: "Wie hoch war die Netzlast in DE-LU in jedem Monat des Jahres 2025 (Monatsnummer und MWh), aufsteigend nach Monat?"
+en: "What was the grid load in DE-LU in each month of 2025 (month number and MWh), in ascending month order?"
+expect: rows
+ordered: true
+gold_sql: |
+  SELECT d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh
+  FROM dw.fact_last l
+  JOIN dw.dim_region r ON r.region_key = l.region_key
+  JOIN dw.dim_datum d ON d.datum_key = l.datum_key
+  WHERE r.smard_code = N'DE-LU'
+    AND d.jahr = 2025
+  GROUP BY d.monat
+  ORDER BY d.monat
+check_sql: |
+  SELECT (v.datum_key / 100) % 100 AS m, SUM(v.netzlast_mwh) AS s
+  FROM rpt.v_last v
+  WHERE v.region_key = 1
+    AND v.datum_key BETWEEN 20250101 AND 20251231
+  GROUP BY (v.datum_key / 100) % 100
+  ORDER BY (v.datum_key / 100) % 100
+tables: [dw.dim_datum, dw.dim_region, dw.fact_last]
+duckdb: ok
+notes: "12 Zeilen, Monatsnummer 1 bis 12. Wert 2026-10-25: Januar 44635302.510 MWh, Dezember 42737622.410 MWh."

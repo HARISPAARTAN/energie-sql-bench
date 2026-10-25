@@ -1,0 +1,22 @@
+id: q027
+split: test
+tier: T2
+tags: [kapazitaet, summe, awz]
+de: "Wie groß war die installierte Leistung der Offshore-Windenergie in Deutschland Ende September 2026 (MW)?"
+en: "What was the installed offshore wind capacity in Germany at the end of September 2026 (MW)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(k.bestand_mw) AS bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Wind Offshore'
+    AND k.datum_key = 20260901
+check_sql: |
+  SELECT SUM(v.anfangsbestand_mw + v.zubau_mw - v.abgang_mw) AS bestand
+  FROM rpt.v_kapazitaet v
+  WHERE v.energietraeger_key = 3
+    AND v.datum_key <= 20260901
+tables: [dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Summe über alle Bundesländer einschließlich AWZ, Mecklenburg-Vorpommern und Niedersachsen; nur AWZ ist zu wenig. Wert 2026-10-25: 11598.743."

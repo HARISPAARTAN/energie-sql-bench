@@ -1,0 +1,28 @@
+id: q029
+split: test
+tier: T2
+tags: [preis, wochentag, gruppierung]
+de: "Wie hoch war der durchschnittliche Day-Ahead-Preis 2025 in DE-LU je Wochentag? Gib die Wochentagsnummer (1 = Montag bis 7 = Sonntag) und den Durchschnitt aus, sortiert nach Wochentag."
+en: "What was the average day-ahead price in DE-LU in 2025 per weekday? Return the weekday number (1 = Monday to 7 = Sunday) and the average, sorted by weekday."
+expect: rows
+ordered: true
+gold_sql: |
+  SELECT d.wochentag_nr, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+  WHERE r.smard_code = N'DE-LU'
+    AND d.jahr = 2025
+  GROUP BY d.wochentag_nr
+  ORDER BY d.wochentag_nr
+check_sql: |
+  SELECT (DATEDIFF(day, '2024-12-30', d.datum) % 7) + 1 AS wt, AVG(v.day_ahead_eur_mwh) AS mittel
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1
+    AND d.datum >= '2025-01-01' AND d.datum < '2026-01-01'
+  GROUP BY (DATEDIFF(day, '2024-12-30', d.datum) % 7) + 1
+  ORDER BY (DATEDIFF(day, '2024-12-30', d.datum) % 7) + 1
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "dim_datum.wochentag_nr ist 1 = Montag; DATEPART(weekday) hängt von DATEFIRST ab. Wert 2026-10-25: Montag 95.101402, Sonntag 67.547900 €/MWh."

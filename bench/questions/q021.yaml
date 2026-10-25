@@ -1,0 +1,25 @@
+id: q021
+split: test
+tier: T2
+tags: [erzeugung, energietraeger, synonym]
+de: "Wie viel Strom erzeugten Braunkohlekraftwerke in DE-LU im Jahr 2024 (MWh)?"
+en: "How much electricity did lignite power plants generate in DE-LU in 2024 (MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND e.name_de = N'Braunkohle'
+    AND f.datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  SELECT SUM(v.erzeugung_mwh) AS summe
+  FROM rpt.v_erzeugung v
+  WHERE v.region_key = 1
+    AND v.energietraeger_key = 9
+    AND v.ts_utc >= '2023-12-31T23:00:00' AND v.ts_utc < '2024-12-31T23:00:00'
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Braunkohle, nicht Steinkohle; EN lignite. Wert 2026-10-25: 70986354.250."

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q027",
+  "result": {
+    "columns": [
+      "bestand_mw"
+    ],
+    "rows": [
+      [
+        "11598.743"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "d9ea8d554127cbd36854220fe781856de528261deeb33eda5f7ea5ea3f440b9e"
+}

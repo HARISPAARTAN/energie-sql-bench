@@ -1,0 +1,35 @@
+{
+  "expect": "rows",
+  "id": "q030",
+  "result": {
+    "columns": [
+      "quartal",
+      "erzeugung_mwh"
+    ],
+    "rows": [
+      [
+        1,
+        "17784128.000"
+      ],
+      [
+        2,
+        "11698223.000"
+      ],
+      [
+        3,
+        "9900140.000"
+      ],
+      [
+        4,
+        "17599204.500"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "edaaff6435832ec0a03e5da6d77d71fda134d112382d8fee08b4fcfab8925bc3"
+}

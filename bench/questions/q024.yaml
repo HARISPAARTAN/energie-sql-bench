@@ -1,0 +1,26 @@
+id: q024
+split: test
+tier: T2
+tags: [erzeugung, kategorie, gruppierung]
+de: "Wie verteilte sich die Stromerzeugung 2024 in DE-LU auf erneuerbare und konventionelle Energieträger? Gib die Kategorie (deutscher Name) und die Erzeugung in MWh aus."
+en: "How was electricity generation in DE-LU in 2024 split between renewable and conventional carriers? Return the category (German name) and the generation in MWh."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT e.kategorie_de AS kategorie, SUM(f.erzeugung_mwh) AS erzeugung_mwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND f.datum_key BETWEEN 20240101 AND 20241231
+  GROUP BY e.kategorie_de
+check_sql: |
+  SELECT CASE WHEN v.energietraeger_key BETWEEN 1 AND 6 THEN N'Erneuerbar' ELSE N'Konventionell' END AS k,
+         SUM(v.erzeugung_mwh) AS s
+  FROM rpt.v_erzeugung v
+  WHERE v.region_key = 1
+    AND v.ts_utc >= '2023-12-31T23:00:00' AND v.ts_utc < '2024-12-31T23:00:00'
+  GROUP BY CASE WHEN v.energietraeger_key BETWEEN 1 AND 6 THEN N'Erneuerbar' ELSE N'Konventionell' END
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Zwei Zeilen Erneuerbar und Konventionell; Pumpspeicher zählt als Konventionell. Wert 2026-10-25: Erneuerbar 257305226.500 MWh, Konventionell 181626426.250 MWh."

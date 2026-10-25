@@ -1,0 +1,30 @@
+id: q026
+split: test
+tier: T2
+tags: [kapazitaet, bundesland, zubau, having]
+de: "Wie viel Wind-Onshore-Leistung (MW) wurde 2025 in den einzelnen Bundesländern zugebaut? Gib nur Bundesländer mit Zubau über 0 aus, mit Name und MW."
+en: "How much onshore wind capacity (MW) was added in each federal state in 2025? Return only states with additions above 0, with name and MW."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT b.name_de AS bundesland, SUM(k.zubau_mw) AS zubau_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Wind Onshore'
+    AND k.datum_key BETWEEN 20250101 AND 20251201
+  GROUP BY b.name_de
+  HAVING SUM(k.zubau_mw) > 0
+check_sql: |
+  SELECT t.name_de, t.zubau
+  FROM (
+      SELECT g.name_de, SUM(v.zubau_mw) AS zubau
+      FROM rpt.v_kapazitaet v
+      JOIN rpt.v_dim_bundesland g ON g.bundesland_key = v.bundesland_key
+      WHERE v.energietraeger_key = 2 AND v.jahr_monat LIKE '2025-%'
+      GROUP BY g.name_de
+  ) t
+  WHERE t.zubau > 0
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "HAVING SUM(zubau_mw) > 0; der Bestand ist falsch. Wert 2026-10-25: 13 Zeilen, größter Zubau Nordrhein-Westfalen 1362.313 MW."
