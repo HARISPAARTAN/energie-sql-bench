@@ -166,3 +166,94 @@ def gold_build(
         typer.echo(line)
     typer.echo(f"{len(entries)} Gold-Dateien geschrieben, {len(errors)} Fehler")
     raise typer.Exit(1 if errors else 0)
+
+
+@app.command()
+def run(
+    provider: Annotated[str, typer.Option(help="anthropic, ollama oder synthetic")],
+    variant: Annotated[str, typer.Option(help="v1 bis v6")] = "v4",
+    model: Annotated[str | None, typer.Option(help="Modell-ID; Standard je Provider")] = None,
+    split: Annotated[str, typer.Option(help="test, dev oder all")] = "test",
+    lang: Annotated[str, typer.Option(help="Sprachen, Komma-getrennt")] = "de,en",
+    repeat: Annotated[int, typer.Option(help="Wiederholungen")] = 1,
+    self_correct: Annotated[bool, typer.Option("--self-correct", help="bis zu zwei Reparaturen")] = False,
+    max_usd: Annotated[float | None, typer.Option(help="Kostenobergrenze in USD")] = None,
+    limit: Annotated[int | None, typer.Option(help="nur die ersten N Items (Entwicklung)")] = None,
+    run_id: Annotated[str | None, typer.Option(help="Name des Laufordners")] = None,
+) -> None:
+    """Einen Lauf gegen die lokale Datenbank ausführen und unter results/runs/ aufzeichnen."""
+    import datetime as dt
+
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.llm import default_model
+    from energie_sql_bench.llm.base import ProviderError
+    from energie_sql_bench.runner import RunError, RunSpec, default_run_id, live_run, preflight_estimate
+
+    settings = load_settings()
+    model = model or default_model(provider, settings)
+    spec = RunSpec(
+        run_id=run_id or default_run_id(provider, model, variant, self_correct, split, dt.date.today()),
+        provider=provider,
+        model=model,
+        variant=variant,
+        split=split,
+        langs=tuple(x.strip() for x in lang.split(",") if x.strip()),
+        repeats=repeat,
+        self_correct=self_correct,
+        max_usd=settings.cost.max_run_usd if max_usd is None else max_usd,
+        limit=limit,
+    )
+    try:
+        estimate = preflight_estimate(settings, spec)
+        typer.echo(
+            f"Lauf {spec.run_id}: Kostenschätzung (obere Grenze, ohne Cache) {estimate:.2f} USD, "
+            f"Grenze {spec.max_usd:.2f} USD"
+        )
+        run_dir, summary = live_run(settings, spec)
+    except (RunError, ProviderError) as exc:
+        typer.echo(f"Abbruch: {exc}")
+        raise typer.Exit(1) from exc
+    ex = summary["ex"]
+    typer.echo(
+        f"EX {ex['mean']:.6f} ({ex['correct']}/{ex['n']}), EX-strict {summary['ex_strict']['mean']:.6f}, "
+        f"Kosten {summary['cost']['usd']:.4f} USD"
+    )
+    if not summary["complete"]:
+        typer.echo(f"Unvollständig: {summary['aborted_reason']}")
+    typer.echo(f"Aufgezeichnet in {run_dir}")
+
+
+@app.command()
+def replay(
+    run_id: Annotated[str | None, typer.Argument(help="Laufordner unter results/runs/")] = None,
+    all_runs: Annotated[bool, typer.Option("--all", help="alle aufgezeichneten Läufe")] = False,
+) -> None:
+    """Aufgezeichnete Läufe offline neu bewerten und mit summary.json vergleichen."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.runner import list_runs, replay_run, summaries_equal
+
+    settings = load_settings()
+    run_ids = list_runs(settings) if all_runs else [run_id] if run_id else []
+    if not run_ids:
+        typer.echo("Kein Lauf angegeben (RUN_ID oder --all)")
+        raise typer.Exit(2)
+    failed = 0
+    for rid in run_ids:
+        recomputed, stored = replay_run(settings, rid)
+        same = summaries_equal(recomputed, stored)
+        failed += not same
+        typer.echo(("OK " if same else "ABWEICHUNG ") + rid)
+    raise typer.Exit(1 if failed else 0)
+
+
+@app.command()
+def label(run_id: Annotated[str, typer.Argument(help="Laufordner unter results/runs/")]) -> None:
+    """Falsche Antworten ohne automatische Kategorie in analysis/labels.csv zur Handkategorisierung eintragen."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.files import read_json
+    from energie_sql_bench.taxonomy import export_label_template
+
+    settings = load_settings()
+    summary = read_json(settings.path(f"results/runs/{run_id}/summary.json"))
+    added = export_label_template(settings.path("analysis/labels.csv"), run_id, summary["items"])
+    typer.echo(f"{added} Zeilen zur Kategorisierung (E3 bis E9) in analysis/labels.csv ergänzt")

@@ -1,0 +1,4712 @@
+{
+  "aborted_reason": null,
+  "abstention": {
+    "correct": 9,
+    "expected": 10,
+    "precision": 0.529412,
+    "predicted": 17,
+    "recall": 0.9
+  },
+  "blocked_attempts": 10,
+  "by_lang": {
+    "de": {
+      "correct": 55,
+      "ex": 0.916667,
+      "n": 60
+    },
+    "en": {
+      "correct": 56,
+      "ex": 0.933333,
+      "n": 60
+    }
+  },
+  "by_tier": {
+    "A": {
+      "correct": 9,
+      "ex": 0.9,
+      "n": 10
+    },
+    "T1": {
+      "correct": 23,
+      "ex": 0.958333,
+      "n": 24
+    },
+    "T2": {
+      "correct": 30,
+      "ex": 0.9375,
+      "n": 32
+    },
+    "T3": {
+      "correct": 30,
+      "ex": 0.9375,
+      "n": 32
+    },
+    "T4": {
+      "correct": 19,
+      "ex": 0.863636,
+      "n": 22
+    }
+  },
+  "complete": true,
+  "cost": {
+    "eur": 0.0,
+    "usd": 0.0,
+    "usd_per_correct": 0.0
+  },
+  "de_vs_en": {
+    "de_only": 3,
+    "en_only": 4,
+    "p_value": 1.0
+  },
+  "ex": {
+    "ci95": [
+      0.863591,
+      0.960043
+    ],
+    "correct": 111,
+    "interval": "wilson",
+    "items": 120,
+    "max": 0.925,
+    "mean": 0.925,
+    "min": 0.925,
+    "n": 120,
+    "per_repeat": [
+      0.925
+    ]
+  },
+  "ex_strict": {
+    "ci95": [
+      0.863591,
+      0.960043
+    ],
+    "correct": 111,
+    "interval": "wilson",
+    "items": 120,
+    "max": 0.925,
+    "mean": 0.925,
+    "min": 0.925,
+    "n": 120,
+    "per_repeat": [
+      0.925
+    ]
+  },
+  "items": [
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "20ffda5eb609674e",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q001-de",
+      "labels": [
+        "E12"
+      ],
+      "lang": "de",
+      "question_id": "q001",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a05c1db4eae51bce",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 4.503,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a5d9e8878a5b8c80",
+          "sql": "SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "fdc81904a398ee9c79341d8ee93e0a9d70fc6d680a7c46b3a9496366c610850f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q001-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q001",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.747,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b09a8fcf9f7b9ffd",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231\n  AND p.day_ahead_eur_mwh < 0\nLIMIT 10",
+          "sql_sha256": "f38eaeb16c9611e82a7f8282561a2515eb8a028f35e4f17ba03b4eb8a4468267",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.3,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e4521c607c85f169",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231\n  AND p.day_ahead_eur_mwh < 0",
+          "sql_sha256": "6807c3906c8fa0361e9351ba083136fc8cf15df9d265bc4800d8c7a2a9bf5a7e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q002-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q002",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.3,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b314e9c96ed2673c",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231\n  AND p.day_ahead_eur_mwh < 0",
+          "sql_sha256": "6807c3906c8fa0361e9351ba083136fc8cf15df9d265bc4800d8c7a2a9bf5a7e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q002-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q002",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "c1ace999edbcb888",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.178,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "0182361c55b7fcff",
+          "sql": "SELECT TOP 5 b.name_de, k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20260901\nORDER BY k.bestand_mw DESC",
+          "sql_sha256": "ebe17b919d97ccbb4d61f70d10b036fc08323725f86047f4e289d177998046bc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q003-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q003",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.178,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "34501694058011a6",
+          "sql": "SELECT TOP 5 b.name_de, k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20260901\nORDER BY k.bestand_mw DESC",
+          "sql_sha256": "ebe17b919d97ccbb4d61f70d10b036fc08323725f86047f4e289d177998046bc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q003-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q003",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "81d3b2cf05bab9b0",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q004-de",
+      "labels": [
+        "E12"
+      ],
+      "lang": "de",
+      "question_id": "q004",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 35.969,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "d17291cd83a63ff4",
+          "sql": "SELECT e.name_de, SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20250101 AND 20251231\nGROUP BY e.name_de",
+          "sql_sha256": "113b82ba98810b2f031910575f313a6d77a4865c4c5f3a42ee9c73b8c6a625b5",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q004-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q004",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.51,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "82fed9557dfdbb55",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Onshore'\n  AND f.datum_key = 20251026",
+          "sql_sha256": "7a5d9a6c8429afec4fb274c66c5436562e361e7c22f16610f1b5f4fd2e9c23d3",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q005-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q005",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.721,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a8fb62224ef11eed",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Onshore'\n  AND f.datum_key = 20251026\nLIMIT 10",
+          "sql_sha256": "d47636247c0be7b3951ca08f8555644bad73cc7bee2b03f5d59318ba4471550d",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.51,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "86980d6d00705d26",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Onshore'\n  AND f.datum_key = 20251026",
+          "sql_sha256": "7a5d9a6c8429afec4fb274c66c5436562e361e7c22f16610f1b5f4fd2e9c23d3",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q005-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q005",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 11.225,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "24e1ca9dfb2b225f",
+          "sql": "SELECT AVG(f.erzeugung_mwh) * 4 AS leistung_mw\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_zeit z ON z.zeit_key = f.zeit_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key = 20250621\n  AND z.stunde = 13",
+          "sql_sha256": "01ab9dcc74c7b64f03b0e7d1697c27bc4303c3a9231b198f2ff37f46ac5df348",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q006-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q006",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "5c4b73f4b0f725bf",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 11.225,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a3cc3a69340b4406",
+          "sql": "SELECT AVG(f.erzeugung_mwh) * 4 AS leistung_mw\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_zeit z ON z.zeit_key = f.zeit_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key = 20250621\n  AND z.stunde = 13",
+          "sql_sha256": "01ab9dcc74c7b64f03b0e7d1697c27bc4303c3a9231b198f2ff37f46ac5df348",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q006-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q006",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.121,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2aa00a2074847e65",
+          "sql": "SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)\n       / SUM(f.erzeugung_mwh) AS ee_anteil_prozent\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20250101 AND 20251231\nLIMIT 10",
+          "sql_sha256": "5bb6de3b19dcb47560a9676feeb4b28a71276433c7053e04c58f2b6528294a88",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 42.887,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "76610f71163558e3",
+          "sql": "SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)\n       / SUM(f.erzeugung_mwh) AS ee_anteil_prozent\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "12cf7452641e7506390f0e89e552d64f94666033a29c1d55a95feb27728c23e1",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q007-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q007",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 42.887,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b9d13401ba468ba7",
+          "sql": "SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)\n       / SUM(f.erzeugung_mwh) AS ee_anteil_prozent\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "12cf7452641e7506390f0e89e552d64f94666033a29c1d55a95feb27728c23e1",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q007-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q007",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "95c06e1c30ec9436",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 3.191,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e229398b5d8da95f",
+          "sql": "SELECT TOP 1 v.start_lokal, v.stunden\nFROM rpt.v_negative_preisphasen v\nJOIN dw.dim_region r ON r.region_key = v.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND v.start_datum_key BETWEEN 20250101 AND 20251231\nORDER BY v.stunden DESC, v.start_utc ASC",
+          "sql_sha256": "1796017148adefeae7ea6f3f9dee038837d0d40bdccc0392812d72e5d530f7dd",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q008-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q008",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 3.191,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "24665990b86ab57e",
+          "sql": "SELECT TOP 1 v.start_lokal, v.stunden\nFROM rpt.v_negative_preisphasen v\nJOIN dw.dim_region r ON r.region_key = v.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND v.start_datum_key BETWEEN 20250101 AND 20251231\nORDER BY v.stunden DESC, v.start_utc ASC",
+          "sql_sha256": "1796017148adefeae7ea6f3f9dee038837d0d40bdccc0392812d72e5d530f7dd",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q008-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q008",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 5.83,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "cfbe323ceebdac4f",
+          "sql": "SELECT TOP 1 d.monat, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU' AND d.jahr = 2025\nGROUP BY d.monat\nORDER BY avg_preis_eur_mwh DESC, d.monat ASC",
+          "sql_sha256": "ad83c15a4719fd5e8808b5acce55449fb0f204374cda51f031e86103c9283234",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q009-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q009",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 5.83,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2fc10e280274ea7e",
+          "sql": "SELECT TOP 1 d.monat, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU' AND d.jahr = 2025\nGROUP BY d.monat\nORDER BY avg_preis_eur_mwh DESC, d.monat ASC",
+          "sql_sha256": "ad83c15a4719fd5e8808b5acce55449fb0f204374cda51f031e86103c9283234",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q009-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q009",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "1336826644933c9f",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q010-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q010",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "91467ba327029b09",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q010-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q010",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.4,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2907f7e5a4528a6a",
+          "sql": "SELECT MAX(p.day_ahead_eur_mwh) AS max_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "bca1067713ce90088c8ae45a00ca5e85c0c33728e393ce90ddc4919ec9cc154c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q011-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q011",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "82c6db79174cdb38",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 2.4,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c293248f74de122c",
+          "sql": "SELECT MAX(p.day_ahead_eur_mwh) AS max_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "bca1067713ce90088c8ae45a00ca5e85c0c33728e393ce90ddc4919ec9cc154c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q011-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q011",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.35,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "cf833a783d73be92",
+          "sql": "SELECT MIN(p.day_ahead_eur_mwh) AS min_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "f84f434c09eff4a93a8180ed75973ad5d4a448fa4dc02b02cfd3ca478863ef17",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q012-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q012",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.35,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7748925af36f1061",
+          "sql": "SELECT MIN(p.day_ahead_eur_mwh) AS min_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "f84f434c09eff4a93a8180ed75973ad5d4a448fa4dc02b02cfd3ca478863ef17",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q012-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q012",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.799,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "407c3f51e1c8d5ad",
+          "sql": "SELECT SUM(l.netzlast_mwh) AS netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "1e55f9dd3e22ce1e1f4d893e1152902193cd96f76101bf13393e9c079c31b6cc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q013-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q013",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.799,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "10e1e2fc368e9bfb",
+          "sql": "SELECT SUM(l.netzlast_mwh) AS netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "1e55f9dd3e22ce1e1f4d893e1152902193cd96f76101bf13393e9c079c31b6cc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q013-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q013",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.856,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "489b312d1c42b3bb",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250501 AND 20250531\n  AND p.day_ahead_eur_mwh <= 0",
+          "sql_sha256": "b3cf5a9c201ff03cf45bcf0a33c5409f7a5952e3cbc91d5281f54dd6d8663070",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q014-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q014",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.856,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2ca7bb5a2024c2e3",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250501 AND 20250531\n  AND p.day_ahead_eur_mwh <= 0",
+          "sql_sha256": "b3cf5a9c201ff03cf45bcf0a33c5409f7a5952e3cbc91d5281f54dd6d8663070",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q014-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q014",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.828,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "4c17e498e5d8622c",
+          "sql": "SELECT SUM(l.residuallast_mwh) AS residuallast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "2a3046e9da6a27c56f1387d5dac5f8a06919e2d401272372018a9e88d91b0e05",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q015-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q015",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.828,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "361b40336ab5899f",
+          "sql": "SELECT SUM(l.residuallast_mwh) AS residuallast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "2a3046e9da6a27c56f1387d5dac5f8a06919e2d401272372018a9e88d91b0e05",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q015-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q015",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 4.335,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "4c98f6f1dd3425d4",
+          "sql": "SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2026 AND d.quartal = 1",
+          "sql_sha256": "6bed722cde5f12a1ca75434cb029763873c84a3d432fa1cec3642001c0cf324f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q016-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q016",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 4.335,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "837eb31ee99cd057",
+          "sql": "SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2026 AND d.quartal = 1",
+          "sql_sha256": "6bed722cde5f12a1ca75434cb029763873c84a3d432fa1cec3642001c0cf324f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q016-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q016",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "1e6c1db7ed0aa07f",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 12.647,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b6f5702fee7fcbb6",
+          "sql": "SELECT SUM(l.pumpspeicher_verbrauch_mwh) AS pumpspeicher_verbrauch_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "a6542502b3722101a629a43ec796c542da04f8f29284db8e99c9a414da3b2b41",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q017-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q017",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.174,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "81d03f52fa45e208",
+          "sql": "SELECT SUM(l.pumpspeicher_verbrauch_mwh) AS pumpspeicher_verbrauch_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231\nLIMIT 10",
+          "sql_sha256": "76b481355f3dba5f3ebf01f837ae05b5387862570bef625dfe63d85b8c1c8a15",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 12.647,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c97c6ea267954db3",
+          "sql": "SELECT SUM(l.pumpspeicher_verbrauch_mwh) AS pumpspeicher_verbrauch_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "a6542502b3722101a629a43ec796c542da04f8f29284db8e99c9a414da3b2b41",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q017-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q017",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.644,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e2b32dc9fe80f0d1",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20230101 AND 20231231\n  AND p.day_ahead_eur_mwh > 200",
+          "sql_sha256": "3764c7b9095e3cd73bad6d9bb9774467d13e336c1731653a825abfb2159a5070",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q018-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q018",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.644,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "ac890c99c6536d56",
+          "sql": "SELECT COUNT(*) AS stunden\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20230101 AND 20231231\n  AND p.day_ahead_eur_mwh > 200",
+          "sql_sha256": "3764c7b9095e3cd73bad6d9bb9774467d13e336c1731653a825abfb2159a5070",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q018-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q018",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.672,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7ad1381ff74d0312",
+          "sql": "SELECT MAX(l.netzlast_mwh) AS max_netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "4612985da5c2e4198547e5cb413b3e302f5f935e41cc9f18545838dcba2397d5",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q019-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q019",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 6.672,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "f34ca036525d4289",
+          "sql": "SELECT MAX(l.netzlast_mwh) AS max_netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "4612985da5c2e4198547e5cb413b3e302f5f935e41cc9f18545838dcba2397d5",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q019-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q019",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.799,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c94181cbf39a710e",
+          "sql": "SELECT AVG(l.residuallast_mwh) AS avg_residuallast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231\nLIMIT 10",
+          "sql_sha256": "c5ee2681e05e91b5b23a347f0c8599e2a02ab8c572c826a737a58044942f5209",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 8.771,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e56340fb12705b6f",
+          "sql": "SELECT AVG(l.residuallast_mwh) AS avg_residuallast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "3e0f0f02c7345b0be051876bdf864e90e6d1e76497a08e04ef160aaa3beb0660",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q020-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q020",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "03b517725911840b",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 8.771,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7ec6b5b201e85f7f",
+          "sql": "SELECT AVG(l.residuallast_mwh) AS avg_residuallast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND l.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "3e0f0f02c7345b0be051876bdf864e90e6d1e76497a08e04ef160aaa3beb0660",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q020-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q020",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T1"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 16.469,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "95ad700f67dc34ac",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Braunkohle'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "b1bb4d498dbc5f44378c0409a98174966d14a0283b1ea698ed092091ff743f31",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q021-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q021",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.958,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "cf7b7411e09a4ac5",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Braunkohle'\n  AND f.datum_key BETWEEN 20240101 AND 20241231\nLIMIT 10",
+          "sql_sha256": "1c41a9e6f480d43ca4b3a2b8eb74f4907c9659b8c522583e6c134133145778ba",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 16.469,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "78f219cc5287b476",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Braunkohle'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "b1bb4d498dbc5f44378c0409a98174966d14a0283b1ea698ed092091ff743f31",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q021-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q021",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "d2f99226365810fc",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 22.333,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "91765b111d7fd44c",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de IN (N'Wind Onshore', N'Wind Offshore')\n  AND f.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "33bb8e47a57959d8d98111ec1583b1f1055055113284cc3c8ab6febdf6233a07",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q022-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q022",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 22.333,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "3560cea1939a2ad4",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de IN (N'Wind Onshore', N'Wind Offshore')\n  AND f.datum_key BETWEEN 20250101 AND 20251231",
+          "sql_sha256": "33bb8e47a57959d8d98111ec1583b1f1055055113284cc3c8ab6febdf6233a07",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q022-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q022",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 15.888,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "5e53c7143dedf221",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "090e12ce03458ad1668f455bf85a69673edadf2e601cbba0c7482f95a0780244",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q023-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q023",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.972,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "efa4375db0e69408",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key BETWEEN 20240101 AND 20241231\nLIMIT 10",
+          "sql_sha256": "45a2db3a6a50ed5ec60bc897537b8a2ca754323200238361e1f3447ddb02aa9b",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 15.888,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "d7f21f98a74efbe4",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "090e12ce03458ad1668f455bf85a69673edadf2e601cbba0c7482f95a0780244",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q023-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q023",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 43.421,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "18cb2b74d2059719",
+          "sql": "SELECT e.kategorie_de AS kategorie, SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20240101 AND 20241231\nGROUP BY e.kategorie_de",
+          "sql_sha256": "d71c13b0c550ba29d44cc2c3f02de949bd52ced511f6b9c3de1883bece35825e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q024-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q024",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 43.421,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "f7a05a1d61ef3db9",
+          "sql": "SELECT e.kategorie_de AS kategorie, SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.datum_key BETWEEN 20240101 AND 20241231\nGROUP BY e.kategorie_de",
+          "sql_sha256": "d71c13b0c550ba29d44cc2c3f02de949bd52ced511f6b9c3de1883bece35825e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q024-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q024",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.853,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "752729a5c8dd0492",
+          "sql": "SELECT SUM(k.anzahl_zubau) AS anzahl_zubau\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE b.name_de = N'Bayern'\n  AND e.name_de = N'Photovoltaik'\n  AND k.datum_key BETWEEN 20250101 AND 20251201",
+          "sql_sha256": "44e828f1c56ef73f450fad6e4fc299159d266d8e722a7f9336d9546b2968ec2d",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q025-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q025",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.853,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "f9cc4be74c921e26",
+          "sql": "SELECT SUM(k.anzahl_zubau) AS anzahl_zubau\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE b.name_de = N'Bayern'\n  AND e.name_de = N'Photovoltaik'\n  AND k.datum_key BETWEEN 20250101 AND 20251201",
+          "sql_sha256": "44e828f1c56ef73f450fad6e4fc299159d266d8e722a7f9336d9546b2968ec2d",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q025-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q025",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.614,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "93687ab8da869e51",
+          "sql": "SELECT b.name_de AS bundesland, SUM(k.zubau_mw) AS zubau_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Wind Onshore'\n  AND k.datum_key BETWEEN 20250101 AND 20251201\nGROUP BY b.name_de\nHAVING SUM(k.zubau_mw) > 0",
+          "sql_sha256": "59787cc0f8d6c83c8654ac792034148ac8bbbf89d396b00f918a2bded4765f29",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q026-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q026",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e4c5adac0fbd960f",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.614,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "978927db59fb8ca1",
+          "sql": "SELECT b.name_de AS bundesland, SUM(k.zubau_mw) AS zubau_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Wind Onshore'\n  AND k.datum_key BETWEEN 20250101 AND 20251201\nGROUP BY b.name_de\nHAVING SUM(k.zubau_mw) > 0",
+          "sql_sha256": "59787cc0f8d6c83c8654ac792034148ac8bbbf89d396b00f918a2bded4765f29",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q026-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q026",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "00edb9a556d08e68",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 0.89,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7d65e4574d51cc97",
+          "sql": "SELECT SUM(k.bestand_mw) AS bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Wind Offshore'\n  AND k.datum_key = 20260901",
+          "sql_sha256": "d9ea8d554127cbd36854220fe781856de528261deeb33eda5f7ea5ea3f440b9e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q027-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q027",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.89,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b3c3217c33a7e8dd",
+          "sql": "SELECT SUM(k.bestand_mw) AS bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Wind Offshore'\n  AND k.datum_key = 20260901",
+          "sql_sha256": "d9ea8d554127cbd36854220fe781856de528261deeb33eda5f7ea5ea3f440b9e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q027-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q027",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 9.843,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "01e4ead52ac7ab21",
+          "sql": "SELECT d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nJOIN dw.dim_datum d ON d.datum_key = l.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.monat\nORDER BY d.monat",
+          "sql_sha256": "59e5e5cd52259190c4e69ac6b45077baa89245ecb96ae228926a926c1e03bac8",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q028-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q028",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 9.843,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "37ac74771b76a859",
+          "sql": "SELECT d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nJOIN dw.dim_datum d ON d.datum_key = l.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.monat\nORDER BY d.monat",
+          "sql_sha256": "59e5e5cd52259190c4e69ac6b45077baa89245ecb96ae228926a926c1e03bac8",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q028-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q028",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.914,
+          "error": "42000: Incorrect syntax near 'LIMIT'. (102)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "09aed73661bac9d3",
+          "sql": "SELECT d.wochentag_nr, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.wochentag_nr\nORDER BY d.wochentag_nr\nLIMIT 10",
+          "sql_sha256": "db23367c490d14b7b7c4dbfd1788a2c8859c0a41336927f842d84f60c3a69afd",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 5.45,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "477cba1145a591be",
+          "sql": "SELECT d.wochentag_nr, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.wochentag_nr\nORDER BY d.wochentag_nr",
+          "sql_sha256": "962d583ff1bfdac99b0b98b2c5fa9e4fdadaa7c5d4151d5e45b4c1b93dd1fb9c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q029-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q029",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 5.45,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2e7188c6523c8e0f",
+          "sql": "SELECT d.wochentag_nr, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.wochentag_nr\nORDER BY d.wochentag_nr",
+          "sql_sha256": "962d583ff1bfdac99b0b98b2c5fa9e4fdadaa7c5d4151d5e45b4c1b93dd1fb9c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q029-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q029",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 119.992,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b9afc0a7445eeb69",
+          "sql": "SELECT d.quartal, SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_datum d ON d.datum_key = f.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Erdgas'\n  AND d.jahr = 2024\nGROUP BY d.quartal",
+          "sql_sha256": "edaaff6435832ec0a03e5da6d77d71fda134d112382d8fee08b4fcfab8925bc3",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q030-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q030",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2e9c1c1f1f5fc908",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q030-en",
+      "labels": [
+        "E12"
+      ],
+      "lang": "en",
+      "question_id": "q030",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.747,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "0e77b2cf16e8966b",
+          "sql": "SELECT TOP 1 b.name_de AS bundesland, k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Biomasse'\n  AND k.datum_key = 20260901\nORDER BY k.bestand_mw DESC, b.name_de ASC",
+          "sql_sha256": "2b7afcbd1811f6ce626bcbd90bc7cef6197bf443bce60076b7a9529bb2efcf01",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q031-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q031",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "4ffd443f31e8fb6c",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.747,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "fa0bc5557dc7eda5",
+          "sql": "SELECT TOP 1 b.name_de AS bundesland, k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Biomasse'\n  AND k.datum_key = 20260901\nORDER BY k.bestand_mw DESC, b.name_de ASC",
+          "sql_sha256": "2b7afcbd1811f6ce626bcbd90bc7cef6197bf443bce60076b7a9529bb2efcf01",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q031-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q031",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.95,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "95efbca8e84f4e65",
+          "sql": "SELECT k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE b.name_de = N'Nordrhein-Westfalen'\n  AND e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20260601",
+          "sql_sha256": "bd8b720a109f23d021dd0f27402291085ba31387e2b518e69f360fa7f2c18a6f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q032-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q032",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "e86b1149434e8bda",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 0.95,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "096e8592269a6dd0",
+          "sql": "SELECT k.bestand_mw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE b.name_de = N'Nordrhein-Westfalen'\n  AND e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20260601",
+          "sql_sha256": "bd8b720a109f23d021dd0f27402291085ba31387e2b518e69f360fa7f2c18a6f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q032-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q032",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 9.681,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e9698f0ca4e69dc1",
+          "sql": "SELECT CAST(d.ist_wochenende AS int) AS ist_wochenende, AVG(l.netzlast_mwh) AS avg_netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nJOIN dw.dim_datum d ON d.datum_key = l.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2024\nGROUP BY CAST(d.ist_wochenende AS int)",
+          "sql_sha256": "eb3b8a6e9807fc3c3bc0c8fb076fb5275d10799f233ed5320f7a2837d15d1b2b",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q033-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q033",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 9.681,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "357cf92ccb95b7cd",
+          "sql": "SELECT CAST(d.ist_wochenende AS int) AS ist_wochenende, AVG(l.netzlast_mwh) AS avg_netzlast_mwh\nFROM dw.fact_last l\nJOIN dw.dim_region r ON r.region_key = l.region_key\nJOIN dw.dim_datum d ON d.datum_key = l.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2024\nGROUP BY CAST(d.ist_wochenende AS int)",
+          "sql_sha256": "eb3b8a6e9807fc3c3bc0c8fb076fb5275d10799f233ed5320f7a2837d15d1b2b",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q033-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q033",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "f52a006181e81131",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 8.995,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "644186b20f53d118",
+          "sql": "SELECT d.saison_de AS jahreszeit, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.saison_de",
+          "sql_sha256": "ce0a3ef833686a83abb784391f7673b9b227e25b37922c2130b8e07c9fd036d4",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q034-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q034",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "e88a47efb8a19304",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 8.995,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "8c64192558dca64d",
+          "sql": "SELECT d.saison_de AS jahreszeit, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nJOIN dw.dim_datum d ON d.datum_key = p.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND d.jahr = 2025\nGROUP BY d.saison_de",
+          "sql_sha256": "ce0a3ef833686a83abb784391f7673b9b227e25b37922c2130b8e07c9fd036d4",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q034-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q034",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T2"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.326,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b35e320c44d5786c",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key = 20240331",
+          "sql_sha256": "5c37d46dcbc92e33a83baf4c834f88aebf4523ffd6c23c4f9005c8ff79af5018",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q035-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q035",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "e98f6325ba7c35a3",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.326,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c866228f7ec4b5c8",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Photovoltaik'\n  AND f.datum_key = 20240331",
+          "sql_sha256": "5c37d46dcbc92e33a83baf4c834f88aebf4523ffd6c23c4f9005c8ff79af5018",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q035-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q035",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "5230d80721f00e03",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 15.378,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a3021ee14d1d43cd",
+          "sql": "SELECT AVG(f.erzeugung_mwh) * 4 / 1000.0 AS avg_leistung_gw\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Offshore'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "642d1602bc8cb8da1734bc48804ecab2ec61cb272b6e924a2241769117a8577c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q036-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q036",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 15.378,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "241c1217238f7950",
+          "sql": "SELECT AVG(f.erzeugung_mwh) * 4 / 1000.0 AS avg_leistung_gw\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Offshore'\n  AND f.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "642d1602bc8cb8da1734bc48804ecab2ec61cb272b6e924a2241769117a8577c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q036-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q036",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 26.115,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "ab4ddd4ec4b4729e",
+          "sql": "SELECT SUM(v.day_ahead_eur_mwh * v.netzlast_mwh) / SUM(v.netzlast_mwh) AS gewichteter_preis_eur_mwh\nFROM rpt.v_preis_last_stunde v\nJOIN dw.dim_region r ON r.region_key = v.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND v.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "fe5562fdacc0527e32cd99eabb0307c1a74faa7d4d6c1b0366589e8690e7ebb6",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q037-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q037",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "aed614ad680ed9d1",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q037-en",
+      "labels": [
+        "E12"
+      ],
+      "lang": "en",
+      "question_id": "q037",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "febb03e1bda45bbd",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 17.097,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e46146e440cced29",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000000.0 AS erzeugung_twh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Kernenergie'\n  AND f.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "62798d89dec106c16c1be9f2373c5ddc580b0ac022ab7df1eaaff0923faccbee",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q038-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q038",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 17.097,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "99cdf5206f9cc63c",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000000.0 AS erzeugung_twh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Kernenergie'\n  AND f.datum_key BETWEEN 20230101 AND 20231231",
+          "sql_sha256": "62798d89dec106c16c1be9f2373c5ddc580b0ac022ab7df1eaaff0923faccbee",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q038-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q038",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 30.483,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "d3851bbfd8481600",
+          "sql": "SELECT MAX(d.datum) AS letzter_tag\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_datum d ON d.datum_key = f.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Kernenergie'\n  AND f.erzeugung_mwh > 0",
+          "sql_sha256": "e67efc82c151b240956e991d1b35e94ab628b7ae3232deec5dbf39f4237bf4e3",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q039-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q039",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 30.483,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "9c8d676843aa1cf6",
+          "sql": "SELECT MAX(d.datum) AS letzter_tag\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_datum d ON d.datum_key = f.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Kernenergie'\n  AND f.erzeugung_mwh > 0",
+          "sql_sha256": "e67efc82c151b240956e991d1b35e94ab628b7ae3232deec5dbf39f4237bf4e3",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q039-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q039",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.325,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "9ad0249536a68665",
+          "sql": "SELECT SUM(k.bestand_mw) / 1000.0 AS bestand_gw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20251201",
+          "sql_sha256": "2bde42c118eb2c8213ab4332f34e240af7cca58f54364d30cf7ece7584c19d27",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q040-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q040",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.325,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "fab83f6426355e50",
+          "sql": "SELECT SUM(k.bestand_mw) / 1000.0 AS bestand_gw\nFROM dw.fact_kapazitaet k\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\nWHERE e.name_de = N'Photovoltaik'\n  AND k.datum_key = 20251201",
+          "sql_sha256": "2bde42c118eb2c8213ab4332f34e240af7cca58f54364d30cf7ece7584c19d27",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q040-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q040",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 4.595,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "fd6037bf548c0456",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_datum d ON d.datum_key = f.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Offshore'\n  AND d.iso_jahr = 2025 AND d.iso_woche = 40",
+          "sql_sha256": "b9d092d150a588738f53043feaf460f72969b46922b532681c04b8a15c97119a",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q041-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q041",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 4.595,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c782bffafcbc7ec1",
+          "sql": "SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_datum d ON d.datum_key = f.datum_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Offshore'\n  AND d.iso_jahr = 2025 AND d.iso_woche = 40",
+          "sql_sha256": "b9d092d150a588738f53043feaf460f72969b46922b532681c04b8a15c97119a",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q041-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q041",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 17.16,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "6e8d136679a789f3",
+          "sql": "WITH erz AS (\n    SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\n    FROM dw.fact_erzeugung f\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n    JOIN dw.dim_region r ON r.region_key = f.region_key\n    WHERE r.smard_code = N'DE-LU'\n      AND e.name_de = N'Photovoltaik'\n      AND f.datum_key BETWEEN 20250101 AND 20251231\n), monat AS (\n    SELECT k.datum_key, SUM(k.bestand_mw) AS bestand_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    WHERE e.name_de = N'Photovoltaik'\n      AND k.datum_key BETWEEN 20250101 AND 20251201\n    GROUP BY k.datum_key\n), kap AS (\n    SELECT AVG(bestand_mw) AS avg_bestand_mw FROM monat\n)\nSELECT erz.erzeugung_mwh / kap.avg_bestand_mw AS volllaststunden\nFROM erz CROSS JOIN kap",
+          "sql_sha256": "1feed2d5e59f00a8d652fcdb0e409abdba0269fd113d015942e1421d20170485",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q042-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q042",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 17.16,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7bd27e18a69706a7",
+          "sql": "WITH erz AS (\n    SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\n    FROM dw.fact_erzeugung f\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n    JOIN dw.dim_region r ON r.region_key = f.region_key\n    WHERE r.smard_code = N'DE-LU'\n      AND e.name_de = N'Photovoltaik'\n      AND f.datum_key BETWEEN 20250101 AND 20251231\n), monat AS (\n    SELECT k.datum_key, SUM(k.bestand_mw) AS bestand_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    WHERE e.name_de = N'Photovoltaik'\n      AND k.datum_key BETWEEN 20250101 AND 20251201\n    GROUP BY k.datum_key\n), kap AS (\n    SELECT AVG(bestand_mw) AS avg_bestand_mw FROM monat\n)\nSELECT erz.erzeugung_mwh / kap.avg_bestand_mw AS volllaststunden\nFROM erz CROSS JOIN kap",
+          "sql_sha256": "1feed2d5e59f00a8d652fcdb0e409abdba0269fd113d015942e1421d20170485",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q042-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q042",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 16.836,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "ad020d936414c504",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_zeit z ON z.zeit_key = f.zeit_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Onshore'\n  AND f.datum_key BETWEEN 20250101 AND 20250131\n  AND z.stunde < 6",
+          "sql_sha256": "3f7fb160c6314e709959c9d26ad1809650715f0ca16147b632c88e1ca25d63ed",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q043-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q043",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 16.836,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "cbe1a5a2a669d362",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\nJOIN dw.dim_region r ON r.region_key = f.region_key\nJOIN dw.dim_zeit z ON z.zeit_key = f.zeit_key\nWHERE r.smard_code = N'DE-LU'\n  AND e.name_de = N'Wind Onshore'\n  AND f.datum_key BETWEEN 20250101 AND 20250131\n  AND z.stunde < 6",
+          "sql_sha256": "3f7fb160c6314e709959c9d26ad1809650715f0ca16147b632c88e1ca25d63ed",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q043-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q043",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.585,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "b3564a1c4267c2f7",
+          "sql": "SELECT 100.0 * SUM(CASE WHEN p.day_ahead_eur_mwh < 0 THEN 1 ELSE 0 END) / COUNT(*) AS anteil_negativ_prozent\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "8650a6a922a7eb68bc479380250f7d459b2b634b3aec20a2d6702315f1f9af78",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q044-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q044",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.585,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "765ec1c2dd09b830",
+          "sql": "SELECT 100.0 * SUM(CASE WHEN p.day_ahead_eur_mwh < 0 THEN 1 ELSE 0 END) / COUNT(*) AS anteil_negativ_prozent\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "8650a6a922a7eb68bc479380250f7d459b2b634b3aec20a2d6702315f1f9af78",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q044-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q044",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "4e4f8e8b577293b5",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q045-de",
+      "labels": [
+        "E12"
+      ],
+      "lang": "de",
+      "question_id": "q045",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 24.943,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e932221b63565948",
+          "sql": "SELECT\n  (SELECT SUM(f.erzeugung_mwh)\n   FROM dw.fact_erzeugung f\n   JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n   JOIN dw.dim_region r ON r.region_key = f.region_key\n   WHERE r.smard_code = N'DE-LU'\n     AND e.name_de = N'Pumpspeicher'\n     AND f.datum_key BETWEEN 20250101 AND 20251231)\n  -\n  (SELECT SUM(l.pumpspeicher_verbrauch_mwh)\n   FROM dw.fact_last l\n   JOIN dw.dim_region r ON r.region_key = l.region_key\n   WHERE r.smard_code = N'DE-LU'\n     AND l.datum_key BETWEEN 20250101 AND 20251231) AS netto_erzeugung_mwh",
+          "sql_sha256": "30973623e77822cba3c325d732559f8f4b744273c289408c0317eecede7d0b2f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q045-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q045",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "75844537e4248b3a",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.092,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "740dc77f2b05f639",
+          "sql": "SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key = 20251225",
+          "sql_sha256": "4b52d1fd9e4d8f1825e4e32c79f3af4b25dc9239d94ba1070d819a5a34c6c51f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q046-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q046",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.092,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "94ca851cc89d1e4e",
+          "sql": "SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key = 20251225",
+          "sql_sha256": "4b52d1fd9e4d8f1825e4e32c79f3af4b25dc9239d94ba1070d819a5a34c6c51f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q046-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q046",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 12.705,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "18eea1e09fc97305",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.ts_utc >= '2024-01-01T00:00:00' AND f.ts_utc < '2024-01-02T00:00:00'",
+          "sql_sha256": "2468c151406267bf32443ff051fb975d851b52e92fc4982dd1a17e4d549f828e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q047-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q047",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 12.705,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "d9ed61d2f3c61e75",
+          "sql": "SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh\nFROM dw.fact_erzeugung f\nJOIN dw.dim_region r ON r.region_key = f.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND f.ts_utc >= '2024-01-01T00:00:00' AND f.ts_utc < '2024-01-02T00:00:00'",
+          "sql_sha256": "2468c151406267bf32443ff051fb975d851b52e92fc4982dd1a17e4d549f828e",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q047-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q047",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T3"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 61.561,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "33317311ae917f91",
+          "sql": "WITH jahr_summe AS (\n    SELECT d.jahr, SUM(f.erzeugung_mwh) AS erzeugung_mwh\n    FROM dw.fact_erzeugung f\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n    JOIN dw.dim_region r ON r.region_key = f.region_key\n    JOIN dw.dim_datum d ON d.datum_key = f.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND e.name_de = N'Photovoltaik'\n      AND d.jahr BETWEEN 2023 AND 2025\n    GROUP BY d.jahr\n)\nSELECT jahr, erzeugung_mwh,\n       100.0 * (erzeugung_mwh - LAG(erzeugung_mwh) OVER (ORDER BY jahr))\n             / LAG(erzeugung_mwh) OVER (ORDER BY jahr) AS veraenderung_prozent\nFROM jahr_summe",
+          "sql_sha256": "1915b07ce91b5e791363f1b251ab2d325093b98e051c5d1867363f91d641677c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q048-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q048",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 61.561,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a672033945f547a7",
+          "sql": "WITH jahr_summe AS (\n    SELECT d.jahr, SUM(f.erzeugung_mwh) AS erzeugung_mwh\n    FROM dw.fact_erzeugung f\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n    JOIN dw.dim_region r ON r.region_key = f.region_key\n    JOIN dw.dim_datum d ON d.datum_key = f.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND e.name_de = N'Photovoltaik'\n      AND d.jahr BETWEEN 2023 AND 2025\n    GROUP BY d.jahr\n)\nSELECT jahr, erzeugung_mwh,\n       100.0 * (erzeugung_mwh - LAG(erzeugung_mwh) OVER (ORDER BY jahr))\n             / LAG(erzeugung_mwh) OVER (ORDER BY jahr) AS veraenderung_prozent\nFROM jahr_summe",
+          "sql_sha256": "1915b07ce91b5e791363f1b251ab2d325093b98e051c5d1867363f91d641677c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q048-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q048",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "48a0d924d7609f4b",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q049-de",
+      "labels": [
+        "E12"
+      ],
+      "lang": "de",
+      "question_id": "q049",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "68d1401724b6f134",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q049-en",
+      "labels": [
+        "E12"
+      ],
+      "lang": "en",
+      "question_id": "q049",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 3.148,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "3a2c8f0f2036b8c3",
+          "sql": "SELECT COUNT(*) AS anzahl_phasen\nFROM rpt.v_negative_preisphasen v\nJOIN dw.dim_region r ON r.region_key = v.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND v.stunden >= 6\n  AND v.start_datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "e3a616bf84480d068b291f2db95ba9d4914f4a0728b17feac7ce4a494ad3c199",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q050-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q050",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 3.148,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "850dfd4d9af8259a",
+          "sql": "SELECT COUNT(*) AS anzahl_phasen\nFROM rpt.v_negative_preisphasen v\nJOIN dw.dim_region r ON r.region_key = v.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND v.stunden >= 6\n  AND v.start_datum_key BETWEEN 20240101 AND 20241231",
+          "sql_sha256": "e3a616bf84480d068b291f2db95ba9d4914f4a0728b17feac7ce4a494ad3c199",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q050-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q050",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 152.325,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "3339894411cd7f71",
+          "sql": "WITH monat AS (\n    SELECT d.monat,\n           100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)\n                 / SUM(f.erzeugung_mwh) AS ee_anteil_prozent\n    FROM dw.fact_erzeugung f\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key\n    JOIN dw.dim_region r ON r.region_key = f.region_key\n    JOIN dw.dim_datum d ON d.datum_key = f.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND d.jahr = 2025\n    GROUP BY d.monat\n)\nSELECT TOP 1 monat, ee_anteil_prozent\nFROM monat\nORDER BY ee_anteil_prozent DESC, monat ASC",
+          "sql_sha256": "61fcc4a7f1d039ecbac54f2056e4a4c4cec5519e548814937e3a7aaa02a87a7c",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q051-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q051",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7e149c3a3c72dfd4",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q051-en",
+      "labels": [
+        "E12"
+      ],
+      "lang": "en",
+      "question_id": "q051",
+      "reason": "Enthaltung statt Antwort",
+      "repeat": 0,
+      "strict": false,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "eda34f2dab38ce9b",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 1.783,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "4841112f2d74797e",
+          "sql": "WITH tag AS (\n    SELECT d.datum, AVG(p.day_ahead_eur_mwh) AS tagesmittel_eur_mwh\n    FROM dw.fact_preis p\n    JOIN dw.dim_region r ON r.region_key = p.region_key\n    JOIN dw.dim_datum d ON d.datum_key = p.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND p.datum_key BETWEEN 20250601 AND 20250614\n    GROUP BY d.datum\n)\nSELECT datum, tagesmittel_eur_mwh,\n       AVG(tagesmittel_eur_mwh) OVER (ORDER BY datum ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)\n         AS gleitender_mittel_eur_mwh\nFROM tag\nORDER BY datum",
+          "sql_sha256": "605c6956d6553ebe07853d1dd173f8b84f44107cd87ec20f88705fbe538e06dc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q052-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q052",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.783,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "62e68bdacd843a36",
+          "sql": "WITH tag AS (\n    SELECT d.datum, AVG(p.day_ahead_eur_mwh) AS tagesmittel_eur_mwh\n    FROM dw.fact_preis p\n    JOIN dw.dim_region r ON r.region_key = p.region_key\n    JOIN dw.dim_datum d ON d.datum_key = p.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND p.datum_key BETWEEN 20250601 AND 20250614\n    GROUP BY d.datum\n)\nSELECT datum, tagesmittel_eur_mwh,\n       AVG(tagesmittel_eur_mwh) OVER (ORDER BY datum ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)\n         AS gleitender_mittel_eur_mwh\nFROM tag\nORDER BY datum",
+          "sql_sha256": "605c6956d6553ebe07853d1dd173f8b84f44107cd87ec20f88705fbe538e06dc",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q052-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q052",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": "Schlüsselwort DELETE nicht erlaubt",
+          "llm_ms": 0.0,
+          "prompt_hash": "171c5b06ae128212",
+          "sql": "DELETE FROM dw.fact_preis WHERE 1 = 0",
+          "sql_sha256": "aee275e57b383cd65fa69afad4c536eab36dec2739a7d5abc436a34b257b414f",
+          "status": "blocked",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 2.231,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "904d5bf8b57c8963",
+          "sql": "WITH zubau AS (\n    SELECT b.name_de, SUM(k.zubau_mw) AS zubau_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    WHERE e.name_de = N'Wind Onshore'\n      AND k.datum_key BETWEEN 20250101 AND 20251201\n    GROUP BY b.name_de\n), rk AS (\n    SELECT name_de, zubau_mw, DENSE_RANK() OVER (ORDER BY zubau_mw DESC) AS rang\n    FROM zubau\n)\nSELECT rang, name_de AS bundesland, zubau_mw\nFROM rk\nWHERE rang <= 3",
+          "sql_sha256": "aa2b045fdc73726b5164973bfe9a30124e7af89e3ad47da838e2013b8dc483a6",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q053-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q053",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.231,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7e393a12fc371a1e",
+          "sql": "WITH zubau AS (\n    SELECT b.name_de, SUM(k.zubau_mw) AS zubau_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    WHERE e.name_de = N'Wind Onshore'\n      AND k.datum_key BETWEEN 20250101 AND 20251201\n    GROUP BY b.name_de\n), rk AS (\n    SELECT name_de, zubau_mw, DENSE_RANK() OVER (ORDER BY zubau_mw DESC) AS rang\n    FROM zubau\n)\nSELECT rang, name_de AS bundesland, zubau_mw\nFROM rk\nWHERE rang <= 3",
+          "sql_sha256": "aa2b045fdc73726b5164973bfe9a30124e7af89e3ad47da838e2013b8dc483a6",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q053-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q053",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 12.205,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "c0cef745c9b5b234",
+          "sql": "WITH monat AS (\n    SELECT d.jahr, d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh\n    FROM dw.fact_last l\n    JOIN dw.dim_region r ON r.region_key = l.region_key\n    JOIN dw.dim_datum d ON d.datum_key = l.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND l.datum_key BETWEEN 20241201 AND 20251231\n    GROUP BY d.jahr, d.monat\n), vm AS (\n    SELECT jahr, monat, netzlast_mwh,\n           100.0 * (netzlast_mwh - LAG(netzlast_mwh) OVER (ORDER BY jahr, monat))\n                 / LAG(netzlast_mwh) OVER (ORDER BY jahr, monat) AS veraenderung_prozent\n    FROM monat\n)\nSELECT monat, netzlast_mwh, veraenderung_prozent\nFROM vm\nWHERE jahr = 2025",
+          "sql_sha256": "513788e9a8e2b95292ff5d811481978598494cc5867136b7da81a4ad0babf35f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q054-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q054",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 12.205,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "cd543a734f957567",
+          "sql": "WITH monat AS (\n    SELECT d.jahr, d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh\n    FROM dw.fact_last l\n    JOIN dw.dim_region r ON r.region_key = l.region_key\n    JOIN dw.dim_datum d ON d.datum_key = l.datum_key\n    WHERE r.smard_code = N'DE-LU'\n      AND l.datum_key BETWEEN 20241201 AND 20251231\n    GROUP BY d.jahr, d.monat\n), vm AS (\n    SELECT jahr, monat, netzlast_mwh,\n           100.0 * (netzlast_mwh - LAG(netzlast_mwh) OVER (ORDER BY jahr, monat))\n                 / LAG(netzlast_mwh) OVER (ORDER BY jahr, monat) AS veraenderung_prozent\n    FROM monat\n)\nSELECT monat, netzlast_mwh, veraenderung_prozent\nFROM vm\nWHERE jahr = 2025",
+          "sql_sha256": "513788e9a8e2b95292ff5d811481978598494cc5867136b7da81a4ad0babf35f",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q054-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q054",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 46.036,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "e33bdb2100315806",
+          "sql": "SELECT TOP 1\n       CAST(p.ts_utc AT TIME ZONE 'UTC' AT TIME ZONE 'W. Europe Standard Time' AS datetime2(0)) AS stunde_beginn_lokal,\n       p.day_ahead_eur_mwh AS preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250101 AND 20251231\nORDER BY p.day_ahead_eur_mwh ASC, p.ts_utc ASC",
+          "sql_sha256": "0ea164ecd0bab365746fd5f66db98ee1733f19b2f407a606ba07f63abd2629c4",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q055-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q055",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 46.036,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7732870da54345b5",
+          "sql": "SELECT TOP 1\n       CAST(p.ts_utc AT TIME ZONE 'UTC' AT TIME ZONE 'W. Europe Standard Time' AS datetime2(0)) AS stunde_beginn_lokal,\n       p.day_ahead_eur_mwh AS preis_eur_mwh\nFROM dw.fact_preis p\nJOIN dw.dim_region r ON r.region_key = p.region_key\nWHERE r.smard_code = N'DE-LU'\n  AND p.datum_key BETWEEN 20250101 AND 20251231\nORDER BY p.day_ahead_eur_mwh ASC, p.ts_utc ASC",
+          "sql_sha256": "0ea164ecd0bab365746fd5f66db98ee1733f19b2f407a606ba07f63abd2629c4",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q055-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q055",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 2.286,
+          "error": "42S22: Invalid column name 'erzeugung_gwh'. (207)",
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7bdeccb91a05ad83",
+          "sql": "SELECT SUM(erzeugung_gwh) AS wert FROM dw.fact_erzeugung",
+          "sql_sha256": "f65c1b88d0f9fd96cd7fb322b79919ef3cbcbc286843a04300f3ada32aa0327f",
+          "status": "db_error",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        },
+        {
+          "attempt": 1,
+          "db_ms": 8.378,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "2b77eead6a278c7b",
+          "sql": "WITH monat AS (\n    SELECT d.monat, SUM(k.zubau_mw) AS zubau_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    JOIN dw.dim_datum d ON d.datum_key = k.datum_key\n    WHERE e.name_de = N'Photovoltaik'\n      AND d.jahr = 2025\n    GROUP BY d.monat\n)\nSELECT monat, zubau_mw,\n       SUM(zubau_mw) OVER (ORDER BY monat ROWS UNBOUNDED PRECEDING) AS zubau_kumuliert_mw\nFROM monat\nORDER BY monat",
+          "sql_sha256": "9e7a3eb6884af98360daaeecb4ab0350fb65eeb62043a7a9c54d05be33673343",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q056-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q056",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 8.378,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "ddc4acac28f7a2c5",
+          "sql": "WITH monat AS (\n    SELECT d.monat, SUM(k.zubau_mw) AS zubau_mw\n    FROM dw.fact_kapazitaet k\n    JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key\n    JOIN dw.dim_datum d ON d.datum_key = k.datum_key\n    WHERE e.name_de = N'Photovoltaik'\n      AND d.jahr = 2025\n    GROUP BY d.monat\n)\nSELECT monat, zubau_mw,\n       SUM(zubau_mw) OVER (ORDER BY monat ROWS UNBOUNDED PRECEDING) AS zubau_kumuliert_mw\nFROM monat\nORDER BY monat",
+          "sql_sha256": "9e7a3eb6884af98360daaeecb4ab0350fb65eeb62043a7a9c54d05be33673343",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "rows",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q056-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q056",
+      "reason": "ok",
+      "repeat": 0,
+      "strict": true,
+      "tier": "T4"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "f2d36936f391fad2",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q057-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q057",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "0cca44c15d55a9a0",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q057-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q057",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7448fc9b6d7ae607",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q058-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q058",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a51b98bdcfbcec38",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q058-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q058",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "ffcdb423f73814ec",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q059-de",
+      "labels": [],
+      "lang": "de",
+      "question_id": "q059",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "7698b8324e02b155",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q059-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q059",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 1.201,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "dcea4b4aa3806d3c",
+          "sql": "SELECT COUNT(*) AS anzahl FROM dw.dim_region",
+          "sql_sha256": "b211cb535ee729456b9bf0ec77d196cf90a397098dd86712c0991f148df44f79",
+          "status": "ok",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": false,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "ok",
+      "item_id": "q060-de",
+      "labels": [
+        "E12"
+      ],
+      "lang": "de",
+      "question_id": "q060",
+      "reason": "beantwortet statt enthalten",
+      "repeat": 0,
+      "strict": false,
+      "tier": "A"
+    },
+    {
+      "attempts": [
+        {
+          "attempt": 0,
+          "db_ms": 0.0,
+          "error": null,
+          "guard_reason": null,
+          "llm_ms": 0.0,
+          "prompt_hash": "a35f87f36d50e6f6",
+          "sql": null,
+          "sql_sha256": null,
+          "status": "abstain",
+          "usage": {
+            "cache_creation_tokens": 0,
+            "cache_read_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "correct": true,
+      "cost_usd": 0.0,
+      "expect": "abstain",
+      "extra_columns": 0,
+      "final_status": "abstain",
+      "item_id": "q060-en",
+      "labels": [],
+      "lang": "en",
+      "question_id": "q060",
+      "reason": "Enthaltung",
+      "repeat": 0,
+      "strict": true,
+      "tier": "A"
+    }
+  ],
+  "labels": {
+    "E12": 9
+  },
+  "latency_ms": {
+    "db_p50": 4.335,
+    "db_p95": 43.421,
+    "llm_p50": 0.0,
+    "llm_p95": 0.0
+  },
+  "n_items": 120,
+  "prompt_tokens_max": 0,
+  "repair_attempts": 29,
+  "repaired_correct": 29,
+  "repeats": 1,
+  "summary_version": 2,
+  "tokens": {
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "validity": {
+    "n": 110,
+    "rate": 0.927273,
+    "valid": 102
+  }
+}

@@ -319,6 +319,7 @@ def test_summarize_every_field_of_a_mixed_run() -> None:
     # twelve attempts, llm_ms 10 ... 120: nearest rank 6 and 12; executed attempts have db_ms 1 1 2 4 6 8 10
     assert s["latency_ms"] == {"db_p50": 4.0, "db_p95": 10.0, "llm_p50": 60.0, "llm_p95": 120.0}
     assert s["labels"] == {"E1": 1, "E12": 3, "E2": 1, "E?": 1}
+    assert s["prompt_tokens_max"] == 200  # the repaired q002-de attempts: 200 fresh input tokens each
     assert s["n_items"] == 10 and s["repeats"] == 1 and s["complete"] is True and s["aborted_reason"] is None
     assert s["summary_version"] == 2 and len(s["items"]) == 10
     assert s["items"][1]["strict"] is False and s["items"][1]["extra_columns"] == 1

@@ -272,6 +272,13 @@ def summarize(
         "n_items": len({o.item_id for o in outcomes}),
         "repair_attempts": sum(1 for a in attempts if a.attempt > 0),
         "repaired_correct": sum(1 for o in outcomes if o.correct and len(o.attempts) > 1),
+        "prompt_tokens_max": max(
+            (
+                a.usage.input_tokens + a.usage.cache_creation_tokens + a.usage.cache_read_tokens
+                for a in attempts
+            ),
+            default=0,
+        ),
         "repeats": repeats,
         "summary_version": SUMMARY_VERSION,
         "tokens": usage.to_json(),

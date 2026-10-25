@@ -31,3 +31,15 @@ jobs:
           python-version: "3.13"
       - run: uv sync --locked
       - run: uv run pytest tests/unit -q
+
+  replay:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.8"
+          python-version: "3.13"
+      - run: uv sync --locked
+      - run: uv run pytest tests/replay -q
+      - run: uv run esb replay --all

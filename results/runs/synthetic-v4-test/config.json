@@ -1,0 +1,50 @@
+{
+  "compare": {
+    "abs_tol": 0.005,
+    "rel_tol": 0.0001
+  },
+  "created": "2026-10-25",
+  "esb_version": "0.1.0",
+  "eur_usd": 1.1193,
+  "price": {
+    "cache_read": 0.0,
+    "cache_write": 0.0,
+    "input": 0.0,
+    "output": 0.0,
+    "provider": "synthetic",
+    "source": "none",
+    "verified": "2026-10-25"
+  },
+  "prompt_token_limit": null,
+  "prompt_version": "1",
+  "provider": {
+    "model": "synthetic-gold-v1",
+    "note": "Pipeline-Test ohne Sprachmodell: Antworten aus Gold-SQL mit festen, markierten Fehlern",
+    "provider": "synthetic"
+  },
+  "rate_date": "2026-10-23",
+  "run_id": "synthetic-v4-test",
+  "snapshot": "fef9ef3543551538",
+  "spec": {
+    "langs": [
+      "de",
+      "en"
+    ],
+    "limit": null,
+    "max_usd": 5.0,
+    "model": "synthetic-gold-v1",
+    "provider": "synthetic",
+    "repeats": 1,
+    "run_id": "synthetic-v4-test",
+    "self_correct": false,
+    "split": "test",
+    "variant": "v4"
+  },
+  "synthetic": true,
+  "variant": {
+    "fewshot": true,
+    "id": "v4",
+    "schema": "full",
+    "semantic": true
+  }
+}
