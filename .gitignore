@@ -6,4 +6,6 @@ __pycache__/
 dist/
 .env
 data/sample/*.duckdb
+data/sample/*.duckdb.wal
+results/partial/
 .superpowers/

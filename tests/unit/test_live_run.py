@@ -54,15 +54,17 @@ class ScriptedLive:
         usage: Usage = Usage(1000, 0, 0, 50),  # noqa: B008
         fail: dict[int, BaseException] | None = None,
         unknown_tokens: bool = False,
+        meta: dict | None = None,
     ) -> None:
         self.inner = SyntheticProvider(questions)
         self.usage = usage
         self.fail = fail or {}
         self.requests: list[Request] = []
         self.unknown_tokens = unknown_tokens
+        self.meta = meta or {"provider": "scripted"}
 
     def describe(self) -> dict:
-        return {"provider": "scripted"}
+        return dict(self.meta)
 
     def complete(self, request: Request) -> Completion:
         self.requests.append(request)
@@ -275,3 +277,64 @@ def test_check_snapshot_refuses_drift_and_closes_the_connection(
     with pytest.raises(RunError, match=r"Snapshot weicht ab \(\d+ Abweichungen\)"):
         runner._check_snapshot(settings)
     assert con.closed
+
+
+OLLAMA_META = {
+    "digest": "sha-a",
+    "model": "qwen2.5-coder:7b",
+    "num_ctx": 16384,
+    "num_predict": 1000,
+    "provider": "ollama",
+    "seed": 42,
+    "temperature": 0,
+}
+ANTHROPIC_META = {
+    "cache": True,
+    "effort": "low",
+    "max_tokens": 2000,
+    "model": "claude-haiku-5-5",
+    "provider": "anthropic",
+    "sdk": "1.17.0",
+}
+
+
+@pytest.mark.parametrize(
+    ("meta", "key", "other"),
+    [
+        (OLLAMA_META, "digest", "sha-b"),
+        (OLLAMA_META, "seed", 43),
+        (OLLAMA_META, "num_predict", 500),
+        (OLLAMA_META, "num_ctx", 8192),
+        (OLLAMA_META, "temperature", 0.7),
+        (ANTHROPIC_META, "model", "claude-sonnet-5-5"),
+        (ANTHROPIC_META, "effort", "high"),
+        (ANTHROPIC_META, "max_tokens", 4000),
+        (ANTHROPIC_META, "cache", False),
+    ],
+)
+def test_a_resume_refuses_changed_provider_settings(
+    settings: Settings,
+    wiring,  # noqa: ANN001
+    meta: dict,
+    key: str,
+    other: object,
+) -> None:
+    _, plan = wiring
+    plan["kwargs"] = {"meta": meta, "fail": {2: KeyboardInterrupt()}}
+    with pytest.raises(KeyboardInterrupt):
+        live_run(settings, spec())
+    plan["kwargs"] = {"meta": {**meta, key: other}}
+    with pytest.raises(RunError, match="Teillauf live-1 stammt aus anderen Einstellungen"):
+        live_run(settings, spec())
+    assert len(journal_rows(settings)) == 1  # nothing was mixed in or discarded
+
+
+def test_a_resume_ignores_the_sdk_version_only(settings: Settings, wiring) -> None:  # noqa: ANN001
+    created, plan = wiring
+    plan["kwargs"] = {"meta": ANTHROPIC_META, "fail": {3: KeyboardInterrupt()}}
+    with pytest.raises(KeyboardInterrupt):
+        live_run(settings, spec())
+    plan["kwargs"] = {"meta": {**ANTHROPIC_META, "sdk": "1.18.2"}}
+    _, summary = live_run(settings, spec())
+    assert summary["complete"] and [r.item_id for r in created[-1].requests] == ["q003-de", "q004-de"]
+    assert not settings.path("results/partial/live-1").exists()

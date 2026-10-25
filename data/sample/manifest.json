@@ -1,0 +1,38 @@
+{
+  "dim_bundesland": {
+    "rows": 18,
+    "sha256": "f66e0e445cacfe0e8a43499e085f117a36bb2f436be4994282e22a166e174298"
+  },
+  "dim_datum": {
+    "rows": 730,
+    "sha256": "be449ebb4190f4752d3c49656844037536f49f6d0c5c6117726469b3b179bf75"
+  },
+  "dim_energietraeger": {
+    "rows": 12,
+    "sha256": "5e32b9a150353075e520a16cc727783ad215e6118b7dcab1bee30710d1c7f5c0"
+  },
+  "dim_region": {
+    "rows": 5,
+    "sha256": "2813e64ebe926f84ae6c017baa1c9a8f69c49f689d4801f75ee752a15d12c3ad"
+  },
+  "dim_zeit": {
+    "rows": 96,
+    "sha256": "f6783e1e875753c199058c8561b9a67641220a16b5b900f605a01009a8bb357f"
+  },
+  "fact_erzeugung": {
+    "rows": 14828,
+    "sha256": "6111158d4b0d03064e612de24261dd62e9bbea2980dbad04389b02b831682168"
+  },
+  "fact_kapazitaet": {
+    "rows": 456,
+    "sha256": "00e9ba573126239126f2cb630597a4447453377ccc4cf4c76be5c6c550a585b5"
+  },
+  "fact_last": {
+    "rows": 1348,
+    "sha256": "39412ee0eb0c0c0d0f2c9a801052b862588f5d80aebba4c43993e7364d09e557"
+  },
+  "fact_preis": {
+    "rows": 337,
+    "sha256": "477fbd2ea4caea247f2262c5645e41014117a8466d0ae87372a394d67d52fb7d"
+  }
+}

@@ -3,7 +3,7 @@
   "errors": 0,
   "intents": 64,
   "matched": 64,
-  "matched_nontrivial": 27,
+  "matched_nontrivial": 23,
   "mismatched": 0,
   "missing": 0,
   "rows": [
@@ -15,7 +15,7 @@
     },
     {
       "id": "q002",
-      "nontrivial": true,
+      "nontrivial": false,
       "reason": "ok",
       "status": "match"
     },
@@ -81,7 +81,7 @@
     },
     {
       "id": "q014",
-      "nontrivial": true,
+      "nontrivial": false,
       "reason": "ok",
       "status": "match"
     },
@@ -105,7 +105,7 @@
     },
     {
       "id": "q018",
-      "nontrivial": true,
+      "nontrivial": false,
       "reason": "ok",
       "status": "match"
     },
@@ -297,7 +297,7 @@
     },
     {
       "id": "q050",
-      "nontrivial": true,
+      "nontrivial": false,
       "reason": "ok",
       "status": "match"
     },

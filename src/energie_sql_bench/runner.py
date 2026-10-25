@@ -437,8 +437,13 @@ def _response_key(row: dict[str, Any]) -> tuple[str, str, int, int]:
 
 
 def _resume_signature(config: dict[str, Any]) -> dict[str, Any]:
+    """Everything that makes two responses comparable. The provider settings are part of it (Ollama model digest,
+    seed, num_ctx, num_predict, temperature; Anthropic model, effort, max_tokens, cache), so a resume never mixes
+    configurations. Only the SDK version is left out: a `uv sync` may change it between two sessions."""
     keys = ("prompt_token_limit", "prompt_version", "price", "snapshot", "spec", "variant")
-    return {key: config.get(key) for key in keys}
+    signature = {key: config.get(key) for key in keys}
+    signature["provider"] = {k: v for k, v in sorted((config.get("provider") or {}).items()) if k != "sdk"}
+    return signature
 
 
 def live_run(settings: Settings, spec: RunSpec) -> tuple[Path, dict[str, Any]]:

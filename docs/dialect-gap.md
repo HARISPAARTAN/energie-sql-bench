@@ -9,13 +9,15 @@ prüfen kann, ob Harness, Vergleich und Gold-Abfragen zusammenpassen: Gold-SQL w
 
 | Teil | Inhalt |
 |---|---|
-| Zeitreihen (`fact_erzeugung`, `fact_last`, `fact_preis`) | ISO-Woche 24/2025 (09.–15.06.2025, die meisten negativen Preisstunden) und ISO-Woche 43/2025 (20.–26.10.2025, Zeitumstellung am 26.10. mit 100 Viertelstunden) |
+| Zeitreihen (`fact_erzeugung`, `fact_last`, `fact_preis`) | ISO-Woche 24/2025 (09.–15.06.2025, 42 Stunden mit negativem Preis; die Woche mit den meisten ist 34/2024 mit 43, sie liegt nicht in der Stichprobe) und ISO-Woche 43/2025 (20.–26.10.2025, Zeitumstellung am 26.10. mit 100 Viertelstunden; die Umstellung im Frühjahr mit 92 Viertelstunden, 30.03.2025, liegt nicht in der Stichprobe) |
 | Kapazität (`fact_kapazitaet`) | Monate 2026-07, 2026-08, 2026-09 |
 | Kalender (`dim_datum`) | 2025 und 2026 |
 | übrige Dimensionen | vollständig |
 
-Fragen über 2023, 2024 oder ganze Jahre liefern auf der Stichprobe meist eine einzige NULL-Zeile oder keine
-Zeile. Solche Übereinstimmungen zählen in `reports/parity.md` als „trivial“. `rpt.v_dq_luecken` rechnet die
+Fragen über 2023, 2024 oder ganze Jahre liefern auf der Stichprobe meist eine einzige NULL-Zeile, keine Zeile
+oder nur Nullen. Solche Übereinstimmungen zählen in `reports/parity.md` als „trivial“; nicht trivial ist ein
+Ergebnis nur, wenn es mindestens einen Wert enthält, der weder NULL noch eine numerische 0 ist. Sie beweisen nur,
+dass die übersetzte Abfrage auf DuckDB läuft und beide Engines „nichts“ oder 0 liefern, nicht dass Werte stimmen. `rpt.v_dq_luecken` rechnet die
 Lücke zwischen den beiden Wochen als fehlend; das ist eine Eigenschaft der Stichprobe, keine Dialektfrage, und
 betrifft beide Engines gleich.
 
@@ -34,14 +36,23 @@ betrifft beide Engines gleich.
 | `SUM`/`AVG` über `decimal` | `decimal(38, s)` | `DECIMAL` oder `DOUBLE` | Toleranz `rel_tol 1e-4`, `abs_tol 0.005` |
 | `FORMAT(x, 'yyyy-MM')` | .NET-Format | `STRFTIME` | nur einfache Datumsformate übersetzbar; sonst `duckdb: skip` |
 | `CONVERT(typ, x, stil)` mit Stilcode | Stilcodes | nicht übersetzt | in Gold-SQL vermeiden |
-| `DATETRUNC`, `ISNULL`, `DATEDIFF`, `DATEPART` | nativ | `DATE_TRUNC`, `COALESCE`, `DATE_DIFF`, `EXTRACT` | gleichwertig (Unit-Tests in `tests/unit/test_dialect.py`) |
+| `DATETRUNC`, `ISNULL` | nativ | `DATE_TRUNC`, `COALESCE` | gleichwertig (Unit-Tests in `tests/unit/test_dialect.py`) |
+| `DATEDIFF`, `DATEPART` | nativ | `DATE_DIFF`, `EXTRACT` | nur für die Einheiten `day` und `hour` geprüft (`tests/unit/test_dialect.py`); `weekday`, `week`, `iso_week` (SQL Server zählt nach `DATEFIRST`, Sonntag zuerst) und `DATEDIFF(week)` unterscheiden sich und kommen im Gold-SQL nicht vor |
+| `bit` | 0/1 | `BOOLEAN` (`ist_wochenende`, `ist_awz`) | der Vergleich bildet Wahrheitswerte auf 0/1 ab |
+| `tinyint` | 0..255 | `SMALLINT` | Werte gleich |
+| `N'...'`-Literale | Unicode-Literal | normales Literal | gleichwertig |
+| `TOP n` ohne vollständige Sortierung oder mit Gleichständen | beliebige Auswahl | beliebige Auswahl | nicht geprüft, ob das Gold-SQL bei Gleichständen eindeutig sortiert; die Übereinstimmung der 64 Intents zeigt es für die Stichprobe |
+| `LIKE` | Groß/Klein egal (Kollation) | Groß/Klein relevant | Gold-SQL nutzt `LIKE` nur mit Ziffernmustern auf `jahr_monat` (`'2025-%'`) |
+| `SET TimeZone = 'UTC'` in `duckdb_views.sql` | – | für `TIMESTAMP` ohne Zone ohne Wirkung | betrifft nur `TIMESTAMPTZ`-Ergebnisse |
 
 ## Prüfung
 
 - `esb sample gold` führt das Gold-SQL auf `energiewende_sample` in SQL Server aus (Ergebnis in `data/sample/gold_mssql/`).
 - `esb sample parity` führt dasselbe Gold-SQL übersetzt in DuckDB aus und vergleicht mit demselben Vergleicher wie der Benchmark.
-- Abnahme: mindestens 80 % der 64 Intents mit Ergebnis (70 Intents minus 6 Abstinenz-Intents) stimmen überein und mindestens 15 davon nicht trivial.
-- Übersprungene Intents stehen mit Grund in `reports/parity.md` und im Feld `duckdb` der Frage. Stand der Erzeugung: alle 64 stimmen überein, keiner wurde übersprungen.
+- Abnahme: mindestens 80 % der 64 Intents mit Ergebnis (70 Intents minus 6 Abstinenz-Intents) stimmen überein und mindestens 15 davon nicht trivial (Wert ungleich NULL und 0).
+- Prüfer prüfbar: `tests/unit/test_parity_checker.py` fährt `run_parity` mit einer DuckDB im Speicher und selbst gebauten Gold-Einträgen durch alle Status (Treffer, Abweichung, Fehler, übersprungen, veraltet); `tests/sample/test_parity.py` verändert eine echte Gold-Zelle und erwartet genau eine Abweichung.
+- Inhaltsprüfsummen: `data/sample/manifest.json` hält je Parquet-Tabelle Zeilenzahl und SHA-256 über die sortierten Zeilen fest (`esb sample manifest`, geprüft von `esb sample parity --check` und einem Test).
+- Übersprungene Intents stehen mit Grund in `reports/parity.md` und im Feld `duckdb` der Frage. Stand der Erzeugung: alle 64 stimmen überein, 23 davon nicht trivial, keiner wurde übersprungen.
 
 ---
 
@@ -53,4 +64,4 @@ database `energiewende_sample` row for row. DuckDB results never enter a score. 
 differences (integer division, `AVG(int)`, `DATEADD` return type, time-zone names, case-sensitive string
 comparison, NULL ordering, decimal precision, `FORMAT` and `CONVERT` styles, `LIMIT` acceptance). Acceptance: at
 least 80 % of the 64 row intents (70 intents minus 6 abstention intents) match, at least 15 of them
-non-trivially; skipped intents carry their reason in `reports/parity.md` and in the question's `duckdb` field.
+non-trivially (a value that is neither NULL nor 0); skipped intents carry their reason in `reports/parity.md` and in the question's `duckdb` field.

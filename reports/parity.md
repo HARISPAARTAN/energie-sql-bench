@@ -9,7 +9,8 @@ on the identical sample. Details: `docs/dialect-gap.md`.
 |---|---|
 | Intents mit Ergebnis / intents with rows | 64 |
 | übereinstimmend / matching | 64 (100.0 %) |
-| davon mit Werten ungleich NULL / of which non-trivial | 27 |
+| davon nicht trivial (Wert ungleich NULL und 0) / of which non-trivial (not NULL, not 0) | 23 |
+| davon trivial (leer, nur NULL oder nur 0) / of which trivial (empty, NULL-only or zero-only) | 41 |
 | abweichend / mismatching | 0 |
 | Fehler / errors | 0 |
 | übersprungen / skipped (`duckdb: skip`) | 0 |

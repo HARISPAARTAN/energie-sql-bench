@@ -3,7 +3,10 @@ plus the gold-SQL parity check between the two engines."""
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +22,7 @@ from energie_sql_bench.execute import (
 from energie_sql_bench.files import read_json
 from energie_sql_bench.gold import GoldEntry, sql_sha256
 from energie_sql_bench.questions import Question, tolerance_for
-from energie_sql_bench.resultset import ResultSet
+from energie_sql_bench.resultset import ResultSet, encode_value
 
 SAMPLE_TABLES = (
     "dim_datum",
@@ -56,6 +59,16 @@ class ParityRow:
     status: str  # match | mismatch | error | skip | missing
     reason: str
     nontrivial: bool
+
+
+def _is_zero(value: Any) -> bool:
+    return isinstance(value, int | float | Decimal) and not isinstance(value, bool) and value == 0
+
+
+def is_nontrivial(result: ResultSet) -> bool:
+    """True when the result carries at least one value that is neither NULL nor a numeric zero. Empty results,
+    all-NULL results and zero-only results prove little about a translation: both engines return nothing or 0."""
+    return any(v is not None and not _is_zero(v) for row in result.rows for v in row)
 
 
 def sample_where(table: str) -> str:
@@ -198,7 +211,7 @@ def run_parity(
                 ParityRow(q.id, "missing", "Stichproben-Gold fehlt oder ist veraltet: esb sample gold", False)
             )
             continue
-        nontrivial = any(v is not None for row in gold.result.rows for v in row)
+        nontrivial = is_nontrivial(gold.result)
         result = executor.run(q.gold_sql)
         if not result.ok or result.result is None:
             rows.append(ParityRow(q.id, "error", (result.error or "")[:200], nontrivial))
@@ -239,7 +252,8 @@ def render_parity(summary: dict[str, Any]) -> str:
         "|---|---|",
         f"| Intents mit Ergebnis / intents with rows | {summary['intents']} |",
         f"| übereinstimmend / matching | {summary['matched']} ({summary['coverage'] * 100:.1f} %) |",
-        f"| davon mit Werten ungleich NULL / of which non-trivial | {summary['matched_nontrivial']} |",
+        f"| davon nicht trivial (Wert ungleich NULL und 0) / of which non-trivial (not NULL, not 0) | {summary['matched_nontrivial']} |",
+        f"| davon trivial (leer, nur NULL oder nur 0) / of which trivial (empty, NULL-only or zero-only) | {summary['matched'] - summary['matched_nontrivial']} |",
         f"| abweichend / mismatching | {summary['mismatched']} |",
         f"| Fehler / errors | {summary['errors']} |",
         f"| übersprungen / skipped (`duckdb: skip`) | {summary['skipped']} |",
@@ -250,3 +264,30 @@ def render_parity(summary: dict[str, Any]) -> str:
     ]
     lines += [f"| {r['id']} | {r['status']} | {r['reason'].replace('|', '/')} |" for r in summary["rows"]]
     return "\n".join(lines) + "\n"
+
+
+def content_digests(sample_dir: Path) -> dict[str, dict[str, Any]]:
+    """Per table: row count and a SHA-256 over the rows in a fixed order (DuckDB ORDER BY ALL), each cell encoded
+    like a gold result (decimals as text, dates as ISO). Independent of Parquet file bytes and compression."""
+    import duckdb
+
+    con = duckdb.connect()
+    try:
+        digests: dict[str, dict[str, Any]] = {}
+        for table in SAMPLE_TABLES:
+            path = (sample_dir / f"{table}.parquet").as_posix().replace("'", "''")
+            cursor = con.execute(f"SELECT * FROM read_parquet('{path}') ORDER BY ALL")
+            columns = [d[0] for d in cursor.description]
+            sha = hashlib.sha256(json.dumps(columns).encode("utf-8"))
+            count = 0
+            while batch := cursor.fetchmany(5000):
+                for row in batch:
+                    line = json.dumps(
+                        [encode_value(v) for v in row], ensure_ascii=False, separators=(",", ":")
+                    )
+                    sha.update(line.encode("utf-8") + b"\n")
+                    count += 1
+            digests[table] = {"rows": count, "sha256": sha.hexdigest()}
+        return digests
+    finally:
+        con.close()

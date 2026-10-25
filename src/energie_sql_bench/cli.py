@@ -297,6 +297,42 @@ def sample_export() -> None:
     settings = load_settings()
     for table, n in export_parquet(settings, settings.path("data/sample")).items():
         typer.echo(f"{table}.parquet: {n} Zeilen")
+    _write_manifest(settings)
+    typer.echo("data/sample/manifest.json geschrieben")
+
+
+def _write_manifest(settings) -> None:  # noqa: ANN001
+    from energie_sql_bench.files import write_json
+    from energie_sql_bench.sample import content_digests
+
+    sample_dir = settings.path("data/sample")
+    write_json(sample_dir / "manifest.json", content_digests(sample_dir))
+
+
+@sample_app.command("manifest")
+def sample_manifest(
+    check: Annotated[
+        bool, typer.Option("--check", help="nur mit data/sample/manifest.json vergleichen")
+    ] = False,
+) -> None:
+    """Inhaltsprüfsummen der Parquet-Dateien (Zeilen und SHA-256 je Tabelle) schreiben oder prüfen."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.files import dump_json, read_json
+    from energie_sql_bench.sample import content_digests
+
+    settings = load_settings()
+    if not check:
+        _write_manifest(settings)
+        typer.echo("data/sample/manifest.json geschrieben")
+        return
+    current = content_digests(settings.path("data/sample"))
+    stored = read_json(settings.path("data/sample/manifest.json"))
+    for table in sorted(set(current) | set(stored)):
+        if current.get(table) != stored.get(table):
+            typer.echo(f"Inhalt weicht ab: {table}")
+    same = dump_json(current) == dump_json(stored)
+    typer.echo("OK" if same else "ABWEICHUNG zu data/sample/manifest.json")
+    raise typer.Exit(0 if same else 1)
 
 
 @sample_app.command("load")
@@ -363,8 +399,14 @@ def sample_parity(
         f"davon nicht-trivial {summary['matched_nontrivial']}"
     )
     if check:
+        from energie_sql_bench.sample import content_digests
+
         same = dump_json(read_json(settings.path("data/sample/parity.json"))) == dump_json(summary)
         typer.echo("OK" if same else "ABWEICHUNG zu data/sample/parity.json")
-        raise typer.Exit(0 if same else 1)
+        digests_same = dump_json(content_digests(settings.path("data/sample"))) == dump_json(
+            read_json(settings.path("data/sample/manifest.json"))
+        )
+        typer.echo("Inhalt OK" if digests_same else "ABWEICHUNG zu data/sample/manifest.json")
+        raise typer.Exit(0 if same and digests_same else 1)
     write_json(settings.path("data/sample/parity.json"), summary)
     write_text(settings.path("reports/parity.md"), render_parity(summary))

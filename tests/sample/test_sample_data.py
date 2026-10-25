@@ -18,6 +18,7 @@ VIEW_ROWS = {
     "v_preis_last_stunde": 337,
     "v_negative_preisphasen": 10,
     "v_kapazitaet": 456,
+    "v_dq_luecken": 55,
 }
 
 
@@ -66,3 +67,11 @@ def test_codes_are_trimmed_and_capacity_matches_warehouse(con) -> None:  # noqa:
         "ON e.energietraeger_key = k.energietraeger_key WHERE k.datum_key = 20260901 AND e.name_de = 'Wind Offshore'"
     ).fetchone()[0]
     assert str(total) == "11598.743"
+
+
+def test_parquet_content_matches_the_manifest() -> None:
+    from energie_sql_bench.files import read_json
+    from energie_sql_bench.sample import content_digests
+
+    assert content_digests(SAMPLE) == read_json(SAMPLE / "manifest.json")
+    assert {t: d["rows"] for t, d in read_json(SAMPLE / "manifest.json").items()} == EXPECTED_ROWS
