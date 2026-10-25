@@ -21,4 +21,4 @@ check_sql: |
       OR (v.datum_key = 20240102 AND z.stunde < 1))
 tables: [dw.dim_region, dw.fact_erzeugung]
 duckdb: ok
-notes: "Hier ausdrücklich UTC; datum_key ist lokal und daher falsch. Wert 2026-10-25: 1217773.000."
+notes: "Hier ausdrücklich UTC; datum_key ist lokal und daher falsch. Wert 2026-10-25: 1217773.000. Pumpspeicher-Erzeugung ist Teil der Summe (alle Energieträger der Erzeugungstabelle, Pumpspeicher zählt zu Konventionell); der Pumpverbrauch steht nur in fact_last und zählt nicht."

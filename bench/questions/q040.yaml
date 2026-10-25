@@ -19,4 +19,4 @@ check_sql: |
     AND v.datum_key <= 20251201
 tables: [dw.dim_energietraeger, dw.fact_kapazitaet]
 duckdb: ok
-notes: "Bestand Dezember 2025 (datum_key 20251201), summiert über Bundesländer, in GW. Wert 2026-10-25: 104.967836."
+notes: "Bestand Dezember 2025 (datum_key 20251201), summiert über Bundesländer, in GW. Wert 2026-10-25: 104.967836. Das Bundesland Unbekannt (34 MW Photovoltaik) ist in der Summe enthalten, weil über alle Bundesländer summiert wird; ohne Unbekannt wären es 104.933836 GW."

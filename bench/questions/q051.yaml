@@ -37,4 +37,4 @@ check_sql: |
   SELECT mo, p FROM rk WHERE rang = 1
 tables: [dw.dim_datum, dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
 duckdb: ok
-notes: "Monatlicher Anteil, dann Maximum; Prozent. Wert 2026-10-25: Monat 6, 73.362550 %."
+notes: "Monatlicher Anteil, dann Maximum; Prozent. Wert 2026-10-25: Monat 6, 73.362550 %. Pumpspeicher zählt zu Konventionell: seine Erzeugung steht im Nenner, nicht im Zähler (kategorie_de = Erneuerbar)."

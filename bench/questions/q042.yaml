@@ -35,4 +35,4 @@ check_sql: |
           WHERE k.energietraeger_key = 1 AND k.jahr_monat LIKE '2025-%') AS stunden
 tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung, dw.fact_kapazitaet]
 duckdb: ok
-notes: "Erzeugung 2025 (MWh) geteilt durch das Mittel der zwölf Monatsend-Bestände (Summe über Bundesländer). Wert 2026-10-25: 757.967344."
+notes: "Erzeugung 2025 (MWh) geteilt durch das Mittel der zwölf Monatsend-Bestände (Summe über Bundesländer). Wert 2026-10-25: 757.967344. Das Bundesland Unbekannt (34 MW Photovoltaik, in jedem Monat gleich) ist im Bestand enthalten, weil über alle Bundesländer summiert wird."
