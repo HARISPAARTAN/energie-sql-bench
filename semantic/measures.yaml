@@ -1,0 +1,196 @@
+# Semantic layer for variants v3 to v6: the 24 measures of the Energiewende-Monitor semantic model as T-SQL
+# templates over dw, plus rules and synonyms. Placeholders in braces: {von} {bis} (datum_key yyyymmdd),
+# {von_vorjahr} {bis_vorjahr}, {jahr} (yyyy), {monat} {vormonat} (jahr_monat 'yyyy-mm'), {monatserster} (yyyymm01),
+# {et} (dw.dim_energietraeger.name_de).
+# Measure texts follow energiewende-monitor/docs/kpi-glossar.md at source_commit (26 measures there; Preisstunden and
+# Datenstand MaStR are not part of this layer). Deviations from the DAX: Installierte Leistung and Volllaststunden are
+# written as the glossary describes them (last month with data up to the end of the period; months from the first to
+# the last generation day); Zeilen sums the four fact tables like the glossary.
+source_commit: b399d0144c22c355cf56e2284d61aac158ed0b5a
+rules:
+  - "datum_key and zeit_key are local (Europe/Berlin); ts_utc is UTC. Years, months, days, weeks and hours in a question are local unless it says UTC. A local day has 96 quarter-hours, 92 on the spring clock change and 100 on the autumn clock change."
+  - "fact_erzeugung and fact_last hold energy in MWh per 15-minute interval; fact_preis holds one row per hour (EUR/MWh). Mean power in MW = AVG(MWh per quarter-hour) * 4."
+  - "Hourly price together with hourly load: rpt.v_preis_last_stunde (hourly load = sum of the four quarter-hours)."
+  - "fact_kapazitaet has one row per month, Bundesland and energy carrier; datum_key is the first day of the month and bestand_mw is the stock at the end of that month. Germany = sum over all Bundeslaender including AWZ (offshore zone) and Unbekannt (unknown)."
+  - "Pumpspeicher counts as Konventionell. Pumping consumption is fact_last.pumpspeicher_verbrauch_mwh, not generation."
+  - "Kernenergie generation ends on 2023-04-15; later rows are NULL or 0."
+  - "Only the bidding zone DE-LU has facts. The control areas 50Hertz, Amprion, TenneT and TransnetBW exist in dw.dim_region without facts."
+  - "Units: GWh = MWh / 1000, TWh = MWh / 1000000, GW = MW / 1000; percent = 100 * share."
+synonyms:
+  solar: Photovoltaik
+  solarstrom: Photovoltaik
+  pv: Photovoltaik
+  solar pv: Photovoltaik
+  windkraft an land: Wind Onshore
+  onshore wind: Wind Onshore
+  windkraft auf see: Wind Offshore
+  offshore wind: Wind Offshore
+  lignite: Braunkohle
+  hard coal: Steinkohle
+  natural gas: Erdgas
+  nuclear: Kernenergie
+  atomkraft: Kernenergie
+  hydro: Wasserkraft
+  biomass: Biomasse
+  pumped storage: Pumpspeicher
+  pumped-storage: Pumpspeicher
+  renewables: Erneuerbar
+  erneuerbare: Erneuerbar
+  stromverbrauch: Netzlast
+  strombedarf: Netzlast
+  grid load: Netzlast
+  residual load: Residuallast
+  börsenstrompreis: Day-Ahead-Preis
+  strompreis: Day-Ahead-Preis
+  großhandelspreis: Day-Ahead-Preis
+  exchange electricity price: Day-Ahead-Preis
+  wholesale price: Day-Ahead-Preis
+  nrw: Nordrhein-Westfalen
+  bavaria: Bayern
+  installed capacity: Bestand Kapazität
+  full-load hours: Volllaststunden
+measures:
+  - id: erzeugung_mwh
+    name_de: Erzeugung (MWh)
+    name_en: Generation (MWh)
+    unit: MWh
+    description: Sum of generated energy; filter carriers through dw.dim_energietraeger.name_de.
+    sql: SELECT SUM(f.erzeugung_mwh) FROM dw.fact_erzeugung f WHERE f.datum_key BETWEEN {von} AND {bis}
+  - id: erzeugung_erneuerbar_mwh
+    name_de: Erzeugung Erneuerbar (MWh)
+    name_en: Renewable generation (MWh)
+    unit: MWh
+    description: Generation of the category Erneuerbar.
+    sql: SELECT SUM(f.erzeugung_mwh) FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE e.kategorie_de = N'Erneuerbar' AND f.datum_key BETWEEN {von} AND {bis}
+  - id: ee_anteil_prozent
+    name_de: EE-Anteil %
+    name_en: Renewable share %
+    unit: percent
+    description: Renewable generation divided by total generation, times 100.
+    sql: SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END) / SUM(f.erzeugung_mwh) FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE f.datum_key BETWEEN {von} AND {bis}
+  - id: netzlast_mwh
+    name_de: Netzlast (MWh)
+    name_en: Grid load (MWh)
+    unit: MWh
+    description: Sum of grid load.
+    sql: SELECT SUM(l.netzlast_mwh) FROM dw.fact_last l WHERE l.datum_key BETWEEN {von} AND {bis}
+  - id: residuallast_mwh
+    name_de: Residuallast (MWh)
+    name_en: Residual load (MWh)
+    unit: MWh
+    description: Sum of residual load (grid load minus wind and PV).
+    sql: SELECT SUM(l.residuallast_mwh) FROM dw.fact_last l WHERE l.datum_key BETWEEN {von} AND {bis}
+  - id: residuallast_min
+    name_de: Residuallast Minimum (MWh/15 min)
+    name_en: Residual load minimum (MWh/15 min)
+    unit: MWh per quarter-hour
+    description: Smallest quarter-hour value of the residual load.
+    sql: SELECT MIN(l.residuallast_mwh) FROM dw.fact_last l WHERE l.datum_key BETWEEN {von} AND {bis}
+  - id: residuallast_avg
+    name_de: Residuallast Ø (MWh/15 min)
+    name_en: Residual load average (MWh/15 min)
+    unit: MWh per quarter-hour
+    description: Average quarter-hour value of the residual load.
+    sql: SELECT AVG(l.residuallast_mwh) FROM dw.fact_last l WHERE l.datum_key BETWEEN {von} AND {bis}
+  - id: day_ahead_avg
+    name_de: Day-Ahead Ø (€/MWh)
+    name_en: Day-ahead average (EUR/MWh)
+    unit: EUR/MWh
+    description: Average hourly day-ahead price.
+    sql: SELECT AVG(p.day_ahead_eur_mwh) FROM dw.fact_preis p WHERE p.datum_key BETWEEN {von} AND {bis}
+  - id: day_ahead_max
+    name_de: Day-Ahead Max (€/MWh)
+    name_en: Day-ahead maximum (EUR/MWh)
+    unit: EUR/MWh
+    description: Highest hourly day-ahead price.
+    sql: SELECT MAX(p.day_ahead_eur_mwh) FROM dw.fact_preis p WHERE p.datum_key BETWEEN {von} AND {bis}
+  - id: day_ahead_min
+    name_de: Day-Ahead Min (€/MWh)
+    name_en: Day-ahead minimum (EUR/MWh)
+    unit: EUR/MWh
+    description: Lowest hourly day-ahead price.
+    sql: SELECT MIN(p.day_ahead_eur_mwh) FROM dw.fact_preis p WHERE p.datum_key BETWEEN {von} AND {bis}
+  - id: negative_preisstunden
+    name_de: Negative Preisstunden
+    name_en: Negative price hours
+    unit: hours
+    description: Number of hours with a day-ahead price below 0.
+    sql: SELECT COUNT(*) FROM dw.fact_preis p WHERE p.day_ahead_eur_mwh < 0 AND p.datum_key BETWEEN {von} AND {bis}
+  - id: erzeugung_vorjahr_mwh
+    name_de: Erzeugung Vorjahr (MWh)
+    name_en: Generation previous year (MWh)
+    unit: MWh
+    description: Generation in the same period one year earlier.
+    sql: SELECT SUM(f.erzeugung_mwh) FROM dw.fact_erzeugung f WHERE f.datum_key BETWEEN {von_vorjahr} AND {bis_vorjahr}
+  - id: erzeugung_delta_vorjahr_prozent
+    name_de: Erzeugung Δ Vorjahr %
+    name_en: Generation change vs previous year %
+    unit: percent
+    description: Change of generation against the same period one year earlier, in percent.
+    sql: SELECT 100.0 * (a.cur - b.prev) / b.prev FROM (SELECT SUM(erzeugung_mwh) AS cur FROM dw.fact_erzeugung WHERE datum_key BETWEEN {von} AND {bis}) a CROSS JOIN (SELECT SUM(erzeugung_mwh) AS prev FROM dw.fact_erzeugung WHERE datum_key BETWEEN {von_vorjahr} AND {bis_vorjahr}) b
+  - id: ee_anteil_vorjahr_prozent
+    name_de: EE-Anteil Vorjahr %
+    name_en: Renewable share previous year %
+    unit: percent
+    description: Renewable share in the same period one year earlier.
+    sql: SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END) / SUM(f.erzeugung_mwh) FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE f.datum_key BETWEEN {von_vorjahr} AND {bis_vorjahr}
+  - id: ee_anteil_delta_vorjahr_pp
+    name_de: EE-Anteil Δ Vorjahr (pp)
+    name_en: Renewable share change vs previous year (pp)
+    unit: percentage points
+    description: Renewable share minus the share one year earlier.
+    sql: SELECT a.anteil - b.anteil FROM (SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END) / SUM(f.erzeugung_mwh) AS anteil FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE f.datum_key BETWEEN {von} AND {bis}) a CROSS JOIN (SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END) / SUM(f.erzeugung_mwh) AS anteil FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE f.datum_key BETWEEN {von_vorjahr} AND {bis_vorjahr}) b
+  - id: netzlast_vormonat_mwh
+    name_de: Netzlast Vormonat (MWh)
+    name_en: Grid load previous month (MWh)
+    unit: MWh
+    description: Grid load of the previous month.
+    sql: SELECT SUM(l.netzlast_mwh) FROM dw.fact_last l JOIN dw.dim_datum d ON d.datum_key = l.datum_key WHERE d.jahr_monat = '{vormonat}'
+  - id: netzlast_delta_vormonat_prozent
+    name_de: Netzlast Δ Vormonat %
+    name_en: Grid load change vs previous month %
+    unit: percent
+    description: Change of the monthly grid load against the previous month, in percent.
+    sql: SELECT 100.0 * (a.mwh - b.mwh) / b.mwh FROM (SELECT SUM(l.netzlast_mwh) AS mwh FROM dw.fact_last l JOIN dw.dim_datum d ON d.datum_key = l.datum_key WHERE d.jahr_monat = '{monat}') a CROSS JOIN (SELECT SUM(l.netzlast_mwh) AS mwh FROM dw.fact_last l JOIN dw.dim_datum d ON d.datum_key = l.datum_key WHERE d.jahr_monat = '{vormonat}') b
+  - id: zubau_mw
+    name_de: Zubau (MW)
+    name_en: Capacity additions (MW)
+    unit: MW
+    description: Capacity commissioned in the months of the period.
+    sql: SELECT SUM(k.zubau_mw) FROM dw.fact_kapazitaet k WHERE k.datum_key BETWEEN {von} AND {bis}
+  - id: zubau_ytd_mw
+    name_de: Zubau YTD (MW)
+    name_en: Capacity additions year to date (MW)
+    unit: MW
+    description: Additions from January of the year up to and including the given month.
+    sql: SELECT SUM(k.zubau_mw) FROM dw.fact_kapazitaet k WHERE k.datum_key BETWEEN {jahr}0101 AND {monatserster}
+  - id: installierte_leistung_mw
+    name_de: Installierte Leistung (MW)
+    name_en: Installed capacity (MW)
+    unit: MW
+    description: Stock at the end of the last month with capacity data on or before the end of the period (equals the cumulative anfangsbestand_mw + zubau_mw - abgang_mw); never a sum over several months. Without a period end, use the newest month.
+    sql: SELECT SUM(k.bestand_mw) FROM dw.fact_kapazitaet k WHERE k.datum_key = (SELECT MAX(k2.datum_key) FROM dw.fact_kapazitaet k2 WHERE k2.datum_key <= {bis})
+  - id: volllaststunden_h
+    name_de: Volllaststunden (h)
+    name_en: Full-load hours (h)
+    unit: hours
+    description: Generation of a carrier divided by the average month-end stock of the months from the month of the first to the last generation day in the period (months without capacity rows do not count; not extrapolated for incomplete years).
+    sql: SELECT g.mwh / c.mw FROM (SELECT SUM(f.erzeugung_mwh) AS mwh, MIN(f.datum_key) AS erste_tag, MAX(f.datum_key) AS letzter_tag FROM dw.fact_erzeugung f JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key WHERE e.name_de = N'{et}' AND f.datum_key BETWEEN {von} AND {bis}) g CROSS APPLY (SELECT AVG(m.mw) AS mw FROM (SELECT k.datum_key, SUM(k.bestand_mw) AS mw FROM dw.fact_kapazitaet k JOIN dw.dim_energietraeger e2 ON e2.energietraeger_key = k.energietraeger_key WHERE e2.name_de = N'{et}' AND k.datum_key BETWEEN (g.erste_tag / 100) * 100 + 1 AND g.letzter_tag GROUP BY k.datum_key) m) c
+  - id: anzahl_einheiten_zubau
+    name_de: Anzahl Einheiten Zubau
+    name_en: Units commissioned
+    unit: units
+    description: Number of units commissioned in the months of the period.
+    sql: SELECT SUM(k.anzahl_zubau) FROM dw.fact_kapazitaet k WHERE k.datum_key BETWEEN {von} AND {bis}
+  - id: datenstand
+    name_de: Datenstand
+    name_en: Data as of
+    unit: timestamp (UTC)
+    description: Newest loaded UTC timestamp of the generation data, independent of any filter.
+    sql: SELECT MAX(f.ts_utc) FROM dw.fact_erzeugung f
+  - id: zeilen
+    name_de: Zeilen
+    name_en: Rows
+    unit: rows
+    description: Number of rows of the four fact tables (generation, load, price, capacity), for data-quality checks.
+    sql: SELECT (SELECT COUNT(*) FROM dw.fact_erzeugung WHERE datum_key BETWEEN {von} AND {bis}) + (SELECT COUNT(*) FROM dw.fact_last WHERE datum_key BETWEEN {von} AND {bis}) + (SELECT COUNT(*) FROM dw.fact_preis WHERE datum_key BETWEEN {von} AND {bis}) + (SELECT COUNT(*) FROM dw.fact_kapazitaet WHERE datum_key BETWEEN {von} AND {bis})
