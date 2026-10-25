@@ -55,7 +55,9 @@ def test_every_template_executes(settings: Settings, reader: MssqlExecutor) -> N
         ("negative_preisstunden", {}, Decimal("573"), Decimal("0")),
         ("day_ahead_avg", {}, Decimal("89.32"), Decimal("0.005")),
         ("installierte_leistung_mw", {"bis": "20241231"}, Decimal("267978"), Decimal("0.5")),
+        ("installierte_leistung_mw", {"bis": "20991231"}, Decimal("303715"), Decimal("0.5")),
         ("volllaststunden_h", {"et": "Wind Onshore"}, Decimal("1634"), Decimal("0.5")),
+        ("zeilen", {"von": "00000000", "bis": "99999999"}, Decimal("1737824"), Decimal("0")),
     ],
 )
 def test_glossary_reconciliation(
@@ -94,3 +96,16 @@ def test_full_load_hours_use_months_of_generation(settings: Settings, reader: Ms
         )
         is None
     )
+
+
+def test_preisstunden_include_the_negative_ones(settings: Settings, reader: MssqlExecutor) -> None:
+    hours = scalar(reader, filled(settings, "preisstunden"))
+    negative = scalar(reader, filled(settings, "negative_preisstunden"))
+    assert 8000 < hours < 9000 and negative == 573  # 2025: about 8,760 price hours, 573 of them negative
+
+
+def test_datenstand_mastr_is_the_newest_month(settings: Settings, reader: MssqlExecutor) -> None:
+    # Text yyyy-mm-01 of the newest capacity month; the warehouse may already hold the partial month after the data cut.
+    value = scalar(reader, filled(settings, "datenstand_mastr"))
+    assert isinstance(value, str) and len(value) == 10 and value.endswith("-01")
+    assert value >= f"{settings.snapshot.mastr_end}-01"

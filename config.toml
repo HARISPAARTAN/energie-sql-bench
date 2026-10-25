@@ -66,8 +66,16 @@ cache = true
 [providers.ollama]
 host = "http://127.0.0.1:11434"
 model = "qwen2.5-coder:7b"
-num_ctx = 8192
+# The v4 system prompt is about 8k tokens; 16384 leaves room for the answer (Ollama drops the head of a longer prompt).
+num_ctx = 16384
 seed = 42
+
+[prompt_budget]
+# Preflight estimate of tokens from characters, and the share of the context kept free for the answer.
+chars_per_token = 3.5
+output_reserve_tokens = 1000
+# Largest prompt (input + cache tokens) a run may report from the provider; a run above it is aborted and invalid.
+anthropic_max_prompt_tokens = 16384
 
 [cost]
 # ECB euro reference rate: USD per 1 EUR, https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml

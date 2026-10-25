@@ -1,11 +1,11 @@
-# Semantic layer for variants v3 to v6: the 24 measures of the Energiewende-Monitor semantic model as T-SQL
+# Semantic layer for variants v3 to v6: the 26 measures of the Energiewende-Monitor semantic model as T-SQL
 # templates over dw, plus rules and synonyms. Placeholders in braces: {von} {bis} (datum_key yyyymmdd),
 # {von_vorjahr} {bis_vorjahr}, {jahr} (yyyy), {monat} {vormonat} (jahr_monat 'yyyy-mm'), {monatserster} (yyyymm01),
 # {et} (dw.dim_energietraeger.name_de).
-# Measure texts follow energiewende-monitor/docs/kpi-glossar.md at source_commit (26 measures there; Preisstunden and
-# Datenstand MaStR are not part of this layer). Deviations from the DAX: Installierte Leistung and Volllaststunden are
-# written as the glossary describes them (last month with data up to the end of the period; months from the first to
-# the last generation day); Zeilen sums the four fact tables like the glossary.
+# Measure texts follow energiewende-monitor/docs/kpi-glossar.md at source_commit (all 26 measures are carried).
+# Deviations from the DAX: Installierte Leistung and Volllaststunden are written as the glossary describes them
+# (last month with data up to the end of the period; months from the first to the last generation day); Zeilen sums
+# the four fact tables like the glossary.
 source_commit: b399d0144c22c355cf56e2284d61aac158ed0b5a
 rules:
   - "datum_key and zeit_key are local (Europe/Berlin); ts_utc is UTC. Years, months, days, weeks and hours in a question are local unless it says UTC. A local day has 96 quarter-hours, 92 on the spring clock change and 100 on the autumn clock change."
@@ -116,6 +116,12 @@ measures:
     unit: hours
     description: Number of hours with a day-ahead price below 0.
     sql: SELECT COUNT(*) FROM dw.fact_preis p WHERE p.day_ahead_eur_mwh < 0 AND p.datum_key BETWEEN {von} AND {bis}
+  - id: preisstunden
+    name_de: Preisstunden
+    name_en: Price hours
+    unit: hours
+    description: Number of hourly price rows in the period (basis of the price-class histogram); a day has 24 price hours, 23 or 25 on a clock change.
+    sql: SELECT COUNT(*) FROM dw.fact_preis p WHERE p.datum_key BETWEEN {von} AND {bis}
   - id: erzeugung_vorjahr_mwh
     name_de: Erzeugung Vorjahr (MWh)
     name_en: Generation previous year (MWh)
@@ -188,6 +194,12 @@ measures:
     unit: timestamp (UTC)
     description: Newest loaded UTC timestamp of the generation data, independent of any filter.
     sql: SELECT MAX(f.ts_utc) FROM dw.fact_erzeugung f
+  - id: datenstand_mastr
+    name_de: Datenstand MaStR
+    name_en: Capacity data as of
+    unit: text (yyyy-mm-dd)
+    description: Newest month with capacity data, independent of any filter, as the first day of that month (the month is incomplete; the export date is in the README).
+    sql: SELECT STUFF(STUFF(CAST(MAX(k.datum_key) AS varchar(8)), 5, 0, '-'), 8, 0, '-') FROM dw.fact_kapazitaet k
   - id: zeilen
     name_de: Zeilen
     name_en: Rows

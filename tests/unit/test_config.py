@@ -93,3 +93,10 @@ def test_dotenv_with_utf8_bom_is_read(tmp_path: Path) -> None:
     path = tmp_path / ".env"
     path.write_bytes(b"\xef\xbb\xbfESB_DB_PASSWORD=abc\nESB_DB_NAME=x\n")
     assert read_dotenv(path) == {"ESB_DB_PASSWORD": "abc", "ESB_DB_NAME": "x"}
+
+
+def test_local_context_and_prompt_budget(tmp_root: Path) -> None:
+    s = load_settings(tmp_root, environ={})
+    assert s.ollama.num_ctx == 16384
+    assert (s.prompt_budget.chars_per_token, s.prompt_budget.output_reserve_tokens) == (3.5, 1000)
+    assert s.prompt_budget.anthropic_max_prompt_tokens == 16384

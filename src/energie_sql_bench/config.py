@@ -134,6 +134,13 @@ class OllamaSettings:
 
 
 @dataclass(frozen=True)
+class PromptBudget:
+    chars_per_token: float = 3.5
+    output_reserve_tokens: int = 1000
+    anthropic_max_prompt_tokens: int = 16384
+
+
+@dataclass(frozen=True)
 class CostSettings:
     eur_usd: float
     rate_date: str
@@ -193,6 +200,7 @@ class Settings:
     report: ReportSettings
     pricing: dict[str, ModelPrice]
     env: dict[str, str] = field(repr=False)
+    prompt_budget: PromptBudget = field(default_factory=PromptBudget)
 
     def path(self, relative: str) -> Path:
         return self.root / relative
@@ -230,6 +238,7 @@ def load_settings(root: Path | None = None, environ: Mapping[str, str] | None = 
     a = cfg["providers"]["anthropic"]
     o = cfg["providers"]["ollama"]
     c = cfg["cost"]
+    b = cfg.get("prompt_budget", {})
     r = cfg["report"]
     pricing = {
         model: ModelPrice(
@@ -273,4 +282,9 @@ def load_settings(root: Path | None = None, environ: Mapping[str, str] | None = 
         ),
         pricing=pricing,
         env=env,
+        prompt_budget=PromptBudget(
+            float(b.get("chars_per_token", 3.5)),
+            int(b.get("output_reserve_tokens", 1000)),
+            int(b.get("anthropic_max_prompt_tokens", 16384)),
+        ),
     )

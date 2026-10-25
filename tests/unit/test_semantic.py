@@ -27,9 +27,9 @@ def fill(sql: str) -> str:
     return sql
 
 
-def test_twenty_four_unique_measures() -> None:
-    assert len(LAYER.measures) == 24
-    assert len({m.id for m in LAYER.measures}) == 24
+def test_twenty_six_unique_measures() -> None:
+    assert len(LAYER.measures) == 26
+    assert len({m.id for m in LAYER.measures}) == 26
 
 
 def test_source_commit_matches_snapshot() -> None:
@@ -52,4 +52,4 @@ def test_render_contains_rules_synonyms_and_measures() -> None:
     assert "- börsenstrompreis -> Day-Ahead-Preis" in text
     assert "Volllaststunden (h) / Full-load hours (h) [hours]" in text
     measure_lines = text.split("Measures", 1)[1].splitlines()[1:]
-    assert len(measure_lines) == 24 and all(line.startswith("- ") for line in measure_lines)
+    assert len(measure_lines) == 26 and all(line.startswith("- ") for line in measure_lines)

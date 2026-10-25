@@ -1,9 +1,27 @@
-"""Scoring: item verdicts, Wilson intervals, exact McNemar tests, percentiles, cost and the run summary."""
+"""Scoring: item verdicts, intervals, exact McNemar tests, percentiles, cost and the run summary.
+
+Repeats and statistics (review finding I1). Repeats of one item share prompt and model, so they are correlated and
+must never be counted as independent observations:
+
+* Accuracy is aggregated per item first (mean correctness over the repeats of that item).
+* With one repeat the accuracy interval is the Wilson 95 % interval over the items.
+* With more than one repeat the interval is a question-level percentile bootstrap (95 %, fixed seed,
+  BOOTSTRAP_RESAMPLES resamples): questions are drawn with replacement, each carrying its German and English items
+  and their per-item means. A question is the unit because its two language items and all its repeats are related.
+  A bootstrap interval collapses to a point when every question has the same outcome; read it together with n.
+* The paired McNemar tests (German against English here, between configurations in the report) run on the per-item
+  majority outcome: an item counts as correct when strictly more than half of its repeats are correct (a tie is not
+  correct). The pairs are items, never (item, repeat).
+* The pooled counts "correct" and "n" of a block are descriptive totals over all repeats; they carry no interval.
+
+METHODOLOGY_NOTE is the wording the report and docs/methodology.md reuse."""
 
 from __future__ import annotations
 
 import math
+import random
 from collections import Counter
+from collections.abc import Iterable
 from fractions import Fraction
 from typing import Any
 
@@ -14,7 +32,23 @@ from energie_sql_bench.questions import Question, tolerance_for
 from energie_sql_bench.records import Outcome, Usage
 from energie_sql_bench.resultset import ResultSet
 
-SUMMARY_VERSION = 1
+SUMMARY_VERSION = 2
+BOOTSTRAP_SEED = 20261025
+BOOTSTRAP_RESAMPLES = 2000
+METHODOLOGY_NOTE = {
+    "de": (
+        "Wiederholungen desselben Items sind nicht unabhängig. Die Genauigkeit wird zuerst je Item über die "
+        "Wiederholungen gemittelt. Bei einer Wiederholung gilt das Wilson-Intervall (95 %) über die Items, bei "
+        "mehreren ein Bootstrap-Intervall (95 %, feste Saat) über die Fragen. McNemar-Tests laufen auf dem "
+        "Mehrheitsergebnis je Item (mehr als die Hälfte der Wiederholungen richtig)."
+    ),
+    "en": (
+        "Repeats of the same item are not independent. Accuracy is first averaged per item over its repeats. "
+        "With one repeat the Wilson interval (95 %) over the items applies; with several, a question-level "
+        "bootstrap interval (95 %, fixed seed). McNemar tests run on the per-item majority outcome (more than "
+        "half of the repeats correct)."
+    ),
+}
 
 
 def r6(x: float) -> float:
@@ -83,16 +117,75 @@ def cost_usd(usage: Usage, price: ModelPrice) -> float:
     ) / 1_000_000
 
 
+def majority_by_item(pairs: Iterable[tuple[str, bool]]) -> dict[str, bool]:
+    """Per-item majority outcome from (item_id, correct) pairs: True when strictly more than half are correct."""
+    counts: dict[str, list[int]] = {}
+    for item_id, correct in pairs:
+        entry = counts.setdefault(item_id, [0, 0])
+        entry[0] += bool(correct)
+        entry[1] += 1
+    return {item_id: 2 * hits > total for item_id, (hits, total) in sorted(counts.items())}
+
+
+def paired_discordant(a: dict[str, bool], b: dict[str, bool]) -> tuple[int, int, int]:
+    """(common items, only a correct, only b correct) for two majority maps; feed the last two to mcnemar_exact."""
+    keys = sorted(set(a) & set(b))
+    return len(keys), sum(1 for k in keys if a[k] and not b[k]), sum(1 for k in keys if b[k] and not a[k])
+
+
+def bootstrap_interval(
+    clusters: list[tuple[float, int]],
+    resamples: int = BOOTSTRAP_RESAMPLES,
+    seed: int = BOOTSTRAP_SEED,
+) -> tuple[float, float]:
+    """95 % percentile bootstrap of the item-weighted accuracy; clusters are (sum of item means, item count)."""
+    if not clusters:
+        return 0.0, 1.0
+    rng = random.Random(seed)
+    size = len(clusters)
+    stats = []
+    for _ in range(resamples):
+        total = weight = 0
+        for _ in range(size):
+            s, w = clusters[rng.randrange(size)]
+            total += s
+            weight += w
+        stats.append(total / weight)
+    return percentile(stats, 2.5) or 0.0, percentile(stats, 97.5) or 0.0
+
+
+def _item_means(outcomes: list[Outcome], attr: str) -> dict[str, tuple[str, float]]:
+    """item_id -> (question_id, mean of attr over the repeats of that item)."""
+    grouped: dict[str, list[Outcome]] = {}
+    for o in outcomes:
+        grouped.setdefault(o.item_id, []).append(o)
+    return {
+        item_id: (rows[0].question_id, sum(bool(getattr(o, attr)) for o in rows) / len(rows))
+        for item_id, rows in sorted(grouped.items())
+    }
+
+
 def _block(outcomes: list[Outcome], repeats: int, attr: str) -> dict[str, Any]:
     per_repeat = []
     for r in range(repeats):
         sub = [o for o in outcomes if o.repeat == r]
         per_repeat.append(r6(sum(getattr(o, attr) for o in sub) / len(sub)) if sub else 0.0)
     k = sum(getattr(o, attr) for o in outcomes)
-    lo, hi = wilson(k, len(outcomes))
+    means = _item_means(outcomes, attr)
+    if repeats > 1:
+        by_question: dict[str, list[float]] = {}
+        for question_id, mean in means.values():
+            by_question.setdefault(question_id, []).append(mean)
+        lo, hi = bootstrap_interval([(sum(v), len(v)) for _, v in sorted(by_question.items())])
+        method = "bootstrap"
+    else:
+        lo, hi = wilson(sum(round(m) for _, m in means.values()), len(means))
+        method = "wilson"
     return {
         "ci95": [r6(lo), r6(hi)],
         "correct": k,
+        "interval": method,
+        "items": len(means),
         "max": max(per_repeat, default=0.0),
         "mean": r6(sum(per_repeat) / len(per_repeat)) if per_repeat else 0.0,
         "min": min(per_repeat, default=0.0),
@@ -136,9 +229,12 @@ def summarize(
     usage = sum((a.usage for a in attempts), Usage())
     usd = sum(o.cost_usd for o in outcomes)
     n_correct = sum(o.correct for o in outcomes)
-    pairs: dict[tuple[str, int], dict[str, bool]] = {}
-    for o in outcomes:
-        pairs.setdefault((o.question_id, o.repeat), {})[o.lang] = o.correct
+    majority = majority_by_item((o.item_id, o.correct) for o in outcomes)
+    langs = {o.item_id: (o.question_id, o.lang) for o in outcomes}
+    pairs: dict[str, dict[str, bool]] = {}
+    for item_id, correct in majority.items():
+        question_id, lang = langs[item_id]
+        pairs.setdefault(question_id, {})[lang] = correct
     de_only = sum(1 for p in pairs.values() if p.get("de") and p.get("en") is False)
     en_only = sum(1 for p in pairs.values() if p.get("en") and p.get("de") is False)
     labels = Counter(label for o in outcomes for label in o.labels)
@@ -173,7 +269,7 @@ def summarize(
             "llm_p50": _opt(percentile([a.llm_ms for a in attempts], 50)),
             "llm_p95": _opt(percentile([a.llm_ms for a in attempts], 95)),
         },
-        "n_items": len(outcomes) // repeats if repeats else len(outcomes),
+        "n_items": len({o.item_id for o in outcomes}),
         "repair_attempts": sum(1 for a in attempts if a.attempt > 0),
         "repaired_correct": sum(1 for o in outcomes if o.correct and len(o.attempts) > 1),
         "repeats": repeats,
