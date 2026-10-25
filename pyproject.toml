@@ -1,6 +1,6 @@
 [project]
 name = "energie-sql-bench"
-version = "0.1.0"
+version = "0.1.1"
 description = "Text-to-SQL-Benchmark auf Deutsch und Englisch auf einem echten SQL-Server-Warehouse der Energiewende."
 readme = "README.md"
 requires-python = ">=3.13"
