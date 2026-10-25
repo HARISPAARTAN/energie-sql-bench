@@ -14,6 +14,7 @@ from energie_sql_bench.scoring import (
     bootstrap_interval,
     cost_usd,
     majority_by_item,
+    majority_by_question,
     mcnemar_exact,
     paired_discordant,
     percentile,
@@ -284,12 +285,12 @@ def test_summarize_every_field_of_a_mixed_run() -> None:
     # Correct: q001-de, q001-en, q002-de (after a repair), q010-de = 4 of 10; strict: q001-en has an extra column = 3.
     assert s["ex"]["correct"] == 4 and s["ex"]["n"] == 10 and s["ex"]["items"] == 10
     assert (s["ex"]["mean"], s["ex"]["min"], s["ex"]["max"], s["ex"]["per_repeat"]) == (0.4, 0.4, 0.4, [0.4])
-    # Wilson 4/10 and 3/10 from the closed-form quadratic
-    assert s["ex"]["ci95"] == pytest.approx([0.16818032970623617, 0.6873262302663417], abs=1e-6)
-    assert s["ex"]["interval"] == "wilson"
+    # Question-level bootstrap over the 5 intents (seeded, so the values are fixed); not Wilson over 10 items.
+    assert s["ex"]["ci95"] == [0.1, 0.7]
+    assert s["ex"]["interval"] == "bootstrap" and s["ex"]["questions"] == 5
     assert s["ex_strict"]["correct"] == 3 and s["ex_strict"]["n"] == 10
     assert (s["ex_strict"]["mean"], s["ex_strict"]["per_repeat"]) == (0.3, [0.3])
-    assert s["ex_strict"]["ci95"] == pytest.approx([0.10779126740630103, 0.6032218525388546], abs=1e-6)
+    assert s["ex_strict"]["ci95"] == [0.1, 0.5]
     assert s["by_lang"] == {"de": {"correct": 3, "ex": 0.6, "n": 5}, "en": {"correct": 1, "ex": 0.2, "n": 5}}
     assert s["by_tier"] == {
         "A": {"correct": 1, "ex": 0.5, "n": 2},
@@ -321,7 +322,7 @@ def test_summarize_every_field_of_a_mixed_run() -> None:
     assert s["labels"] == {"E1": 1, "E12": 3, "E2": 1, "E?": 1}
     assert s["prompt_tokens_max"] == 200  # the repaired q002-de attempts: 200 fresh input tokens each
     assert s["n_items"] == 10 and s["repeats"] == 1 and s["complete"] is True and s["aborted_reason"] is None
-    assert s["summary_version"] == 2 and len(s["items"]) == 10
+    assert s["summary_version"] == 3 and len(s["items"]) == 10
     assert s["items"][1]["strict"] is False and s["items"][1]["extra_columns"] == 1
 
 
@@ -437,3 +438,48 @@ def test_de_vs_en_majority_flips_a_single_repeat_disagreement() -> None:
 def test_methodology_note_is_available_in_both_languages() -> None:
     assert set(METHODOLOGY_NOTE) == {"de", "en"}
     assert "Bootstrap" in METHODOLOGY_NOTE["de"] and "bootstrap" in METHODOLOGY_NOTE["en"]
+
+
+def test_single_repeat_interval_is_clustered_by_intent_not_wilson_over_items() -> None:
+    # Ten intents, German and English always agree: five intents right in both languages, five wrong in both.
+    # Wilson over 20 items (width about 0.40) would treat the 20 items as independent; the sample is 10 intents.
+    patterns: dict[tuple[str, str], list[bool]] = {}
+    for n in range(1, 11):
+        for lang in ("de", "en"):
+            patterns[(f"q{n:03d}", lang)] = [n <= 5]
+    ex = summarize(repeated(patterns), repeats=1, eur_usd=1.0)["ex"]
+    assert (ex["correct"], ex["n"], ex["items"], ex["questions"], ex["interval"]) == (
+        10,
+        20,
+        20,
+        10,
+        "bootstrap",
+    )
+    wilson_lo, wilson_hi = wilson(10, 20)
+    lo, hi = ex["ci95"]
+    assert (hi - lo) > 1.3 * (wilson_hi - wilson_lo)
+    # The same outcomes with independent languages (5 right in German only, 5 in English only) give a narrower
+    # interval, because every intent then carries one right and one wrong item.
+    mixed = {(f"q{n:03d}", lang): [(lang == "de") == (n <= 5)] for n in range(1, 11) for lang in ("de", "en")}
+    mlo, mhi = summarize(repeated(mixed), repeats=1, eur_usd=1.0)["ex"]["ci95"]
+    assert (mhi - mlo) < (hi - lo)
+
+
+def test_majority_by_question_needs_every_language_item_correct() -> None:
+    rows = [
+        ("q1", "q1-de", True),
+        ("q1", "q1-en", True),
+        ("q2", "q2-de", True),
+        ("q2", "q2-en", False),
+        ("q3", "q3-de", False),
+        ("q3", "q3-en", False),
+        # q4: both items right in two of three repeats, so both are majority-correct
+        ("q4", "q4-de", True),
+        ("q4", "q4-de", True),
+        ("q4", "q4-de", False),
+        ("q4", "q4-en", True),
+        ("q4", "q4-en", False),
+        ("q4", "q4-en", True),
+    ]
+    assert majority_by_question(rows) == {"q1": True, "q2": False, "q3": False, "q4": True}
+    assert majority_by_question([]) == {}

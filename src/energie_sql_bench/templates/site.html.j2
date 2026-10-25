@@ -101,6 +101,21 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 </table>
 </div>
 
+{% if excluded %}
+<h2>{{ "Nicht gewertete Läufe" if de else "Runs not scored" }}</h2>
+<p>{% if de %}Diese Aufzeichnungen erfüllen die geplante Konfiguration nicht (voller Testsplit, beide Sprachen, ohne --limit, aktueller Snapshot und Prompt-Version) und erscheinen in keiner Zeile.{% else %}These recordings do not match the planned configuration (full test split, both languages, no --limit, current snapshot and prompt version) and appear in no row.{% endif %}</p>
+<div class="scroll">
+<table>
+<thead><tr>{% for h in (["Lauf", "Konfiguration", "Grund"] if de else ["Run", "Configuration", "Reason"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for e in excluded %}
+<tr><td><span class="pill">{{ e.run_id }}</span></td><td>{{ e.key }}</td><td>{{ e.reason }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+
 <h2>{{ synthetic_label }}</h2>
 <p>{% if de %}Kein Sprachmodell: ein deterministischer Generator antwortet aus dem Gold-SQL mit festen, markierten Fehlern. Prüft Guard, Ausführung, Vergleich, Selbstkorrektur, Bewertung und Replay.{% else %}No language model: a deterministic generator answers from the gold SQL with fixed, labelled faults. Tests guard, execution, comparison, self-correction, scoring and replay.{% endif %}</p>
 <div class="scroll">
@@ -117,7 +132,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 <h2>{{ "Gepaarte Vergleiche" if de else "Paired comparisons" }}</h2>
 <div class="scroll">
 <table>
-<thead><tr>{% for h in (["A", "B", "Paare", "nur A", "nur B", "p (McNemar)"] if de else ["A", "B", "Pairs", "only A", "only B", "p (McNemar)"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<thead><tr>{% for h in (["A", "B", "Intents", "nur A", "nur B", "p (McNemar)"] if de else ["A", "B", "Intents", "only A", "only B", "p (McNemar)"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
 <tbody>
 {% for c in comparisons %}
 <tr><td>{{ c.a }}</td><td>{{ c.b }}</td><td class="num">{{ c.pairs }}</td><td class="num">{{ c.a_only }}</td><td class="num">{{ c.b_only }}</td><td class="{{ 'pending' if c.pairs == '–' else 'num' }}">{{ c.p }}</td></tr>
@@ -147,6 +162,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 {% if parity %}
   <div class="card"><div class="label meta">{{ "DuckDB-Parität (CI)" if de else "DuckDB parity (CI)" }}</div><div class="stat">{{ parity.coverage }}</div><p class="meta">{{ parity.matched }}/{{ parity.intents }} {{ "Intents, davon" if de else "intents," }} {{ parity.nontrivial }} {{ "nicht trivial" if de else "non-trivial" }}</p></div>
 {% endif %}
+  <div class="card"><div class="label meta">{{ "Herkunft des Goldstandards" if de else "Provenance of the gold set" }}</div><div class="stat">{{ "von einem Sprachmodell entworfen" if de else "drafted by a language model" }}</div><p class="meta">{{ "Fragen, Gold-SQL und Gegenprobe-Abfragen entwarf ein Sprachmodell (Claude); geprüft durch Ausführung am Warehouse. Die Prüfung von 20 Intents durch den Eigentümer steht aus." if de else "Questions, gold SQL and check queries were drafted by a language model (Claude) and verified by execution against the warehouse. The owner's review of 20 intents is pending." }}</p></div>
   <div class="card"><div class="label meta">Replay</div><div class="stat">offline</div><p class="meta">{{ "CI berechnet jede Zahl aus den Aufzeichnungen neu, ohne Datenbank und ohne API-Schlüssel" if de else "CI re-derives every number from the recordings, without database or API key" }}</p></div>
 </div>
 

@@ -48,15 +48,31 @@ EX: share of items whose result set matches the gold result set (extra columns a
 ## {{ "Gepaarte Vergleiche (exakter McNemar-Test)" if de else "Paired comparisons (exact McNemar test)" }}
 
 {% if de %}
-| A | B | Paare | nur A richtig | nur B richtig | p |
+| A | B | Intents | nur A richtig | nur B richtig | p |
 {% else %}
-| A | B | Pairs | only A correct | only B correct | p |
+| A | B | Intents | only A correct | only B correct | p |
 {% endif %}
 |---|---|---|---|---|---|
 {% for c in comparisons %}
 | {{ c.a }} | {{ c.b }} | {{ c.pairs }} | {{ c.a_only }} | {{ c.b_only }} | {{ c.p }} |
 {% endfor %}
 
+{% if excluded %}
+## {{ "Nicht gewertete Läufe" if de else "Runs not scored" }}
+
+{% if de %}
+Diese Aufzeichnungen erfüllen die geplante Konfiguration nicht (voller Testsplit, beide Sprachen, ohne `--limit`, aktueller Snapshot und Prompt-Version) und erscheinen deshalb in keiner Zeile.
+{% else %}
+These recordings do not match the planned configuration (full test split, both languages, no `--limit`, current snapshot and prompt version) and therefore appear in no row.
+{% endif %}
+
+| {{ "Lauf" if de else "Run" }} | {{ "Konfiguration" if de else "Configuration" }} | {{ "Grund" if de else "Reason" }} |
+|---|---|---|
+{% for e in excluded %}
+| `{{ e.run_id }}` | `{{ e.key }}` | {{ e.reason }} |
+{% endfor %}
+
+{% endif %}
 ## {{ synthetic_label }}
 
 {% if de %}

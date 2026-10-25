@@ -1,17 +1,19 @@
 """Scoring: item verdicts, intervals, exact McNemar tests, percentiles, cost and the run summary.
 
-Repeats and statistics (review finding I1). Repeats of one item share prompt and model, so they are correlated and
-must never be counted as independent observations:
+Repeats and statistics (review findings I1 and I4). The German and the English item of one intent are paired
+(same question, same gold result), and the repeats of one item share prompt and model, so neither may be counted as
+independent observations:
 
 * Accuracy is aggregated per item first (mean correctness over the repeats of that item).
-* With one repeat the accuracy interval is the Wilson 95 % interval over the items.
-* With more than one repeat the interval is a question-level percentile bootstrap (95 %, fixed seed,
-  BOOTSTRAP_RESAMPLES resamples): questions are drawn with replacement, each carrying its German and English items
-  and their per-item means. A question is the unit because its two language items and all its repeats are related.
-  A bootstrap interval collapses to a point when every question has the same outcome; read it together with n.
-* The paired McNemar tests (German against English here, between configurations in the report) run on the per-item
-  majority outcome: an item counts as correct when strictly more than half of its repeats are correct (a tie is not
-  correct). The pairs are items, never (item, repeat).
+* The accuracy interval is a question-level percentile bootstrap for every repeat count (95 %, fixed seed,
+  BOOTSTRAP_RESAMPLES resamples): intents are drawn with replacement, each carrying its German and English items
+  and their per-item means. The intent is the unit because its two language items and all its repeats are related;
+  the effective sample size is the number of intents (60 in the test split), not the number of items (120).
+  A bootstrap interval collapses to a point when every intent has the same outcome; read it together with n.
+* The paired McNemar tests (between configurations in the report) run on intents: an item counts as correct when
+  strictly more than half of its repeats are correct (a tie is not correct), and an intent counts as correct for a
+  configuration when all its language items are correct by that rule. The pairs are intents, never items and never
+  (item, repeat). The German against English comparison inside a run pairs the two language items of each intent.
 * The pooled counts "correct" and "n" of a block are descriptive totals over all repeats; they carry no interval.
 
 METHODOLOGY_NOTE is the wording the report and docs/methodology.md reuse."""
@@ -32,21 +34,25 @@ from energie_sql_bench.questions import Question, tolerance_for
 from energie_sql_bench.records import Outcome, Usage
 from energie_sql_bench.resultset import ResultSet
 
-SUMMARY_VERSION = 2
+SUMMARY_VERSION = 3
 BOOTSTRAP_SEED = 20261025
 BOOTSTRAP_RESAMPLES = 2000
 METHODOLOGY_NOTE = {
     "de": (
-        "Wiederholungen desselben Items sind nicht unabhängig. Die Genauigkeit wird zuerst je Item über die "
-        "Wiederholungen gemittelt. Bei einer Wiederholung gilt das Wilson-Intervall (95 %) über die Items, bei "
-        "mehreren ein Bootstrap-Intervall (95 %, feste Saat) über die Fragen. McNemar-Tests laufen auf dem "
-        "Mehrheitsergebnis je Item (mehr als die Hälfte der Wiederholungen richtig)."
+        "Das deutsche und das englische Item eines Intents sind gepaart, Wiederholungen desselben Items sind "
+        "nicht unabhängig. Die Genauigkeit wird zuerst je Item über die Wiederholungen gemittelt. Das "
+        "95 %-Intervall ist bei jeder Wiederholungszahl ein Bootstrap-Intervall über die Intents (feste Saat); die "
+        "wirksame Stichprobengröße ist die Zahl der Intents (60), nicht die der Items (120). McNemar-Tests laufen "
+        "auf Intents: Ein Item gilt als richtig, wenn mehr als die Hälfte seiner Wiederholungen richtig ist, ein "
+        "Intent, wenn alle seine Sprachitems richtig sind."
     ),
     "en": (
-        "Repeats of the same item are not independent. Accuracy is first averaged per item over its repeats. "
-        "With one repeat the Wilson interval (95 %) over the items applies; with several, a question-level "
-        "bootstrap interval (95 %, fixed seed). McNemar tests run on the per-item majority outcome (more than "
-        "half of the repeats correct)."
+        "The German and the English item of one intent are paired, and repeats of the same item are not "
+        "independent. Accuracy is first averaged per item over its repeats. The 95 % interval is, for every "
+        "number of repeats, a bootstrap interval over intents (fixed seed); the effective sample size is the "
+        "number of intents (60), not the number of items (120). McNemar tests run on intents: an item counts as "
+        "correct when more than half of its repeats are correct, an intent when all its language items are "
+        "correct."
     ),
 }
 
@@ -127,8 +133,23 @@ def majority_by_item(pairs: Iterable[tuple[str, bool]]) -> dict[str, bool]:
     return {item_id: 2 * hits > total for item_id, (hits, total) in sorted(counts.items())}
 
 
+def majority_by_question(rows: Iterable[tuple[str, str, bool]]) -> dict[str, bool]:
+    """Per-intent outcome from (question_id, item_id, correct) rows: every language item must be correct by majority.
+
+    The German and English item of an intent are paired, so the intent, not the item, is the unit of a paired test.
+    """
+    rows = list(rows)
+    by_item = majority_by_item((item_id, correct) for _, item_id, correct in rows)
+    question_of = {item_id: question_id for question_id, item_id, _ in rows}
+    outcome: dict[str, bool] = {}
+    for item_id, correct in by_item.items():
+        question_id = question_of[item_id]
+        outcome[question_id] = outcome.get(question_id, True) and correct
+    return dict(sorted(outcome.items()))
+
+
 def paired_discordant(a: dict[str, bool], b: dict[str, bool]) -> tuple[int, int, int]:
-    """(common items, only a correct, only b correct) for two majority maps; feed the last two to mcnemar_exact."""
+    """(common keys, only a correct, only b correct) for two majority maps (per item or per intent); feed the last two to mcnemar_exact."""
     keys = sorted(set(a) & set(b))
     return len(keys), sum(1 for k in keys if a[k] and not b[k]), sum(1 for k in keys if b[k] and not a[k])
 
@@ -172,19 +193,15 @@ def _block(outcomes: list[Outcome], repeats: int, attr: str) -> dict[str, Any]:
         per_repeat.append(r6(sum(getattr(o, attr) for o in sub) / len(sub)) if sub else 0.0)
     k = sum(getattr(o, attr) for o in outcomes)
     means = _item_means(outcomes, attr)
-    if repeats > 1:
-        by_question: dict[str, list[float]] = {}
-        for question_id, mean in means.values():
-            by_question.setdefault(question_id, []).append(mean)
-        lo, hi = bootstrap_interval([(sum(v), len(v)) for _, v in sorted(by_question.items())])
-        method = "bootstrap"
-    else:
-        lo, hi = wilson(sum(round(m) for _, m in means.values()), len(means))
-        method = "wilson"
+    by_question: dict[str, list[float]] = {}
+    for question_id, mean in means.values():
+        by_question.setdefault(question_id, []).append(mean)
+    lo, hi = bootstrap_interval([(sum(v), len(v)) for _, v in sorted(by_question.items())])
     return {
         "ci95": [r6(lo), r6(hi)],
         "correct": k,
-        "interval": method,
+        "interval": "bootstrap",
+        "questions": len(by_question),
         "items": len(means),
         "max": max(per_repeat, default=0.0),
         "mean": r6(sum(per_repeat) / len(per_repeat)) if per_repeat else 0.0,

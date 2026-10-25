@@ -13,8 +13,9 @@ from typing import Any
 from energie_sql_bench import __version__
 from energie_sql_bench.config import PlannedConfig, Settings
 from energie_sql_bench.files import read_json
+from energie_sql_bench.prompts import PROMPT_VERSION
 from energie_sql_bench.questions import load_questions
-from energie_sql_bench.scoring import METHODOLOGY_NOTE, majority_by_item, mcnemar_exact, paired_discordant
+from energie_sql_bench.scoring import METHODOLOGY_NOTE, majority_by_question, mcnemar_exact, paired_discordant
 from energie_sql_bench.taxonomy import label_counts, load_labels
 
 PENDING = {"de": "ausstehend: Live-Lauf", "en": "pending: live run"}
@@ -94,6 +95,52 @@ class RunView:
     synthetic: bool
     created: str
     summary: dict[str, Any]
+    # What the recording says about its own configuration (config.json); None means unknown, which is not eligible.
+    snapshot: str | None = None
+    prompt_version: str | None = None
+    langs: tuple[str, ...] | None = None
+    limit: int | None = None
+
+
+@dataclass(frozen=True)
+class Eligibility:
+    """What a recorded run must match to be a published row (review finding I2)."""
+
+    snapshot: str
+    prompt_version: str
+    n_items: int
+    langs: tuple[str, ...] = ("de", "en")
+
+
+def eligibility_for(settings: Settings) -> Eligibility:
+    fingerprint = read_json(settings.path("snapshot/fingerprint.json"))
+    return Eligibility(
+        snapshot=str(fingerprint["digest"]),
+        prompt_version=PROMPT_VERSION,
+        n_items=question_stats(settings)["scored"],
+    )
+
+
+def ineligible_reason(run: RunView, expected: Eligibility) -> str | None:
+    """Why a recorded run may not be a published row (German, shown to the owner), or None when it may."""
+    if run.synthetic:
+        return None
+    if run.split != "test":
+        return f"Split {run.split} statt test"
+    if not run.summary["complete"]:
+        return "unvollständiger Lauf"
+    if run.limit is not None:
+        return f"--limit {run.limit}: nur ein Teil der Items"
+    if run.langs != expected.langs:
+        shown = "unbekannt" if run.langs is None else "+".join(run.langs)
+        return f"Sprachen {shown} statt {'+'.join(expected.langs)}"
+    if run.summary["n_items"] != expected.n_items:
+        return f"{run.summary['n_items']} Items statt {expected.n_items}"
+    if run.snapshot != expected.snapshot:
+        return f"Snapshot {run.snapshot} statt {expected.snapshot}"
+    if run.prompt_version != expected.prompt_version:
+        return f"Prompt-Version {run.prompt_version} statt {expected.prompt_version}"
+    return None
 
 
 def label_sort_key(label: str) -> tuple[int, int]:
@@ -159,14 +206,24 @@ def load_runs(settings: Settings) -> list[RunView]:
                 bool(cfg["synthetic"]),
                 cfg["created"],
                 read_json(run_dir / "summary.json"),
+                cfg.get("snapshot"),
+                cfg.get("prompt_version"),
+                tuple(spec["langs"]) if spec.get("langs") is not None else None,
+                spec.get("limit"),
             )
         )
     return runs
 
 
-def select_runs(runs: list[RunView], planned: tuple[PlannedConfig, ...]) -> list[tuple[str, RunView | None]]:
-    """(key, newest complete real test run or None) for every planned key, then unplanned real runs."""
-    eligible = [r for r in runs if not r.synthetic and r.split == "test" and r.summary["complete"]]
+def select_runs(
+    runs: list[RunView], planned: tuple[PlannedConfig, ...], expected: Eligibility
+) -> list[tuple[str, RunView | None]]:
+    """(key, newest eligible real test run or None) for every planned key, then unplanned eligible real runs.
+
+    Eligible means: complete test split, no --limit, both languages, the full scored item set, the committed
+    snapshot digest and the current prompt version. Anything else never becomes a published row; see
+    excluded_runs for the reason."""
+    eligible = [r for r in runs if not r.synthetic and ineligible_reason(r, expected) is None]
     chosen: list[tuple[str, RunView | None]] = []
     for plan in planned:
         matches = sorted((r for r in eligible if r.key == plan.key), key=lambda r: (r.created, r.run_id))
@@ -178,6 +235,16 @@ def select_runs(runs: list[RunView], planned: tuple[PlannedConfig, ...]) -> list
     newest: dict[str, RunView] = {r.key: r for r in extra}
     chosen.extend((key, run) for key, run in sorted(newest.items()))
     return chosen
+
+
+def excluded_runs(runs: list[RunView], expected: Eligibility) -> list[dict[str, str]]:
+    """Real recorded runs that are not eligible as a published row, with the reason."""
+    rows = []
+    for r in sorted(runs, key=lambda r: (r.key, r.created, r.run_id)):
+        reason = ineligible_reason(r, expected)
+        if not r.synthetic and reason is not None:
+            rows.append({"run_id": r.run_id, "key": r.key, "reason": reason})
+    return rows
 
 
 def _metrics(run: RunView, lang: str) -> dict[str, Any]:
@@ -231,9 +298,16 @@ def leaderboard_rows(
 
 
 def _majority(run: RunView) -> dict[str, bool]:
-    """Per-item majority outcome (strictly more than half of the repeats correct): the unit of a paired test is
-    the item, never an (item, repeat) pair."""
-    return majority_by_item((i["item_id"], bool(i["correct"])) for i in run.summary["items"])
+    """Per-intent outcome: an item is correct on the majority of its repeats (strictly more than half), an intent
+    when all its language items are. The German and English item of an intent are paired, so the unit of a paired
+    test is the intent, never an item and never an (item, repeat) pair."""
+    return majority_by_question(
+        (_question_of(i), i["item_id"], bool(i["correct"])) for i in run.summary["items"]
+    )
+
+
+def _question_of(item: dict[str, Any]) -> str:
+    return str(item.get("question_id") or item["item_id"].rsplit("-", 1)[0])
 
 
 def _paired(a: RunView, b: RunView) -> tuple[int, int, int]:
@@ -423,7 +497,8 @@ def replace_headline(text: str, block: str) -> str:
 
 def build_context(settings: Settings, lang: str) -> dict[str, Any]:
     runs = load_runs(settings)
-    chosen = select_runs(runs, settings.report.planned)
+    expected = eligibility_for(settings)
+    chosen = select_runs(runs, settings.report.planned, expected)
     rows = leaderboard_rows(chosen, settings, lang)
     synthetic = synthetic_rows(runs, lang)
     tax_runs, tax_rows = taxonomy_rows(runs, load_labels(settings.path("analysis/labels.csv")), lang)
@@ -438,6 +513,7 @@ def build_context(settings: Settings, lang: str) -> dict[str, Any]:
         "rows": rows,
         "real_runs": sum(1 for r in rows if not r["pending"]),
         "synthetic": synthetic,
+        "excluded": excluded_runs(runs, expected),
         "comparisons": comparison_rows(chosen, settings, lang),
         "taxonomy_runs": tax_runs,
         "taxonomy_rows": tax_rows,
