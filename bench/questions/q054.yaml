@@ -1,0 +1,42 @@
+id: q054
+split: test
+tier: T4
+tags: [vormonat, lag, prozent]
+de: "Um wie viel Prozent änderte sich die monatliche Netzlast in DE-LU 2025 jeweils gegenüber dem Vormonat? Gib Monatsnummer, Netzlast in MWh und Veränderung in Prozent aus; für Januar 2025 gilt Dezember 2024 als Vormonat."
+en: "By what percentage did the monthly grid load in DE-LU change against the previous month in 2025? Return month number, grid load in MWh and change in percent; for January 2025, December 2024 is the previous month."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH monat AS (
+      SELECT d.jahr, d.monat, SUM(l.netzlast_mwh) AS netzlast_mwh
+      FROM dw.fact_last l
+      JOIN dw.dim_region r ON r.region_key = l.region_key
+      JOIN dw.dim_datum d ON d.datum_key = l.datum_key
+      WHERE r.smard_code = N'DE-LU'
+        AND l.datum_key BETWEEN 20241201 AND 20251231
+      GROUP BY d.jahr, d.monat
+  ), vm AS (
+      SELECT jahr, monat, netzlast_mwh,
+             100.0 * (netzlast_mwh - LAG(netzlast_mwh) OVER (ORDER BY jahr, monat))
+                   / LAG(netzlast_mwh) OVER (ORDER BY jahr, monat) AS veraenderung_prozent
+      FROM monat
+  )
+  SELECT monat, netzlast_mwh, veraenderung_prozent
+  FROM vm
+  WHERE jahr = 2025
+check_sql: |
+  WITH m AS (
+      SELECT DATEFROMPARTS(d.jahr, d.monat, 1) AS mon, SUM(v.netzlast_mwh) AS s
+      FROM rpt.v_last v
+      JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+      WHERE v.region_key = 1
+        AND v.datum_key BETWEEN 20241201 AND 20251231
+      GROUP BY d.jahr, d.monat
+  )
+  SELECT MONTH(a.mon) AS mo, a.s, 100.0 * (a.s - b.s) / b.s AS pct
+  FROM m a
+  JOIN m b ON b.mon = DATEADD(month, -1, a.mon)
+  WHERE a.mon >= '2025-01-01'
+tables: [dw.dim_datum, dw.dim_region, dw.fact_last]
+duckdb: ok
+notes: "LAG über Dezember 2024 bis Dezember 2025, danach auf 2025 filtern. Wert 2026-10-25: 12 Zeilen, Januar 44635302.510 MWh mit 6.725884 %, Dezember 42737622.410 MWh mit 2.009739 %."

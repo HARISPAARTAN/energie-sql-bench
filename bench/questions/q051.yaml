@@ -1,0 +1,40 @@
+id: q051
+split: test
+tier: T4
+tags: [anteil, monat, ranking]
+de: "In welchem Monat des Jahres 2025 war der Anteil erneuerbarer Energien an der Stromerzeugung in DE-LU am höchsten? Gib die Monatsnummer und den Anteil in Prozent aus; bei Gleichstand der frühere Monat."
+en: "In which month of 2025 was the renewable share of electricity generation in DE-LU highest? Return the month number and the share in percent; on a tie, the earlier month."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH monat AS (
+      SELECT d.monat,
+             100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)
+                   / SUM(f.erzeugung_mwh) AS ee_anteil_prozent
+      FROM dw.fact_erzeugung f
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+      JOIN dw.dim_region r ON r.region_key = f.region_key
+      JOIN dw.dim_datum d ON d.datum_key = f.datum_key
+      WHERE r.smard_code = N'DE-LU'
+        AND d.jahr = 2025
+      GROUP BY d.monat
+  )
+  SELECT TOP 1 monat, ee_anteil_prozent
+  FROM monat
+  ORDER BY ee_anteil_prozent DESC, monat ASC
+check_sql: |
+  WITH m AS (
+      SELECT (v.datum_key / 100) % 100 AS mo,
+             100.0 * SUM(CASE WHEN v.energietraeger_key BETWEEN 1 AND 6 THEN v.erzeugung_mwh ELSE 0 END)
+                   / SUM(v.erzeugung_mwh) AS p
+      FROM rpt.v_erzeugung v
+      WHERE v.region_key = 1
+        AND v.ts_utc >= '2024-12-31T23:00:00' AND v.ts_utc < '2025-12-31T23:00:00'
+      GROUP BY (v.datum_key / 100) % 100
+  ), rk AS (
+      SELECT mo, p, RANK() OVER (ORDER BY p DESC) AS rang FROM m
+  )
+  SELECT mo, p FROM rk WHERE rang = 1
+tables: [dw.dim_datum, dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Monatlicher Anteil, dann Maximum; Prozent. Wert 2026-10-25: Monat 6, 73.362550 %."

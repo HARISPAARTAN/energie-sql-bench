@@ -1,0 +1,35 @@
+id: q056
+split: test
+tier: T4
+tags: [kumuliert, kapazitaet, fenster]
+de: "Wie entwickelte sich der kumulierte Photovoltaik-Zubau 2025 in Deutschland? Gib für jeden Monat 2025 die Monatsnummer, den Zubau des Monats (MW) und den seit Jahresbeginn kumulierten Zubau (MW) aus, sortiert nach Monat."
+en: "How did cumulative solar PV additions develop in Germany in 2025? For each month of 2025 return the month number, the month's additions (MW) and the year-to-date cumulative additions (MW), sorted by month."
+expect: rows
+ordered: true
+gold_sql: |
+  WITH monat AS (
+      SELECT d.monat, SUM(k.zubau_mw) AS zubau_mw
+      FROM dw.fact_kapazitaet k
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+      JOIN dw.dim_datum d ON d.datum_key = k.datum_key
+      WHERE e.name_de = N'Photovoltaik'
+        AND d.jahr = 2025
+      GROUP BY d.monat
+  )
+  SELECT monat, zubau_mw,
+         SUM(zubau_mw) OVER (ORDER BY monat ROWS UNBOUNDED PRECEDING) AS zubau_kumuliert_mw
+  FROM monat
+  ORDER BY monat
+check_sql: |
+  WITH m AS (
+      SELECT (v.datum_key / 100) % 100 AS mo, SUM(v.zubau_mw) AS s
+      FROM rpt.v_kapazitaet v
+      WHERE v.energietraeger_key = 1 AND v.jahr_monat LIKE '2025-%'
+      GROUP BY (v.datum_key / 100) % 100
+  )
+  SELECT a.mo, a.s, (SELECT SUM(b.s) FROM m b WHERE b.mo <= a.mo) AS kum
+  FROM m a
+  ORDER BY a.mo
+tables: [dw.dim_datum, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Summe über Bundesländer je Monat, dann laufende Summe. Wert 2026-10-25: 12 Zeilen, Januar 1396.993 MW, Dezember 1312.017 MW, kumuliert 15013.650 MW."

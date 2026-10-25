@@ -173,8 +173,14 @@ def unknown_columns(sql: str, schema: dict[str, Any]) -> list[str]:
         db, table = name.split(".")
         mapping.setdefault(db, {})[table] = {col["name"]: "TEXT" for col in meta["columns"]}
     try:
+        tree = sqlglot.parse_one(sql, read="tsql")
+        ctes = {cte.alias_or_name.lower() for cte in tree.find_all(sqlglot.exp.CTE)}
+        for table in tree.find_all(sqlglot.exp.Table):
+            full = f"{table.db}.{table.name}".lower()
+            if (table.db or table.name.lower() not in ctes) and full not in schema["tables"]:
+                return [f"Unknown table: {full}"]
         qualify(
-            sqlglot.parse_one(sql, read="tsql"),
+            tree,
             schema=mapping,
             dialect="tsql",
             validate_qualify_columns=True,

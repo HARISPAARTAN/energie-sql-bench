@@ -1,0 +1,8 @@
+id: q058
+split: test
+tier: A
+tags: [enthaltung]
+de: "Wie hoch war der durchschnittliche Haushaltsstrompreis in Deutschland 2025 (ct/kWh)?"
+en: "What was the average household electricity price in Germany in 2025 (ct/kWh)?"
+expect: abstain
+notes: "Nur Großhandelspreise (Day-Ahead) im Warehouse; der Day-Ahead-Preis ist keine Antwort."

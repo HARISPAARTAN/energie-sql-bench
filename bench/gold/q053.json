@@ -1,0 +1,36 @@
+{
+  "expect": "rows",
+  "id": "q053",
+  "result": {
+    "columns": [
+      "rang",
+      "bundesland",
+      "zubau_mw"
+    ],
+    "rows": [
+      [
+        1,
+        "Nordrhein-Westfalen",
+        "1362.313"
+      ],
+      [
+        2,
+        "Niedersachsen",
+        "1162.357"
+      ],
+      [
+        3,
+        "Schleswig-Holstein",
+        "803.540"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "aa2b045fdc73726b5164973bfe9a30124e7af89e3ad47da838e2013b8dc483a6"
+}

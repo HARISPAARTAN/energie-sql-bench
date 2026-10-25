@@ -1,0 +1,40 @@
+id: q052
+split: test
+tier: T4
+tags: [fenster, gleitend, tag]
+de: "Gib für den 1. bis 14. Juni 2025 (Ortszeit) die täglichen Durchschnittspreise (Day-Ahead) in DE-LU und den gleitenden 7-Tage-Durchschnitt der Tagesmittel aus (aktueller Tag und die sechs Tage davor, nur Tage aus diesem Zeitraum). Spalten: Datum, Tagesmittel, gleitender Durchschnitt; sortiert nach Datum."
+en: "For 1 to 14 June 2025 (local time), return the daily average day-ahead prices in DE-LU and the 7-day moving average of the daily means (current day and the six days before, only days from this period). Columns: date, daily mean, moving average; sorted by date."
+expect: rows
+ordered: true
+gold_sql: |
+  WITH tag AS (
+      SELECT d.datum, AVG(p.day_ahead_eur_mwh) AS tagesmittel_eur_mwh
+      FROM dw.fact_preis p
+      JOIN dw.dim_region r ON r.region_key = p.region_key
+      JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+      WHERE r.smard_code = N'DE-LU'
+        AND p.datum_key BETWEEN 20250601 AND 20250614
+      GROUP BY d.datum
+  )
+  SELECT datum, tagesmittel_eur_mwh,
+         AVG(tagesmittel_eur_mwh) OVER (ORDER BY datum ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+           AS gleitender_mittel_eur_mwh
+  FROM tag
+  ORDER BY datum
+check_sql: |
+  WITH t AS (
+      SELECT d.datum AS dt, AVG(v.day_ahead_eur_mwh) AS m
+      FROM rpt.v_preis v
+      JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+      WHERE v.region_key = 1
+        AND d.datum >= '2025-06-01' AND d.datum <= '2025-06-14'
+      GROUP BY d.datum
+  )
+  SELECT a.dt, a.m, AVG(b.m) AS gl
+  FROM t a
+  JOIN t b ON b.dt BETWEEN DATEADD(day, -6, a.dt) AND a.dt
+  GROUP BY a.dt, a.m
+  ORDER BY a.dt
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Fenster über die Tagesmittel, nicht über Stundenwerte; die ersten Tage mitteln über weniger Tage. Wert 2026-10-25: 14 Zeilen, 2025-06-01 Tagesmittel 39.577500 und gleitend 39.577500, 2025-06-14 Tagesmittel 44.375416 und gleitend 48.203511 €/MWh."

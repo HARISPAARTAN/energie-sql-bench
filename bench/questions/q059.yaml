@@ -1,0 +1,8 @@
+id: q059
+split: test
+tier: A
+tags: [enthaltung]
+de: "Wie viele Tonnen CO2 verursachte die Stromerzeugung in DE-LU im Jahr 2024?"
+en: "How many tonnes of CO2 did electricity generation in DE-LU cause in 2024?"
+expect: abstain
+notes: "Keine Emissionsdaten oder Emissionsfaktoren im Warehouse."

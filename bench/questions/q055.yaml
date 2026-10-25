@@ -1,0 +1,34 @@
+id: q055
+split: test
+tier: T4
+tags: [ranking, lokalzeit, stunde]
+de: "Welche Stunde hatte 2025 in DE-LU den niedrigsten Day-Ahead-Preis? Gib den Beginn der Stunde in Ortszeit und den Preis aus; bei Gleichstand die früheste Stunde."
+en: "Which hour had the lowest day-ahead price in DE-LU in 2025? Return the start of the hour in local time and the price; on a tie, the earliest hour."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT TOP 1
+         CAST(p.ts_utc AT TIME ZONE 'UTC' AT TIME ZONE 'W. Europe Standard Time' AS datetime2(0)) AS stunde_beginn_lokal,
+         p.day_ahead_eur_mwh AS preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20250101 AND 20251231
+  ORDER BY p.day_ahead_eur_mwh ASC, p.ts_utc ASC
+check_sql: |
+  SELECT TOP 1
+         DATEADD(second, DATEDIFF(second, CAST('00:00:00' AS time), z.uhrzeit), CAST(d.datum AS datetime2(0))) AS beginn,
+         v.day_ahead_eur_mwh AS preis
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  JOIN rpt.v_dim_zeit z ON z.zeit_key = v.zeit_key
+  WHERE v.region_key = 1
+    AND d.jahr = 2025
+    AND v.day_ahead_eur_mwh = (SELECT MIN(w.day_ahead_eur_mwh)
+                               FROM rpt.v_preis w
+                               JOIN rpt.v_dim_datum d2 ON d2.datum_key = w.datum_key
+                               WHERE w.region_key = 1 AND d2.jahr = 2025)
+  ORDER BY v.ts_utc ASC
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "ts_utc ist UTC; Ortszeit über AT TIME ZONE 'W. Europe Standard Time'. Wert 2026-10-25: 2025-05-11 13:00:00, -250.32 €/MWh."

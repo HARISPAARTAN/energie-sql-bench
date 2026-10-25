@@ -1,0 +1,8 @@
+id: q057
+split: test
+tier: A
+tags: [enthaltung, regelzone]
+de: "Wie hoch war die Netzlast der Regelzone TenneT im Jahr 2024 (MWh)?"
+en: "What was the grid load of the TenneT control area in 2024 (MWh)?"
+expect: abstain
+notes: "Die Region TenneT existiert, hat aber keine Fakten; NICHT_BEANTWORTBAR oder ein leeres Ergebnis (auch eine Zeile mit NULL) ist richtig."

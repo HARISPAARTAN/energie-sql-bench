@@ -1,0 +1,38 @@
+id: q053
+split: test
+tier: T4
+tags: [ranking, dense, kapazitaet]
+de: "Welche drei Bundesländer hatten 2025 den größten Wind-Onshore-Zubau (MW)? Gleich großer Zubau erhält denselben Rang, Ränge ohne Lücken; gib Rang, Name und MW für die Ränge 1 bis 3 aus."
+en: "Which three federal states had the largest onshore wind additions (MW) in 2025? Equal additions share a rank, ranks without gaps; return rank, name and MW for ranks 1 to 3."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH zubau AS (
+      SELECT b.name_de, SUM(k.zubau_mw) AS zubau_mw
+      FROM dw.fact_kapazitaet k
+      JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+      WHERE e.name_de = N'Wind Onshore'
+        AND k.datum_key BETWEEN 20250101 AND 20251201
+      GROUP BY b.name_de
+  ), rk AS (
+      SELECT name_de, zubau_mw, DENSE_RANK() OVER (ORDER BY zubau_mw DESC) AS rang
+      FROM zubau
+  )
+  SELECT rang, name_de AS bundesland, zubau_mw
+  FROM rk
+  WHERE rang <= 3
+check_sql: |
+  WITH z AS (
+      SELECT g.name_de AS n, SUM(v.zubau_mw) AS s
+      FROM rpt.v_kapazitaet v
+      JOIN rpt.v_dim_bundesland g ON g.bundesland_key = v.bundesland_key
+      WHERE v.energietraeger_key = 2 AND v.jahr_monat LIKE '2025-%'
+      GROUP BY g.name_de
+  )
+  SELECT 1 + (SELECT COUNT(DISTINCT z2.s) FROM z z2 WHERE z2.s > z1.s) AS rg, z1.n, z1.s
+  FROM z z1
+  WHERE 1 + (SELECT COUNT(DISTINCT z2.s) FROM z z2 WHERE z2.s > z1.s) <= 3
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "DENSE_RANK; bei Gleichstand mehr als drei Zeilen möglich. Wert 2026-10-25: 1 Nordrhein-Westfalen 1362.313 MW, 2 Niedersachsen 1162.357 MW, 3 Schleswig-Holstein 803.540 MW."

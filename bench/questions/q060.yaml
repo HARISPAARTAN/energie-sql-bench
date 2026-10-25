@@ -1,0 +1,8 @@
+id: q060
+split: test
+tier: A
+tags: [enthaltung, region]
+de: "Wie hoch war der durchschnittliche Day-Ahead-Preis in Frankreich im Jahr 2024 (€/MWh)?"
+en: "What was the average day-ahead price in France in 2024 (EUR/MWh)?"
+expect: abstain
+notes: "Nur das Marktgebiet DE-LU ist geladen."
