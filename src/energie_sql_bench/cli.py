@@ -213,6 +213,12 @@ def run(
     except (RunError, ProviderError) as exc:
         typer.echo(f"Abbruch: {exc}")
         raise typer.Exit(1) from exc
+    except KeyboardInterrupt as exc:
+        typer.echo(
+            f"Unterbrochen. Bezahlte Antworten liegen in results/partial/{spec.run_id}; "
+            "derselbe Befehl mit derselben --run-id setzt den Lauf fort."
+        )
+        raise typer.Exit(130) from exc
     ex = summary["ex"]
     typer.echo(
         f"EX {ex['mean']:.6f} ({ex['correct']}/{ex['n']}), EX-strict {summary['ex_strict']['mean']:.6f}, "

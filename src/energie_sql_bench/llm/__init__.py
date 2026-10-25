@@ -30,7 +30,9 @@ def make_provider(name: str, model: str, settings: Settings, questions: list[Que
     if name == "ollama":
         from energie_sql_bench.llm.ollama import OllamaProvider
 
-        return OllamaProvider(settings.ollama, model)
+        return OllamaProvider(
+            settings.ollama, model, num_predict=settings.prompt_budget.output_reserve_tokens
+        )
     if name == "synthetic":
         from energie_sql_bench.llm.synthetic import SyntheticProvider
 

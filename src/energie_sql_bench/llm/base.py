@@ -25,6 +25,7 @@ class Completion:
     usage: Usage
     llm_ms: float
     meta: dict[str, Any] = field(default_factory=dict)
+    prompt_tokens_known: bool = True  # False: the provider did not report a usable prompt size (fail closed)
 
 
 class ProviderError(RuntimeError):

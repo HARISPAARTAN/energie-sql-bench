@@ -33,6 +33,7 @@ class ReplayProvider:
             Usage.from_json(record["usage"]),
             float(record["llm_ms"]),
             dict(record.get("meta") or {}),
+            prompt_tokens_known=record.get("prompt_tokens", 0) is not None,
         )
 
 

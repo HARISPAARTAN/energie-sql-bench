@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import re
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from functools import partial
 from pathlib import Path
@@ -18,7 +19,8 @@ from energie_sql_bench.execute import ExecResult, Executor
 from energie_sql_bench.files import dump_json, read_json
 from energie_sql_bench.gold import GoldEntry, load_gold, sql_sha256
 from energie_sql_bench.guard import check_sql
-from energie_sql_bench.llm.base import Provider, ProviderError, Request
+from energie_sql_bench.llm.base import Completion, Provider, ProviderError, ReplayMiss, Request
+from energie_sql_bench.llm.replay import RecordedExecutor, ReplayProvider
 from energie_sql_bench.prompts import (
     PROMPT_VERSION,
     PromptContext,
@@ -82,6 +84,13 @@ class RunResult:
     complete: bool = True
     aborted_reason: str | None = None
     cost_usd: float = 0.0
+    sink: Callable[[dict[str, Any]], None] | None = field(default=None, repr=False, compare=False)
+
+    def record(self, row: dict[str, Any]) -> None:
+        """Keep a response row and hand it to the sink (the crash-safe journal of a live run) at once."""
+        self.responses.append(row)
+        if self.sink is not None:
+            self.sink(row)
 
 
 @dataclass(frozen=True)
@@ -165,9 +174,10 @@ def execute_run(
     compare: CompareSettings,
     items: list[Item] | None = None,
     token_limit: int | None = None,
+    on_response: Callable[[dict[str, Any]], None] | None = None,
 ) -> RunResult:
     items = select_items(ctx, spec) if items is None else items
-    out = RunResult()
+    out = RunResult(sink=on_response)
     cache: dict[str, ExecResult] = {}
     errors_in_row = 0
     max_attempts = MAX_REPAIRS + 1 if spec.self_correct else 1
@@ -193,7 +203,7 @@ def execute_run(
                 except ProviderError as exc:
                     errors_in_row += 1
                     message = str(exc)[:500]
-                    out.responses.append(
+                    out.record(
                         {
                             **base,
                             "error": message,
@@ -222,18 +232,26 @@ def execute_run(
                     break
                 errors_in_row = 0
                 tokens = prompt_tokens(completion.usage)
-                out.responses.append(
+                out.record(
                     {
                         **base,
                         "error": None,
                         "llm_ms": completion.llm_ms,
                         "meta": completion.meta,
-                        "prompt_tokens": tokens,
+                        "prompt_tokens": tokens if completion.prompt_tokens_known else None,
                         "text": completion.text,
                         "usage": completion.usage.to_json(),
                     }
                 )
                 item_cost += cost_usd(completion.usage, price)
+                if token_limit is not None and not completion.prompt_tokens_known:
+                    out.cost_usd += item_cost
+                    out.complete = False
+                    out.aborted_reason = (
+                        f"Tokenzahl des Prompts unbekannt ({item.item_id}): Anbieter meldete keine verwertbare Zahl, "
+                        "Grenze nicht prüfbar, Lauf ungültig"
+                    )
+                    return out
                 if token_limit is not None and tokens > token_limit:
                     out.cost_usd += item_cost
                     out.complete = False
@@ -393,10 +411,43 @@ def run_config(
     }
 
 
+class ResumingProvider:
+    """Serves the responses already journaled for this run id and asks the live provider only for the rest,
+    so an interrupted paid run continues without paying for an item twice."""
+
+    def __init__(self, recorded: list[dict[str, Any]], live: Provider) -> None:
+        self._recorded = ReplayProvider(recorded)
+        self._live = live
+        self.resumed = 0
+
+    def describe(self) -> dict[str, Any]:
+        return self._live.describe()
+
+    def complete(self, request: Request) -> Completion:
+        try:
+            completion = self._recorded.complete(request)
+        except ReplayMiss:
+            return self._live.complete(request)
+        self.resumed += 1
+        return completion
+
+
+def _response_key(row: dict[str, Any]) -> tuple[str, str, int, int]:
+    return (row["prompt_hash"], row["model"], int(row["repeat"]), int(row["attempt"]))
+
+
+def _resume_signature(config: dict[str, Any]) -> dict[str, Any]:
+    keys = ("prompt_token_limit", "prompt_version", "price", "snapshot", "spec", "variant")
+    return {key: config.get(key) for key in keys}
+
+
 def live_run(settings: Settings, spec: RunSpec) -> tuple[Path, dict[str, Any]]:
+    """Run against the live provider and database. Every response is appended to
+    results/partial/<run_id>/responses.jsonl as it arrives; calling again with the same run id after an
+    interruption (Ctrl+C, an adapter bug, a lost connection) resumes without paying for recorded items."""
     from energie_sql_bench.execute import MssqlExecutor
     from energie_sql_bench.llm import make_provider
-    from energie_sql_bench.llm.recorder import write_run
+    from energie_sql_bench.llm.recorder import Journal, write_run
 
     variant, price = _validate(settings, spec)
     ctx = load_context(settings)
@@ -405,8 +456,28 @@ def live_run(settings: Settings, spec: RunSpec) -> tuple[Path, dict[str, Any]]:
     if estimate > spec.max_usd:
         raise RunError(f"Kostenschätzung {estimate:.2f} USD liegt über --max-usd {spec.max_usd:.2f}")
     _check_prompt_fits(settings, spec, variant, ctx, items)
-    provider = make_provider(spec.provider, spec.model, settings, ctx.questions)  # fails fast without a key
+    live = make_provider(spec.provider, spec.model, settings, ctx.questions)  # fails fast without a key
     digest = _check_snapshot(settings)
+    config = run_config(spec, variant, settings, live.describe(), price, digest)
+    journal = Journal(settings.path(f"results/partial/{spec.run_id}"))
+    recorded: list[dict[str, Any]] = []
+    if journal.exists():
+        stored, recorded = journal.load()
+        if _resume_signature(stored) != _resume_signature(config):
+            raise RunError(
+                f"Teillauf {spec.run_id} stammt aus anderen Einstellungen: "
+                f"results/partial/{spec.run_id} prüfen oder löschen"
+            )
+    else:
+        journal.start(config)
+    recorded = [row for row in recorded if not row.get("error")]  # provider errors are retried
+    known = {_response_key(row) for row in recorded}
+    provider = ResumingProvider(recorded, live)
+
+    def persist(row: dict[str, Any]) -> None:
+        if _response_key(row) not in known:
+            journal.append(row)
+
     executor = MssqlExecutor(settings.db)
     try:
         result = execute_run(
@@ -419,6 +490,7 @@ def live_run(settings: Settings, spec: RunSpec) -> tuple[Path, dict[str, Any]]:
             settings.compare,
             items,
             prompt_token_limit(settings, spec.provider),
+            on_response=persist,
         )
     finally:
         executor.close()
@@ -426,20 +498,14 @@ def live_run(settings: Settings, spec: RunSpec) -> tuple[Path, dict[str, Any]]:
         result.outcomes, spec.repeats, settings.cost.eur_usd, result.complete, result.aborted_reason
     )
     run_dir = settings.path(f"results/runs/{spec.run_id}")
-    write_run(
-        run_dir,
-        run_config(spec, variant, settings, provider.describe(), price, digest),
-        result.responses,
-        result.predictions,
-        summary,
-    )
+    write_run(run_dir, config, result.responses, result.predictions, summary)
+    journal.discard()
     return run_dir, summary
 
 
 def replay_run(settings: Settings, run_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """(recomputed summary, stored summary) of a committed run, without network or database."""
     from energie_sql_bench.llm.recorder import read_run
-    from energie_sql_bench.llm.replay import RecordedExecutor, ReplayProvider
 
     files = read_run(settings.path(f"results/runs/{run_id}"))
     cfg = files.config
