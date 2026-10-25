@@ -90,3 +90,33 @@ def test_row_cap(settings: Settings) -> None:
     finally:
         executor.close()
     assert result.ok and result.result.truncated and len(result.result.rows) == 10
+
+
+# Review I1: forward-referenced CTE names reached the legacy catalog views. The guard must block them before
+# anything is sent to SQL Server, so the live executor is wrapped to count calls.
+FORWARD_CTE = [
+    "WITH a AS (SELECT name FROM sysobjects), sysobjects AS (SELECT N'x' AS name) SELECT TOP 3 name FROM a",
+    "WITH a AS (SELECT name FROM syslogins), syslogins AS (SELECT N'x' AS name) SELECT name FROM a",
+    "WITH a AS (SELECT name FROM sysusers), sysusers AS (SELECT N'x' AS name) SELECT name FROM a",
+    "WITH a AS (SELECT name FROM sysdatabases), sysdatabases AS (SELECT N'x' AS name) SELECT name FROM a",
+]
+
+
+class _CountingExecutor:
+    def __init__(self, inner: MssqlExecutor) -> None:
+        self.inner = inner
+        self.calls = 0
+
+    def run(self, sql: str):  # noqa: ANN201
+        self.calls += 1
+        return self.inner.run(sql)
+
+
+@pytest.mark.parametrize("sql", FORWARD_CTE)
+def test_forward_referenced_cte_is_blocked_before_execution(reader: MssqlExecutor, sql: str) -> None:
+    from energie_sql_bench.runner import _evaluate
+
+    counting = _CountingExecutor(reader)
+    evaluation = _evaluate(f"```sql\n{sql}\n```", counting, {}, {})
+    assert evaluation.status == "blocked", evaluation
+    assert counting.calls == 0

@@ -115,6 +115,17 @@ MALICIOUS = [
     "SELECT 1 RECEIVE",
     "SELECT 1 SEND",
     "SELECT 1 THROW",
+    # Review I1: a CTE name defined later in the same WITH list is an ordinary table reference inside an
+    # earlier CTE and reaches the legacy catalog views; and the legacy views by their bare name.
+    "WITH a AS (SELECT name FROM sysobjects), sysobjects AS (SELECT N'x' AS name) SELECT TOP 3 name FROM a",
+    "WITH a AS (SELECT name FROM syslogins), syslogins AS (SELECT N'x' AS name) SELECT name FROM a",
+    "WITH a AS (SELECT name FROM sysusers), sysusers AS (SELECT N'x' AS name) SELECT name FROM a",
+    "WITH a AS (SELECT name FROM sysdatabases), sysdatabases AS (SELECT N'x' AS name) SELECT name FROM a",
+    "WITH a AS (SELECT 1 x FROM b), b AS (SELECT 1 x) SELECT x FROM a",
+    "WITH sysobjects AS (SELECT name FROM sysobjects) SELECT name FROM sysobjects",
+    "SELECT name FROM sysobjects",
+    "SELECT name FROM syscolumns",
+    "SELECT name FROM [sysindexes]",
 ]
 
 BENIGN = [
@@ -158,12 +169,18 @@ BENIGN = [
     "SELECT * FROM dw.fact_preis WHERE tag = 'COMMIT' OR tag = 'GO' OR tag = N'sys.objects'",
     "SELECT COUNT(*) FROM dw.fact_preis p WHERE EXISTS "
     "(SELECT 1 FROM dw.dim_region r WHERE r.region_key = p.region_key AND r.smard_code = 'DE-LU')",
+    # Correctly ordered CTE chains, and a recursive CTE that refers to itself.
+    "WITH a AS (SELECT datum_key FROM dw.fact_preis), b AS (SELECT datum_key FROM a) SELECT COUNT(*) FROM b",
+    "WITH a AS (SELECT 1 AS n), b AS (SELECT n FROM a), c AS (SELECT n FROM a JOIN b ON b.n = a.n) "
+    "SELECT n FROM c",
+    "WITH r AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM r WHERE n < 5) SELECT n FROM r",
+    "WITH a AS (SELECT 1 AS n) SELECT n FROM a UNION ALL SELECT n FROM a",
 ]
 
 
 def test_case_counts() -> None:
-    assert len(MALICIOUS) == 45 + 3 + 13 + 3 + 8 + 20 + 5 + 8 == 105
-    assert len(BENIGN) == 30 + 5
+    assert len(MALICIOUS) == 45 + 3 + 13 + 3 + 8 + 20 + 5 + 8 + 9 == 114
+    assert len(BENIGN) == 30 + 5 + 4
 
 
 @pytest.mark.parametrize("sql", MALICIOUS)
@@ -247,3 +264,20 @@ def test_moderate_nesting_is_allowed() -> None:
 def test_check_sql_never_raises(sql: str) -> None:
     result = check_sql(sql)
     assert result.allowed is False
+
+
+def test_forward_reference_reason_names_the_legacy_view() -> None:
+    result = check_sql(
+        "WITH a AS (SELECT name FROM syslogins), syslogins AS (SELECT N'x' AS name) SELECT name FROM a"
+    )
+    assert "Systemsicht" in result.reason
+
+
+def test_cte_reference_to_a_later_cte_is_a_plain_table() -> None:
+    result = check_sql("WITH a AS (SELECT 1 x FROM b), b AS (SELECT 1 x) SELECT x FROM a")
+    assert result.allowed is False and "ohne Schema" in result.reason
+
+
+def test_main_query_sees_every_cte_and_later_ctes_see_earlier_ones() -> None:
+    sql = "WITH a AS (SELECT 1 AS n), b AS (SELECT n FROM a) SELECT n FROM a UNION ALL SELECT n FROM b"
+    assert check_sql(sql).allowed

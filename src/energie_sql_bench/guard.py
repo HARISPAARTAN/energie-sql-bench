@@ -188,6 +188,25 @@ _STRING_TOKENS = frozenset(
 )
 
 
+# Legacy compatibility views of SQL Server (sys.sysobjects and friends, reachable by their bare name from any
+# database, plus the master-only ones). All of them are catalog metadata, none is a warehouse table.
+_LEGACY_SYSTEM_VIEWS = frozenset(
+    """
+    sysaltfiles syscacheobjects syscharsets syscolumns syscomments sysconfigures sysconstraints
+    syscurconfigs sysdatabases sysdepends sysdevices sysfilegroups sysfiles sysforeignkeys sysfulltextcatalogs
+    sysindexes sysindexkeys syslanguages syslockinfo syslogins sysmembers sysmessages sysobjects sysoledbusers
+    sysopentapes sysperfinfo syspermissions sysprocesses sysprotects sysreferences sysremotelogins sysservers
+    systypes sysusers sysxlogins
+    """.split()
+)
+
+
+def _is_legacy_system_view(name: str) -> bool:
+    """True for the legacy sys* views, and conservatively for any other bare name that starts with sys."""
+    lowered = name.lower()
+    return lowered in _LEGACY_SYSTEM_VIEWS or lowered.startswith("sys")
+
+
 @dataclass(frozen=True)
 class GuardResult:
     allowed: bool
@@ -276,6 +295,38 @@ def _block_node(node: exp.Expression) -> str | None:
     return None
 
 
+def _visible_cte_names(table: exp.Table) -> frozenset[str]:
+    """CTE names an unqualified table reference resolves to, as T-SQL resolves them.
+
+    Inside the body of a CTE only the CTEs defined before it in the same WITH list (and the CTE itself, for
+    recursion) are visible; in the query the WITH belongs to, all of them are. A name defined later is an
+    ordinary table reference and falls through to the catalog and schema checks.
+    """
+    visible: set[str] = set()
+    child: exp.Expression = table
+    node = table.parent
+    while node is not None:
+        if isinstance(node, exp.With):
+            if isinstance(child, exp.CTE):
+                for cte in node.expressions:
+                    name = cte.alias_or_name.lower()
+                    # A legacy system view name may not resolve to the CTE being defined: SQL Server reads
+                    # a self-reference without a recursive member as the catalog view of that name.
+                    if cte is not child or not _is_legacy_system_view(name):
+                        visible.add(name)
+                    if cte is child:
+                        break
+        else:
+            with_clause = node.args.get("with_") or node.args.get(
+                "with"
+            )  # key name differs by sqlglot version
+            if isinstance(with_clause, exp.With) and child is not with_clause:
+                visible.update(cte.alias_or_name.lower() for cte in with_clause.expressions)
+        child = node
+        node = node.parent
+    return frozenset(visible)
+
+
 def check_sql(sql: str | None, allowed_schemas: frozenset[str] = ALLOWED_SCHEMAS) -> GuardResult:
     """Never raises: anything unexpected, including a RecursionError from the parser, is a block."""
     try:
@@ -307,15 +358,16 @@ def _check_sql(sql: str | None, allowed_schemas: frozenset[str]) -> GuardResult:
         reason = _block_node(node)
         if reason is not None:
             return _block(reason)
-    cte_names = {cte.alias_or_name.lower() for cte in root.find_all(exp.CTE)}
     tables: set[str] = set()
     for table in root.find_all(exp.Table):
         if not isinstance(table.this, exp.Identifier):
             return _block("Tabellenfunktionen und Tabellenausdrücke nicht erlaubt")
         name = str(table.name).lower()
         schema = str(table.db).lower()
-        if not schema and name in cte_names:
+        if not schema and name in _visible_cte_names(table):
             continue
+        if not schema and not table.catalog and _is_legacy_system_view(name):
+            return _block(f"Systemsicht {table.name} (Legacy-Kompatibilitätssicht) nicht erlaubt")
         if table.catalog:
             return _block(f"Datenbank- oder Servernamen nicht erlaubt: {table.sql(dialect='tsql')}")
         if not name:
