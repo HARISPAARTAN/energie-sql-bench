@@ -1,0 +1,31 @@
+id: q031
+split: test
+tier: T2
+tags: [kapazitaet, bundesland, ranking]
+de: "Welches Bundesland hatte Ende September 2026 den größten Bestand an Biomasse-Leistung, und wie viele MW waren es?"
+en: "Which federal state had the largest biomass capacity at the end of September 2026, and how many MW was it?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT TOP 1 b.name_de AS bundesland, k.bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Biomasse'
+    AND k.datum_key = 20260901
+  ORDER BY k.bestand_mw DESC, b.name_de ASC
+check_sql: |
+  WITH st AS (
+      SELECT v.bundesland_key, SUM(v.anfangsbestand_mw + v.zubau_mw - v.abgang_mw) AS bestand
+      FROM rpt.v_kapazitaet v
+      WHERE v.energietraeger_key = 4 AND v.datum_key <= 20260901
+      GROUP BY v.bundesland_key
+  ), rk AS (
+      SELECT g.name_de, s.bestand, RANK() OVER (ORDER BY s.bestand DESC) AS rang
+      FROM st s
+      JOIN rpt.v_dim_bundesland g ON g.bundesland_key = s.bundesland_key
+  )
+  SELECT name_de, bestand FROM rk WHERE rang = 1
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Bestand am Monatsende, datum_key 20260901. Wert 2026-10-25: Bayern 1879.963 MW."

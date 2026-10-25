@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q037",
+  "result": {
+    "columns": [
+      "gewichteter_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "80.982705"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "fe5562fdacc0527e32cd99eabb0307c1a74faa7d4d6c1b0366589e8690e7ebb6"
+}

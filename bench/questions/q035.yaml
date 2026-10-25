@@ -1,0 +1,25 @@
+id: q035
+split: test
+tier: T3
+tags: [dst, lokalzeit, einheit, synonym]
+de: "Wie viel Solarstrom (GWh) wurde am 31. März 2024 nach deutscher Ortszeit in DE-LU erzeugt?"
+en: "How much solar power (GWh) was generated in DE-LU on 31 March 2024, German local time?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND e.name_de = N'Photovoltaik'
+    AND f.datum_key = 20240331
+check_sql: |
+  SELECT SUM(v.erzeugung_mwh) / 1000.0 AS gwh
+  FROM rpt.v_erzeugung v
+  WHERE v.region_key = 1
+    AND v.energietraeger_key = 1
+    AND v.ts_utc >= '2024-03-30T23:00:00' AND v.ts_utc < '2024-03-31T22:00:00'
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Tag der Zeitumstellung (92 Viertelstunden); GWh. Wert 2026-10-25: 207.464000."

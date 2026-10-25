@@ -1,0 +1,25 @@
+id: q032
+split: test
+tier: T2
+tags: [kapazitaet, bundesland, synonym]
+de: "Wie viel Photovoltaik-Leistung (MW) war Ende Juni 2026 in NRW installiert?"
+en: "How much solar PV capacity (MW) was installed in NRW at the end of June 2026?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT k.bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE b.name_de = N'Nordrhein-Westfalen'
+    AND e.name_de = N'Photovoltaik'
+    AND k.datum_key = 20260601
+check_sql: |
+  SELECT v.bestand_mw AS leistung
+  FROM rpt.v_kapazitaet v
+  WHERE v.bundesland_key = 10
+    AND v.energietraeger_key = 1
+    AND v.jahr_monat = '2026-06'
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "NRW = Nordrhein-Westfalen (Kürzel NW); datum_key 20260601. Wert 2026-10-25: 13597.725."

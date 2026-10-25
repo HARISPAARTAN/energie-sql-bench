@@ -1,0 +1,22 @@
+id: q040
+split: test
+tier: T3
+tags: [kapazitaet, einheit, summe]
+de: "Wie viel Photovoltaik-Leistung war Ende 2025 in Deutschland insgesamt installiert, in GW?"
+en: "How much solar PV capacity was installed in Germany in total at the end of 2025, in GW?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(k.bestand_mw) / 1000.0 AS bestand_gw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Photovoltaik'
+    AND k.datum_key = 20251201
+check_sql: |
+  SELECT SUM(v.anfangsbestand_mw + v.zubau_mw - v.abgang_mw) / 1000.0 AS gw
+  FROM rpt.v_kapazitaet v
+  WHERE v.energietraeger_key = 1
+    AND v.datum_key <= 20251201
+tables: [dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Bestand Dezember 2025 (datum_key 20251201), summiert über Bundesländer, in GW. Wert 2026-10-25: 104.967836."

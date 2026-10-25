@@ -1,0 +1,25 @@
+id: q033
+split: test
+tier: T2
+tags: [last, wochenende, gruppierung]
+de: "Wie hoch war 2024 die durchschnittliche Netzlast je Viertelstunde (MWh) in DE-LU an Wochenenden und an Werktagen? Gib eine Kennzahl (1 = Samstag oder Sonntag, 0 = Montag bis Freitag) und den Durchschnitt aus."
+en: "What was the average grid load per quarter-hour (MWh) in DE-LU in 2024 on weekends and on weekdays? Return a flag (1 = Saturday or Sunday, 0 = Monday to Friday) and the average."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT CAST(d.ist_wochenende AS int) AS ist_wochenende, AVG(l.netzlast_mwh) AS avg_netzlast_mwh
+  FROM dw.fact_last l
+  JOIN dw.dim_region r ON r.region_key = l.region_key
+  JOIN dw.dim_datum d ON d.datum_key = l.datum_key
+  WHERE r.smard_code = N'DE-LU'
+    AND d.jahr = 2024
+  GROUP BY CAST(d.ist_wochenende AS int)
+check_sql: |
+  SELECT CASE WHEN d.wochentag_nr >= 6 THEN 1 ELSE 0 END AS we, AVG(v.netzlast_mwh) AS mittel
+  FROM rpt.v_last v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2024
+  GROUP BY CASE WHEN d.wochentag_nr >= 6 THEN 1 ELSE 0 END
+tables: [dw.dim_datum, dw.dim_region, dw.fact_last]
+duckdb: ok
+notes: "Feiertage zählen als Werktage; Kennzahl aus dim_datum.ist_wochenende. Wert 2026-10-25: Werktage (0) 14035.316066 MWh, Wochenende (1) 11756.978279 MWh."

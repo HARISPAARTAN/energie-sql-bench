@@ -1,0 +1,32 @@
+id: q034
+split: test
+tier: T2
+tags: [preis, saison, synonym]
+de: "Wie hoch war der durchschnittliche Börsenstrompreis 2025 je Jahreszeit? Gib die Jahreszeit mit ihrem deutschen Namen (Winter, Frühling, Sommer, Herbst) und den Durchschnitt in €/MWh aus."
+en: "What was the average exchange electricity price in 2025 per season? Return the season with its German name (Winter, Frühling, Sommer, Herbst) and the average in EUR/MWh."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT d.saison_de AS jahreszeit, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+  WHERE r.smard_code = N'DE-LU'
+    AND d.jahr = 2025
+  GROUP BY d.saison_de
+check_sql: |
+  SELECT CASE WHEN d.monat IN (12, 1, 2) THEN N'Winter'
+              WHEN d.monat BETWEEN 3 AND 5 THEN N'Frühling'
+              WHEN d.monat BETWEEN 6 AND 8 THEN N'Sommer'
+              ELSE N'Herbst' END AS saison,
+         AVG(v.day_ahead_eur_mwh) AS mittel
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2025
+  GROUP BY CASE WHEN d.monat IN (12, 1, 2) THEN N'Winter'
+                WHEN d.monat BETWEEN 3 AND 5 THEN N'Frühling'
+                WHEN d.monat BETWEEN 6 AND 8 THEN N'Sommer'
+                ELSE N'Herbst' END
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "dim_datum.saison_de (meteorologisch; Winter = Januar, Februar und Dezember desselben Kalenderjahres). Wert 2026-10-25: Frühling 80.016375, Herbst 89.868759, Sommer 76.391032, Winter 111.494986 €/MWh."

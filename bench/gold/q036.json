@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q036",
+  "result": {
+    "columns": [
+      "avg_leistung_gw"
+    ],
+    "rows": [
+      [
+        "2.922071"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "642d1602bc8cb8da1734bc48804ecab2ec61cb272b6e924a2241769117a8577c"
+}

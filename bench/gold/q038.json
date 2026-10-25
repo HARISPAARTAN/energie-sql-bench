@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q038",
+  "result": {
+    "columns": [
+      "erzeugung_twh"
+    ],
+    "rows": [
+      [
+        "6.740739"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "62798d89dec106c16c1be9f2373c5ddc580b0ac022ab7df1eaaff0923faccbee"
+}

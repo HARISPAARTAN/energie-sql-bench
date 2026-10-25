@@ -1,0 +1,31 @@
+id: q037
+split: test
+tier: T3
+tags: [preis, gewichtet, granularitaet]
+de: "Wie hoch war der mit der Netzlast gewichtete durchschnittliche Day-Ahead-Preis in DE-LU im Jahr 2024 (€/MWh)?"
+en: "What was the load-weighted average day-ahead price in DE-LU in 2024 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(v.day_ahead_eur_mwh * v.netzlast_mwh) / SUM(v.netzlast_mwh) AS gewichteter_preis_eur_mwh
+  FROM rpt.v_preis_last_stunde v
+  JOIN dw.dim_region r ON r.region_key = v.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND v.datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  WITH h AS (
+      SELECT region_key, DATETRUNC(hour, ts_utc) AS stunde, SUM(netzlast_mwh) AS last_mwh,
+             COUNT(netzlast_mwh) AS n
+      FROM dw.fact_last
+      WHERE region_key = 1
+      GROUP BY region_key, DATETRUNC(hour, ts_utc)
+  )
+  SELECT SUM(p.day_ahead_eur_mwh * h.last_mwh) / SUM(h.last_mwh) AS preis
+  FROM dw.fact_preis p
+  JOIN h ON h.region_key = p.region_key AND h.stunde = p.ts_utc
+  WHERE p.region_key = 1
+    AND h.n = 4
+    AND p.ts_utc >= '2023-12-31T23:00:00' AND p.ts_utc < '2024-12-31T23:00:00'
+tables: [dw.dim_region, rpt.v_preis_last_stunde]
+duckdb: ok
+notes: "Stundenpreis mal Stundenlast (Summe der vier Viertelstunden), geteilt durch die Summe der Stundenlast; Viertelstunden ohne passende Stunde dürfen nicht doppelt zählen. Wert 2026-10-25: 80.982705."
