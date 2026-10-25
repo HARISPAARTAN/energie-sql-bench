@@ -43,6 +43,7 @@ jobs:
       - run: uv sync --locked
       - run: uv run pytest tests/replay -q
       - run: uv run esb replay --all
+      - run: uv run esb report --check
 
   sample:
     runs-on: ubuntu-24.04

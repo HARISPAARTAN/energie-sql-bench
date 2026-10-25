@@ -410,3 +410,26 @@ def sample_parity(
         raise typer.Exit(0 if same and digests_same else 1)
     write_json(settings.path("data/sample/parity.json"), summary)
     write_text(settings.path("reports/parity.md"), render_parity(summary))
+
+
+@app.command()
+def report(
+    check: Annotated[
+        bool, typer.Option("--check", help="nur prüfen, ob die erzeugten Dateien aktuell sind")
+    ] = False,
+) -> None:
+    """Leaderboard (DE, EN), Ergebnisseite site/ und README-Kurzfassung aus den aufgezeichneten Läufen erzeugen."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.report import build_outputs, stale_outputs, write_outputs
+
+    settings = load_settings()
+    outputs = build_outputs(settings)
+    if check:
+        stale = stale_outputs(outputs)
+        for path in stale:
+            typer.echo(f"veraltet: {path.relative_to(settings.root).as_posix()}")
+        typer.echo("OK" if not stale else "esb report ausführen und committen")
+        raise typer.Exit(1 if stale else 0)
+    write_outputs(outputs)
+    for path in sorted(outputs):
+        typer.echo(f"geschrieben: {path.relative_to(settings.root).as_posix()}")

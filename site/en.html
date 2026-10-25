@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energie-SQL-Bench</title>
+<meta name="description" content="Text-to-SQL benchmark in German and English on a SQL Server warehouse about the German energy transition">
+<style>
+:root {
+  --bg: #0B0F14; --surface: #111821; --line: #1E2833; --text: #E6EDF3; --muted: #8B98A5;
+  --accent: #F2A93B; --accent-dim: rgba(242, 169, 59, 0.35); --synthetic: #5B6B7B;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--sans); }
+main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--accent); }
+header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+.eyebrow, .label, th, .meta, .pill { font-family: var(--mono); letter-spacing: 0.02em; }
+.eyebrow { color: var(--accent); font-size: 12px; text-transform: uppercase; }
+h1 { font-size: 30px; margin: 6px 0 8px; font-weight: 650; }
+h2 { font-size: 18px; margin: 40px 0 12px; font-weight: 600; }
+h2::before { content: "// "; color: var(--accent); font-family: var(--mono); }
+p { margin: 8px 0; max-width: 78ch; }
+.meta { color: var(--muted); font-size: 12px; }
+.lang { float: right; font-family: var(--mono); font-size: 12px; }
+.notice { border: 1px solid var(--accent-dim); background: rgba(242, 169, 59, 0.07); border-radius: 6px; padding: 12px 14px; margin: 20px 0; }
+.pill { display: inline-block; font-size: 11px; padding: 1px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; background: var(--surface); }
+td.num { font-family: var(--mono); text-align: right; }
+td.pending { color: var(--accent); font-family: var(--mono); }
+tr:last-child td { border-bottom: 0; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+svg .value { fill: var(--text); }
+svg .pending-text { fill: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.stat { font-family: var(--mono); font-size: 22px; color: var(--text); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 12px; }
+@media (max-width: 600px) { h1 { font-size: 24px; } .lang { float: none; display: block; margin-bottom: 8px; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="lang" href="index.html">Deutsch</a>
+  <div class="eyebrow">energie-sql-bench · v0.1.0</div>
+  <h1>Energie-SQL-Bench</h1>
+  <p>How well do language models answer domain questions about the German power market with T-SQL on a real star schema? 70 intents in German and English, gold SQL and gold result sets, execution-based scoring, guarded read-only execution.</p>
+  <div class="meta">SMARD 2023-01-01 – 2026-09-30 · MaStR to 2026-09 · as of 2026-10-01 · monitor b399d01 · <a href="https://github.com/HARISPAARTAN/energie-sql-bench">GitHub</a></div>
+</header>
+
+<div class="notice"><strong>No live run yet.</strong> Every model row reads <span class="label">pending: live run</span>; the first paid runs arrive with v0.2.0. Numbers are never estimated. The grey bars below are a pipeline test (synthetic, no language model).</div>
+
+<h2>Execution accuracy (EX)</h2>
+<div class="scroll card">
+<svg role="img" aria-label="Execution accuracy per configuration" viewBox="0 0 820 498" width="820" height="498">
+  <line x1="190" y1="0" x2="190" y2="474" stroke="#1E2833"/>
+  <text x="190" y="490" text-anchor="middle">0 %</text>
+  <line x1="330" y1="0" x2="330" y2="474" stroke="#1E2833"/>
+  <text x="330" y="490" text-anchor="middle">25 %</text>
+  <line x1="470" y1="0" x2="470" y2="474" stroke="#1E2833"/>
+  <text x="470" y="490" text-anchor="middle">50 %</text>
+  <line x1="610" y1="0" x2="610" y2="474" stroke="#1E2833"/>
+  <text x="610" y="490" text-anchor="middle">75 %</text>
+  <line x1="750" y1="0" x2="750" y2="474" stroke="#1E2833"/>
+  <text x="750" y="490" text-anchor="middle">100 %</text>
+  <text x="180" y="17" text-anchor="end">Haiku 5.5 · v1</text>
+  <rect x="190" y="5" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="17">pending: live run</text>
+  <text x="180" y="43" text-anchor="end">Haiku 5.5 · v2</text>
+  <rect x="190" y="31" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="43">pending: live run</text>
+  <text x="180" y="69" text-anchor="end">Haiku 5.5 · v3</text>
+  <rect x="190" y="57" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="69">pending: live run</text>
+  <text x="180" y="95" text-anchor="end">Haiku 5.5 · v4</text>
+  <rect x="190" y="83" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="95">pending: live run</text>
+  <text x="180" y="121" text-anchor="end">Haiku 5.5 · v5</text>
+  <rect x="190" y="109" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="121">pending: live run</text>
+  <text x="180" y="147" text-anchor="end">Haiku 5.5 · v6</text>
+  <rect x="190" y="135" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="147">pending: live run</text>
+  <text x="180" y="173" text-anchor="end">Haiku 5.5 · v4 · SC</text>
+  <rect x="190" y="161" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="173">pending: live run</text>
+  <text x="180" y="199" text-anchor="end">Sonnet 5.5 · v1</text>
+  <rect x="190" y="187" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="199">pending: live run</text>
+  <text x="180" y="225" text-anchor="end">Sonnet 5.5 · v2</text>
+  <rect x="190" y="213" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="225">pending: live run</text>
+  <text x="180" y="251" text-anchor="end">Sonnet 5.5 · v3</text>
+  <rect x="190" y="239" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="251">pending: live run</text>
+  <text x="180" y="277" text-anchor="end">Sonnet 5.5 · v4</text>
+  <rect x="190" y="265" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="277">pending: live run</text>
+  <text x="180" y="303" text-anchor="end">Sonnet 5.5 · v5</text>
+  <rect x="190" y="291" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="303">pending: live run</text>
+  <text x="180" y="329" text-anchor="end">Sonnet 5.5 · v6</text>
+  <rect x="190" y="317" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="329">pending: live run</text>
+  <text x="180" y="355" text-anchor="end">Opus 5.5 · v4</text>
+  <rect x="190" y="343" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="355">pending: live run</text>
+  <text x="180" y="381" text-anchor="end">Qwen 7B · v4</text>
+  <rect x="190" y="369" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="381">pending: live run</text>
+  <text x="180" y="407" text-anchor="end">Qwen 7B · v5</text>
+  <rect x="190" y="395" width="560" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="198" y="407">pending: live run</text>
+  <text x="180" y="433" text-anchor="end">synthetic-v4-test</text>
+  <rect x="190" y="421" width="382.7" height="16" rx="2" fill="#5B6B7B"/>
+  <text class="value" x="578.7" y="433">68.3 %</text>
+  <text x="180" y="459" text-anchor="end">synthetic-v4-test-sc</text>
+  <rect x="190" y="447" width="518.0" height="16" rx="2" fill="#5B6B7B"/>
+  <text class="value" x="714.0" y="459">92.5 %</text>
+</svg>
+</div>
+<p class="meta">amber: model run with 95 % interval · dashed: pending: live run · grey: Pipeline test (synthetic, no language model) · SC: self-correction</p>
+
+<h2>Configurations</h2>
+<div class="scroll">
+<table>
+<thead><tr><th>Configuration</th><th>EX (95 % CI)</th><th>Range</th><th>EX-strict</th><th>Validity</th><th>Blocked</th><th>Abstention P / R</th><th>LLM p50 / p95 ms</th><th>DB p50 / p95 ms</th><th>Tokens</th><th>USD / correct</th><th>Run</th></tr></thead>
+<tbody>
+<tr><td>Claude Haiku 5.5 · v1 (full schema)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v2 (full schema + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v3 (full schema + semantic layer)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v5 (oracle tables + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v6 (retrieved tables + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot) · self-correction</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v1 (full schema)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v2 (full schema + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v3 (full schema + semantic layer)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v5 (oracle tables + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v6 (retrieved tables + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Claude Opus 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Qwen2.5-Coder 7B (Ollama) · v4 (full schema + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+<tr><td>Qwen2.5-Coder 7B (Ollama) · v5 (oracle tables + semantic layer + Few-Shot)</td><td class="pending" colspan="11">pending: live run</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Pipeline test (synthetic, no language model)</h2>
+<p>No language model: a deterministic generator answers from the gold SQL with fixed, labelled faults. Tests guard, execution, comparison, self-correction, scoring and replay.</p>
+<div class="scroll">
+<table>
+<thead><tr><th>Run</th><th>Mode</th><th>EX</th><th>EX-strict</th><th>Blocked</th><th>Repairs</th><th>Error classes</th></tr></thead>
+<tbody>
+<tr><td><span class="pill">synthetic-v4-test</span></td><td>single shot</td><td class="num">68.3 % (82/120)</td><td class="num">68.3 %</td><td class="num">10</td><td class="num">0</td><td>E1 8, E2 11, E11 10, E12 9</td></tr>
+<tr><td><span class="pill">synthetic-v4-test-sc</span></td><td>self-correction</td><td class="num">92.5 % (111/120)</td><td class="num">92.5 %</td><td class="num">10</td><td class="num">29</td><td>E12 9</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Paired comparisons</h2>
+<div class="scroll">
+<table>
+<thead><tr><th>A</th><th>B</th><th>Pairs</th><th>only A</th><th>only B</th><th>p (McNemar)</th></tr></thead>
+<tbody>
+<tr><td>Claude Haiku 5.5 · v1 (full schema)</td><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">pending: live run</td></tr>
+<tr><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot) · self-correction</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">pending: live run</td></tr>
+<tr><td>Claude Sonnet 5.5 · v1 (full schema)</td><td>Claude Sonnet 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">pending: live run</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Error classes</h2>
+<div class="scroll">
+<table>
+<thead><tr><th>Class</th><th>Meaning</th><th>synthetic-v4-test</th><th>synthetic-v4-test-sc</th></tr></thead>
+<tbody>
+<tr><td class="label">E1</td><td>syntax or dialect</td><td class="num">8</td><td class="num">0</td></tr>
+<tr><td class="label">E2</td><td>hallucinated table or column</td><td class="num">11</td><td class="num">0</td></tr>
+<tr><td class="label">E11</td><td>blocked by the guard</td><td class="num">10</td><td class="num">0</td></tr>
+<tr><td class="label">E12</td><td>abstention error</td><td class="num">9</td><td class="num">9</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Benchmark</h2>
+<div class="grid">
+  <div class="card"><div class="label meta">Question set</div><div class="stat">70 × DE/EN</div><p class="meta">120 scored items, tiers A 5, T1 12, T2 16, T3 16, T4 11</p></div>
+  <div class="card"><div class="label meta">Safety</div><div class="stat">SELECT only</div><p class="meta">bench_reader login, sqlglot guard, 30 s timeout, 10,000 rows</p></div>
+  <div class="card"><div class="label meta">DuckDB parity (CI)</div><div class="stat">100.0 %</div><p class="meta">64/64 intents, 23 non-trivial</p></div>
+  <div class="card"><div class="label meta">Replay</div><div class="stat">offline</div><p class="meta">CI re-derives every number from the recordings, without database or API key</p></div>
+</div>
+
+<footer>
+  <p>Data: Bundesnetzagentur | SMARD.de (CC BY 4.0). Datenquelle: Marktstammdatenregister der Bundesnetzagentur, Datenlizenz Deutschland – Namensnennung – Version 2.0 (https://www.govdata.de/dl-de/by-2-0), Daten aggregiert.</p>
+  <p>Code MIT, question set and gold CC BY 4.0. <a href="https://github.com/HARISPAARTAN/energie-sql-bench">https://github.com/HARISPAARTAN/energie-sql-bench</a></p>
+</footer>
+</main>
+</body>
+</html>

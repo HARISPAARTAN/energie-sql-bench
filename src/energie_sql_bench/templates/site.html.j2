@@ -1,0 +1,159 @@
+{% set de = lang == "de" %}
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energie-SQL-Bench</title>
+<meta name="description" content="{{ 'Text-to-SQL-Benchmark auf Deutsch und Englisch auf einem SQL-Server-Warehouse zur Energiewende' if de else 'Text-to-SQL benchmark in German and English on a SQL Server warehouse about the German energy transition' }}">
+<style>
+:root {
+  --bg: #0B0F14; --surface: #111821; --line: #1E2833; --text: #E6EDF3; --muted: #8B98A5;
+  --accent: #F2A93B; --accent-dim: rgba(242, 169, 59, 0.35); --synthetic: #5B6B7B;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--sans); }
+main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--accent); }
+header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+.eyebrow, .label, th, .meta, .pill { font-family: var(--mono); letter-spacing: 0.02em; }
+.eyebrow { color: var(--accent); font-size: 12px; text-transform: uppercase; }
+h1 { font-size: 30px; margin: 6px 0 8px; font-weight: 650; }
+h2 { font-size: 18px; margin: 40px 0 12px; font-weight: 600; }
+h2::before { content: "// "; color: var(--accent); font-family: var(--mono); }
+p { margin: 8px 0; max-width: 78ch; }
+.meta { color: var(--muted); font-size: 12px; }
+.lang { float: right; font-family: var(--mono); font-size: 12px; }
+.notice { border: 1px solid var(--accent-dim); background: rgba(242, 169, 59, 0.07); border-radius: 6px; padding: 12px 14px; margin: 20px 0; }
+.pill { display: inline-block; font-size: 11px; padding: 1px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; background: var(--surface); }
+td.num { font-family: var(--mono); text-align: right; }
+td.pending { color: var(--accent); font-family: var(--mono); }
+tr:last-child td { border-bottom: 0; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+svg .value { fill: var(--text); }
+svg .pending-text { fill: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.stat { font-family: var(--mono); font-size: 22px; color: var(--text); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 12px; }
+@media (max-width: 600px) { h1 { font-size: 24px; } .lang { float: none; display: block; margin-bottom: 8px; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="lang" href="{{ 'en.html' if de else 'index.html' }}">{{ "English" if de else "Deutsch" }}</a>
+  <div class="eyebrow">energie-sql-bench · v{{ version }}</div>
+  <h1>Energie-SQL-Bench</h1>
+  <p>{% if de %}Wie gut beantworten Sprachmodelle Fachfragen zum deutschen Strommarkt mit T-SQL auf einem echten Sternschema? {{ questions.intents }} Intents auf Deutsch und Englisch, Gold-SQL und Gold-Ergebnisse, ausführungsbasierte Bewertung, abgesicherte Nur-Lese-Ausführung.{% else %}How well do language models answer domain questions about the German power market with T-SQL on a real star schema? {{ questions.intents }} intents in German and English, gold SQL and gold result sets, execution-based scoring, guarded read-only execution.{% endif %}</p>
+  <div class="meta">SMARD {{ snapshot.smard }} · MaStR {{ "bis" if de else "to" }} {{ snapshot.mastr }} · {{ "Stichtag" if de else "as of" }} {{ snapshot.as_of }} · monitor {{ snapshot.commit }} · <a href="{{ repo_url }}">GitHub</a></div>
+</header>
+
+{% if real_runs == 0 %}
+<div class="notice">{% if de %}<strong>Noch kein Live-Lauf.</strong> Jede Modellzeile steht auf <span class="label">{{ pending_text }}</span>; die ersten bezahlten Läufe erscheinen mit v0.2.0. Zahlen werden nie geschätzt. Die grauen Balken unten sind ein {{ synthetic_label }}.{% else %}<strong>No live run yet.</strong> Every model row reads <span class="label">{{ pending_text }}</span>; the first paid runs arrive with v0.2.0. Numbers are never estimated. The grey bars below are a {{ synthetic_label|lower }}.{% endif %}</div>
+{% endif %}
+
+<h2>{{ "Ausführungsgenauigkeit (EX)" if de else "Execution accuracy (EX)" }}</h2>
+<div class="scroll card">
+<svg role="img" aria-label="{{ 'Ausführungsgenauigkeit je Konfiguration' if de else 'Execution accuracy per configuration' }}" viewBox="0 0 {{ chart.total }} {{ chart.height }}" width="{{ chart.total }}" height="{{ chart.height }}">
+{% for t in chart.ticks %}
+  <line x1="{{ t.x }}" y1="0" x2="{{ t.x }}" y2="{{ chart.height - 24 }}" stroke="#1E2833"/>
+  <text x="{{ t.x }}" y="{{ chart.height - 8 }}" text-anchor="middle">{{ t.text }}</text>
+{% endfor %}
+{% for b in chart.bars %}
+  <text x="{{ chart.x0 - 10 }}" y="{{ b.y + 17 }}" text-anchor="end">{{ b.label }}</text>
+{% if b.pending %}
+  <rect x="{{ chart.x0 }}" y="{{ b.y + 5 }}" width="{{ b.w }}" height="16" rx="2" fill="none" stroke="#F2A93B" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+  <text class="pending-text" x="{{ chart.x0 + 8 }}" y="{{ b.y + 17 }}">{{ b.text }}</text>
+{% elif b.synthetic %}
+  <rect x="{{ chart.x0 }}" y="{{ b.y + 5 }}" width="{{ b.w }}" height="16" rx="2" fill="#5B6B7B"/>
+  <text class="value" x="{{ chart.x0 + b.w + 6 }}" y="{{ b.y + 17 }}">{{ b.text }}</text>
+{% else %}
+  <rect x="{{ chart.x0 }}" y="{{ b.y + 5 }}" width="{{ b.w }}" height="16" rx="2" fill="#F2A93B"/>
+  <line x1="{{ chart.x0 + b.lo }}" y1="{{ b.y + 13 }}" x2="{{ chart.x0 + b.hi }}" y2="{{ b.y + 13 }}" stroke="#E6EDF3" stroke-width="1.5"/>
+  <text class="value" x="{{ chart.x0 + b.hi + 6 }}" y="{{ b.y + 17 }}">{{ b.text }}</text>
+{% endif %}
+{% endfor %}
+</svg>
+</div>
+<p class="meta">{{ "Bernstein: Modelllauf mit 95 %-Intervall · gestrichelt: " ~ pending_text ~ " · grau: " ~ synthetic_label ~ " · SK: Selbstkorrektur" if de else "amber: model run with 95 % interval · dashed: " ~ pending_text ~ " · grey: " ~ synthetic_label ~ " · SC: self-correction" }}</p>
+
+<h2>{{ "Konfigurationen" if de else "Configurations" }}</h2>
+<div class="scroll">
+<table>
+<thead><tr>{% for h in (["Konfiguration", "EX (95 %-KI)", "Spanne", "EX-strict", "Validität", "blockiert", "Enthaltung P / R", "LLM p50 / p95 ms", "DB p50 / p95 ms", "Tokens", "USD / richtig", "Lauf"] if de else ["Configuration", "EX (95 % CI)", "Range", "EX-strict", "Validity", "Blocked", "Abstention P / R", "LLM p50 / p95 ms", "DB p50 / p95 ms", "Tokens", "USD / correct", "Run"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for r in rows %}
+{% if r.pending %}
+<tr><td>{{ r.label }}</td><td class="pending" colspan="11">{{ r.ex }}</td></tr>
+{% else %}
+<tr><td>{{ r.label }}</td><td class="num">{{ r.ex }}</td><td class="num">{{ r.spread }}</td><td class="num">{{ r.ex_strict }}</td><td class="num">{{ r.validity }}</td><td class="num">{{ r.blocked }}</td><td class="num">{{ r.abstention }}</td><td class="num">{{ r.llm_ms }}</td><td class="num">{{ r.db_ms }}</td><td class="num">{{ r.tokens }}</td><td class="num">{{ r.usd_per_correct }}</td><td><span class="pill">{{ r.run_id }}</span></td></tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2>{{ synthetic_label }}</h2>
+<p>{% if de %}Kein Sprachmodell: ein deterministischer Generator antwortet aus dem Gold-SQL mit festen, markierten Fehlern. Prüft Guard, Ausführung, Vergleich, Selbstkorrektur, Bewertung und Replay.{% else %}No language model: a deterministic generator answers from the gold SQL with fixed, labelled faults. Tests guard, execution, comparison, self-correction, scoring and replay.{% endif %}</p>
+<div class="scroll">
+<table>
+<thead><tr>{% for h in (["Lauf", "Modus", "EX", "EX-strict", "blockiert", "Reparaturen", "Fehlerklassen"] if de else ["Run", "Mode", "EX", "EX-strict", "Blocked", "Repairs", "Error classes"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for s in synthetic %}
+<tr><td><span class="pill">{{ s.run_id }}</span></td><td>{{ s.mode }}</td><td class="num">{{ s.ex }}</td><td class="num">{{ s.ex_strict }}</td><td class="num">{{ s.blocked }}</td><td class="num">{{ s.repairs }}</td><td>{{ s.labels }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2>{{ "Gepaarte Vergleiche" if de else "Paired comparisons" }}</h2>
+<div class="scroll">
+<table>
+<thead><tr>{% for h in (["A", "B", "Paare", "nur A", "nur B", "p (McNemar)"] if de else ["A", "B", "Pairs", "only A", "only B", "p (McNemar)"]) %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for c in comparisons %}
+<tr><td>{{ c.a }}</td><td>{{ c.b }}</td><td class="num">{{ c.pairs }}</td><td class="num">{{ c.a_only }}</td><td class="num">{{ c.b_only }}</td><td class="{{ 'pending' if c.pairs == '–' else 'num' }}">{{ c.p }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2>{{ "Fehlerklassen" if de else "Error classes" }}</h2>
+{% if taxonomy_rows %}
+<div class="scroll">
+<table>
+<thead><tr><th>{{ "Klasse" if de else "Class" }}</th><th>{{ "Bedeutung" if de else "Meaning" }}</th>{% for run in taxonomy_runs %}<th>{{ run }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for t in taxonomy_rows %}
+<tr><td class="label">{{ t.label }}</td><td>{{ t.name }}</td>{% for c in t.counts %}<td class="num">{{ c }}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+
+<h2>{{ "Benchmark" if de else "Benchmark" }}</h2>
+<div class="grid">
+  <div class="card"><div class="label meta">{{ "Fragenkatalog" if de else "Question set" }}</div><div class="stat">{{ questions.intents }} × DE/EN</div><p class="meta">{{ questions.scored }} {{ "bewertete Items, Tiers" if de else "scored items, tiers" }} {% for t in questions.tiers %}{{ t.tier }} {{ t.test }}{{ ", " if not loop.last }}{% endfor %}</p></div>
+  <div class="card"><div class="label meta">{{ "Sicherheit" if de else "Safety" }}</div><div class="stat">SELECT only</div><p class="meta">{{ "Login bench_reader, sqlglot-Guard, 30 s Timeout, 10.000 Zeilen" if de else "bench_reader login, sqlglot guard, 30 s timeout, 10,000 rows" }}</p></div>
+{% if parity %}
+  <div class="card"><div class="label meta">{{ "DuckDB-Parität (CI)" if de else "DuckDB parity (CI)" }}</div><div class="stat">{{ parity.coverage }}</div><p class="meta">{{ parity.matched }}/{{ parity.intents }} {{ "Intents, davon" if de else "intents," }} {{ parity.nontrivial }} {{ "nicht trivial" if de else "non-trivial" }}</p></div>
+{% endif %}
+  <div class="card"><div class="label meta">Replay</div><div class="stat">offline</div><p class="meta">{{ "CI berechnet jede Zahl aus den Aufzeichnungen neu, ohne Datenbank und ohne API-Schlüssel" if de else "CI re-derives every number from the recordings, without database or API key" }}</p></div>
+</div>
+
+<footer>
+  <p>{{ "Daten" if de else "Data" }}: Bundesnetzagentur | SMARD.de (CC BY 4.0). Datenquelle: Marktstammdatenregister der Bundesnetzagentur, Datenlizenz Deutschland – Namensnennung – Version 2.0 (https://www.govdata.de/dl-de/by-2-0), Daten aggregiert.</p>
+  <p>{{ "Code MIT, Fragenkatalog und Gold CC BY 4.0." if de else "Code MIT, question set and gold CC BY 4.0." }} <a href="{{ repo_url }}">{{ repo_url }}</a></p>
+</footer>
+</main>
+</body>
+</html>
