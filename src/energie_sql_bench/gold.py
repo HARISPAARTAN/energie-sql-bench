@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,7 +15,7 @@ from energie_sql_bench.execute import Executor
 from energie_sql_bench.files import read_json, write_json
 from energie_sql_bench.guard import check_sql
 from energie_sql_bench.questions import Question, tables_in_sql, tolerance_for
-from energie_sql_bench.resultset import ResultSet
+from energie_sql_bench.resultset import ResultSet, encode_value
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,20 @@ def sql_sha256(sql: str) -> str:
     return hashlib.sha256(sql.strip().encode("utf-8")).hexdigest()
 
 
+def canonical_rows(result: ResultSet) -> ResultSet:
+    """Rows in a fixed order, for unordered intents: the engine may return them in any order, the file must not churn."""
+
+    def key(row: list[Any]) -> str:
+        return json.dumps([encode_value(v) for v in row], ensure_ascii=False)
+
+    return ResultSet(result.columns, result.types, sorted(result.rows, key=key), result.truncated)
+
+
+def stale_gold(gold: dict[str, GoldEntry], digest: str) -> list[str]:
+    """Ids of gold files that were frozen against a different snapshot digest."""
+    return sorted(qid for qid, entry in gold.items() if entry.snapshot != digest)
+
+
 def _verify(
     q: Question, executor: Executor, max_rows: int, cmp: CompareSettings
 ) -> tuple[ResultSet | None, list[str]]:
@@ -52,6 +67,8 @@ def _verify(
         verdict = check_sql(sql)
         if not verdict.allowed:
             problems.append(f"{q.id}: {label} vom Guard blockiert: {verdict.reason}")
+    if problems:
+        return None, problems
     expected_tables = tables_in_sql(q.gold_sql or "")
     if sorted(q.tables) != expected_tables:
         problems.append(f"{q.id}: tables muss {expected_tables} sein")
@@ -60,9 +77,10 @@ def _verify(
         problems.append(f"{q.id}: gold_sql fehlgeschlagen: {first.error}")
         return None, problems
     second = executor.run(q.gold_sql or "")
-    if not second.ok or second.result is None or second.result.to_json() != first.result.to_json():
+    result = first.result if q.ordered else canonical_rows(first.result)
+    again = None if second.result is None else (second.result if q.ordered else canonical_rows(second.result))
+    if not second.ok or again is None or again.to_json() != result.to_json():
         problems.append(f"{q.id}: gold_sql nicht reproduzierbar")
-    result = first.result
     if result.truncated or len(result.rows) > max_rows:
         problems.append(f"{q.id}: mehr als {max_rows} Zeilen")
     if not result.rows:

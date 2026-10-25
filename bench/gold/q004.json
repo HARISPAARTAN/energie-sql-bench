@@ -8,32 +8,20 @@
     ],
     "rows": [
       [
-        "Erdgas",
-        "60606643.670"
+        "Biomasse",
+        "36103747.890"
       ],
       [
         "Braunkohle",
         "67166354.430"
       ],
       [
+        "Erdgas",
+        "60606643.670"
+      ],
+      [
         "Photovoltaik",
         "74217707.670"
-      ],
-      [
-        "Biomasse",
-        "36103747.890"
-      ],
-      [
-        "Sonstige Konventionelle",
-        "14462963.610"
-      ],
-      [
-        "Wind Onshore",
-        "107231652.080"
-      ],
-      [
-        "Wind Offshore",
-        "26194570.690"
       ],
       [
         "Pumpspeicher",
@@ -44,12 +32,24 @@
         "953117.370"
       ],
       [
+        "Sonstige Konventionelle",
+        "14462963.610"
+      ],
+      [
         "Steinkohle",
         "28157408.160"
       ],
       [
         "Wasserkraft",
         "14244949.910"
+      ],
+      [
+        "Wind Offshore",
+        "26194570.690"
+      ],
+      [
+        "Wind Onshore",
+        "107231652.080"
       ]
     ],
     "truncated": false,
@@ -58,6 +58,6 @@
       "decimal"
     ]
   },
-  "snapshot": "44b27e3cfa841c31",
+  "snapshot": "fef9ef3543551538",
   "sql_sha256": "113b82ba98810b2f031910575f313a6d77a4865c4c5f3a42ee9c73b8c6a625b5"
 }

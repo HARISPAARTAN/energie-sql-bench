@@ -99,6 +99,7 @@ def snapshot(
     """Fingerabdruck des Datenschnitts schreiben oder prüfen."""
     from energie_sql_bench.config import load_settings
     from energie_sql_bench.files import read_json, write_json
+    from energie_sql_bench.gold import load_gold, stale_gold
     from energie_sql_bench.snapshot import compare_fingerprints
 
     settings = load_settings()
@@ -108,7 +109,13 @@ def snapshot(
         write_json(path, live)
         typer.echo(f"Fingerabdruck {live['digest']} geschrieben")
         return
-    diffs = compare_fingerprints(read_json(path), live)
+    stored = read_json(path)
+    diffs = compare_fingerprints(stored, live)
+    stale = stale_gold(load_gold(settings.path("bench/gold")), stored.get("digest", ""))
+    if stale:
+        diffs.append(
+            f"Gold-Dateien mit anderem Snapshot als {stored.get('digest')} eingefroren: {', '.join(stale)}"
+        )
     for line in diffs[:50]:
         typer.echo(line)
     typer.echo("Snapshot unverändert" if not diffs else f"{len(diffs)} Abweichungen")
@@ -118,12 +125,15 @@ def snapshot(
 @gold_app.command("build")
 def gold_build(
     only: Annotated[str | None, typer.Option(help="Komma-getrennte IDs, zum Beispiel q001,q002")] = None,
+    refreeze: Annotated[
+        bool, typer.Option("--refreeze", help="Gold-Dateien eines älteren Snapshots neu einfrieren")
+    ] = False,
 ) -> None:
     """Gold-SQL zweimal ausführen, Gegenprobe vergleichen, bench/gold/*.json schreiben."""
     from energie_sql_bench.config import load_settings
     from energie_sql_bench.execute import MssqlExecutor
     from energie_sql_bench.files import read_json
-    from energie_sql_bench.gold import build_gold, write_gold
+    from energie_sql_bench.gold import build_gold, load_gold, stale_gold, write_gold
     from energie_sql_bench.questions import load_questions
     from energie_sql_bench.snapshot import compare_fingerprints
 
@@ -132,6 +142,13 @@ def gold_build(
     diffs = compare_fingerprints(stored, _live_fingerprint(settings))
     if diffs:
         typer.echo(f"Snapshot weicht ab ({len(diffs)} Abweichungen): esb snapshot --check")
+        raise typer.Exit(1)
+    stale = stale_gold(load_gold(settings.path("bench/gold")), stored["digest"])
+    if stale and not refreeze:
+        typer.echo(
+            f"Gold wurde mit einem anderen Snapshot als {stored['digest']} eingefroren: {', '.join(stale)}. "
+            "Der Datenschnitt hat sich geändert; bei gewollter Neueinfrierung: esb gold build --refreeze"
+        )
         raise typer.Exit(1)
     questions = load_questions(settings.path("bench/questions"))
     if only:

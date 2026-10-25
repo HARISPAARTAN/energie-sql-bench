@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -10,18 +11,20 @@ from typing import Literal
 
 import sqlglot
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlglot import exp
 
 from energie_sql_bench.config import CompareSettings
 
 _TOKEN = re.compile(r"[a-zäöüß0-9]+")
+_TABLE = re.compile(r"^(dw|rpt)\.[A-Za-z_][A-Za-z0-9_]*$")
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 class Tolerance(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    rel: float = 1e-4
-    abs: float = 0.005
+    rel: float = Field(1e-4, ge=0, allow_inf_nan=False)
+    abs: float = Field(0.005, ge=0, allow_inf_nan=False)
 
 
 class Question(BaseModel):
@@ -40,7 +43,42 @@ class Question(BaseModel):
     check_sql: str | None = None
     tables: list[str] = Field(default_factory=list)
     duckdb: str = "ok"
-    notes: str
+    notes: str = Field(min_length=1)
+
+    @field_validator("as_of")
+    @classmethod
+    def _as_of_is_a_date(cls, value: str) -> str:
+        try:
+            if not _ISO_DATE.fullmatch(value):
+                raise ValueError(value)
+            dt.date.fromisoformat(value)
+        except ValueError:
+            raise ValueError("as_of muss ein Datum im Format JJJJ-MM-TT sein") from None
+        return value
+
+    @field_validator("notes")
+    @classmethod
+    def _notes_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("notes darf nicht leer sein")
+        return value
+
+    @field_validator("gold_sql", "check_sql")
+    @classmethod
+    def _sql_not_blank(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("SQL darf nicht nur aus Leerraum bestehen")
+        return value
+
+    @field_validator("tables")
+    @classmethod
+    def _tables_are_schema_objects(cls, value: list[str]) -> list[str]:
+        bad = [t for t in value if not _TABLE.fullmatch(t)]
+        if bad:
+            raise ValueError(f"tables muss dw.<name> oder rpt.<name> enthalten, nicht {bad}")
+        if len(set(value)) != len(value):
+            raise ValueError("tables enthält Duplikate")
+        return value
 
     @model_validator(mode="after")
     def _consistent(self) -> Question:

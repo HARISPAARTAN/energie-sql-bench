@@ -3,7 +3,15 @@ from pathlib import Path
 
 from energie_sql_bench.config import CompareSettings
 from energie_sql_bench.execute import ExecResult
-from energie_sql_bench.gold import GoldEntry, build_gold, load_gold, sql_sha256, write_gold
+from energie_sql_bench.gold import (
+    GoldEntry,
+    build_gold,
+    canonical_rows,
+    load_gold,
+    sql_sha256,
+    stale_gold,
+    write_gold,
+)
 from energie_sql_bench.questions import Question
 from energie_sql_bench.resultset import ResultSet
 
@@ -72,3 +80,54 @@ def test_roundtrip_files(tmp_path: Path) -> None:
     entry = GoldEntry("q001", "rows", ResultSet(["a"], ["decimal"], [[Decimal("1.50")]]), "abc", "d1")
     write_gold({"q001": entry}, tmp_path)
     assert load_gold(tmp_path)["q001"] == entry
+
+
+def multi(*values: str) -> ExecResult:
+    return ExecResult(True, ResultSet(["a"], ["decimal"], [[Decimal(v)] for v in values]), None, None, 1.0)
+
+
+def test_unordered_rows_are_stored_in_canonical_order_and_reproducible_in_any_order() -> None:
+    ex = FakeExecutor({GOLD: [multi("3", "1", "2"), multi("2", "3", "1")], CHECK: [multi("1", "2", "3")]})
+    entries, errors = build_gold([q()], ex, "d1", 1000, CMP)
+    assert errors == []
+    assert entries["q001"].result.rows == [[Decimal("1")], [Decimal("2")], [Decimal("3")]]
+
+
+def test_ordered_rows_keep_the_query_order_and_order_changes_are_not_reproducible() -> None:
+    ex = FakeExecutor({GOLD: [multi("3", "1"), multi("1", "3")], CHECK: [multi("3", "1")]})
+    entries, errors = build_gold([q(ordered=True)], ex, "d1", 1000, CMP)
+    assert any("nicht reproduzierbar" in e for e in errors) and "q001" not in entries
+    ex = FakeExecutor({GOLD: [multi("3", "1"), multi("3", "1")], CHECK: [multi("3", "1")]})
+    entries, errors = build_gold([q(ordered=True)], ex, "d1", 1000, CMP)
+    assert errors == [] and entries["q001"].result.rows == [[Decimal("3")], [Decimal("1")]]
+
+
+def test_canonical_rows_handles_mixed_null_and_text() -> None:
+    result = ResultSet(["a", "b"], ["str", "int"], [["b", None], ["a", 2], ["a", None]])
+    assert canonical_rows(result).rows == [["a", 2], ["a", None], ["b", None]]
+
+
+def test_guard_blocked_query_is_not_executed() -> None:
+    ex = FakeExecutor({})  # any run() would raise KeyError
+    entries, errors = build_gold([q(gold_sql="DELETE FROM dw.fact_preis")], ex, "d1", 1000, CMP)
+    assert "q001" not in entries and any("vom Guard blockiert" in e for e in errors)
+
+
+def test_other_failure_branches() -> None:
+    boom = ExecResult(False, None, "kaputt", "db_error", 0.1)
+    ex = FakeExecutor({GOLD: [boom]})
+    assert any("gold_sql fehlgeschlagen" in e for e in build_gold([q()], ex, "d1", 1000, CMP)[1])
+    ex = FakeExecutor({GOLD: [ok("1"), ok("1")], CHECK: [boom]})
+    assert any("check_sql fehlgeschlagen" in e for e in build_gold([q()], ex, "d1", 1000, CMP)[1])
+    empty = ExecResult(True, ResultSet(["a"], ["decimal"], []), None, None, 1.0)
+    ex = FakeExecutor({GOLD: [empty, empty], CHECK: [empty]})
+    assert any("leeres Gold-Ergebnis" in e for e in build_gold([q()], ex, "d1", 1000, CMP)[1])
+    ex = FakeExecutor({GOLD: [multi("1", "2", "3"), multi("1", "2", "3")], CHECK: [multi("1", "2", "3")]})
+    assert any("mehr als 2 Zeilen" in e for e in build_gold([q()], ex, "d1", 2, CMP)[1])
+
+
+def test_stale_gold_lists_files_frozen_against_another_digest() -> None:
+    a = GoldEntry("q001", "rows", None, "x", "old")
+    b = GoldEntry("q002", "rows", None, "x", "new")
+    assert stale_gold({"q001": a, "q002": b}, "new") == ["q001"]
+    assert stale_gold({"q002": b}, "new") == []
