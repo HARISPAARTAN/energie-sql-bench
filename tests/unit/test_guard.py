@@ -100,6 +100,21 @@ MALICIOUS = [
     "SELECT NEWID()",
     "SELECT * FROM dw.fact_preis WHERE a = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES)",
     "SELECT * FROM dw.fact_preis WHERE a = (SELECT COUNT(*) FROM sys.tables)",
+    # Review R1: OPTION on a set-operation root lifts MAXRECURSION and other query limits.
+    "SELECT 1 AS a UNION ALL SELECT 2 OPTION (MAXRECURSION 0)",
+    "SELECT 1 AS a EXCEPT SELECT 2 OPTION (MAXRECURSION 0)",
+    "SELECT 1 AS a INTERSECT SELECT 2 OPTION (RECOMPILE)",
+    "WITH x AS (SELECT 1 a UNION ALL SELECT a + 1 FROM x) SELECT a FROM x UNION ALL SELECT 1 OPTION (MAXRECURSION 0)",
+    "SELECT * FROM (SELECT 1 AS a UNION SELECT 2 OPTION (HASH JOIN)) AS t",
+    # Review R1: statement words that a bare SELECT 1 <word> lets through unless the word list stops them.
+    "SELECT 1 DISABLE",
+    "SELECT 1 ENABLE",
+    "SELECT 1 GET",
+    "SELECT 1 GO",
+    "SELECT 1 MOVE",
+    "SELECT 1 RECEIVE",
+    "SELECT 1 SEND",
+    "SELECT 1 THROW",
 ]
 
 BENIGN = [
@@ -147,7 +162,7 @@ BENIGN = [
 
 
 def test_case_counts() -> None:
-    assert len(MALICIOUS) == 45 + 3 + 13 + 3 + 8 + 20 == 92
+    assert len(MALICIOUS) == 45 + 3 + 13 + 3 + 8 + 20 + 5 + 8 == 105
     assert len(BENIGN) == 30 + 5
 
 

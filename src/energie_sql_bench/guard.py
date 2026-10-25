@@ -252,7 +252,7 @@ def _block_node(node: exp.Expression) -> str | None:
         return f"{type(node).__name__} nicht erlaubt"
     if isinstance(node, exp.Func):
         return _block_function(node)
-    if isinstance(node, exp.Select) and node.args.get("options"):
+    if node.args.get("options"):  # Select, Union, Intersect, Except: OPTION lifts MAXRECURSION and more
         return "Abfragehinweise (OPTION) nicht erlaubt"
     if isinstance(node, exp.Lateral) and not isinstance(node.this, exp.Subquery):
         return "APPLY und LATERAL sind nur mit einer Unterabfrage erlaubt"
