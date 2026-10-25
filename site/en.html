@@ -49,7 +49,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 <main>
 <header>
   <a class="lang" href="index.html">Deutsch</a>
-  <div class="eyebrow">energie-sql-bench · v0.1.0</div>
+  <div class="eyebrow">energie-sql-bench · v0.1.1</div>
   <h1>Energie-SQL-Bench</h1>
   <p>How well do language models answer domain questions about the German power market with T-SQL on a real star schema? 70 intents in German and English, gold SQL and gold result sets, execution-based scoring, guarded read-only execution.</p>
   <div class="meta">SMARD 2023-01-01 – 2026-09-30 · MaStR to 2026-09 · as of 2026-10-01 · monitor b399d01 · <a href="https://github.com/HARISPAARTAN/energie-sql-bench">GitHub</a></div>
@@ -153,6 +153,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 </table>
 </div>
 
+
 <h2>Pipeline test (synthetic, no language model)</h2>
 <p>No language model: a deterministic generator answers from the gold SQL with fixed, labelled faults. Tests guard, execution, comparison, self-correction, scoring and replay.</p>
 <div class="scroll">
@@ -168,7 +169,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 <h2>Paired comparisons</h2>
 <div class="scroll">
 <table>
-<thead><tr><th>A</th><th>B</th><th>Pairs</th><th>only A</th><th>only B</th><th>p (McNemar)</th></tr></thead>
+<thead><tr><th>A</th><th>B</th><th>Intents</th><th>only A</th><th>only B</th><th>p (McNemar)</th></tr></thead>
 <tbody>
 <tr><td>Claude Haiku 5.5 · v1 (full schema)</td><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">pending: live run</td></tr>
 <tr><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot)</td><td>Claude Haiku 5.5 · v4 (full schema + semantic layer + Few-Shot) · self-correction</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">pending: live run</td></tr>
@@ -195,6 +196,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
   <div class="card"><div class="label meta">Question set</div><div class="stat">70 × DE/EN</div><p class="meta">120 scored items, tiers A 5, T1 12, T2 16, T3 16, T4 11</p></div>
   <div class="card"><div class="label meta">Safety</div><div class="stat">SELECT only</div><p class="meta">bench_reader login, sqlglot guard, 30 s timeout, 10,000 rows</p></div>
   <div class="card"><div class="label meta">DuckDB parity (CI)</div><div class="stat">100.0 %</div><p class="meta">64/64 intents, 23 non-trivial</p></div>
+  <div class="card"><div class="label meta">Provenance of the gold set</div><div class="stat">drafted by a language model</div><p class="meta">Questions, gold SQL and check queries were drafted by a language model (Claude) and verified by execution against the warehouse. The owner's review of 20 intents is pending.</p></div>
   <div class="card"><div class="label meta">Replay</div><div class="stat">offline</div><p class="meta">CI re-derives every number from the recordings, without database or API key</p></div>
 </div>
 

@@ -49,7 +49,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 <main>
 <header>
   <a class="lang" href="en.html">English</a>
-  <div class="eyebrow">energie-sql-bench · v0.1.0</div>
+  <div class="eyebrow">energie-sql-bench · v0.1.1</div>
   <h1>Energie-SQL-Bench</h1>
   <p>Wie gut beantworten Sprachmodelle Fachfragen zum deutschen Strommarkt mit T-SQL auf einem echten Sternschema? 70 Intents auf Deutsch und Englisch, Gold-SQL und Gold-Ergebnisse, ausführungsbasierte Bewertung, abgesicherte Nur-Lese-Ausführung.</p>
   <div class="meta">SMARD 2023-01-01 – 2026-09-30 · MaStR bis 2026-09 · Stichtag 2026-10-01 · monitor b399d01 · <a href="https://github.com/HARISPAARTAN/energie-sql-bench">GitHub</a></div>
@@ -153,6 +153,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 </table>
 </div>
 
+
 <h2>Pipeline-Test (synthetisch, kein Sprachmodell)</h2>
 <p>Kein Sprachmodell: ein deterministischer Generator antwortet aus dem Gold-SQL mit festen, markierten Fehlern. Prüft Guard, Ausführung, Vergleich, Selbstkorrektur, Bewertung und Replay.</p>
 <div class="scroll">
@@ -168,7 +169,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 <h2>Gepaarte Vergleiche</h2>
 <div class="scroll">
 <table>
-<thead><tr><th>A</th><th>B</th><th>Paare</th><th>nur A</th><th>nur B</th><th>p (McNemar)</th></tr></thead>
+<thead><tr><th>A</th><th>B</th><th>Intents</th><th>nur A</th><th>nur B</th><th>p (McNemar)</th></tr></thead>
 <tbody>
 <tr><td>Claude Haiku 5.5 · v1 (volles Schema)</td><td>Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot)</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">ausstehend: Live-Lauf</td></tr>
 <tr><td>Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot)</td><td>Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot) · Selbstkorrektur</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="pending">ausstehend: Live-Lauf</td></tr>
@@ -195,6 +196,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
   <div class="card"><div class="label meta">Fragenkatalog</div><div class="stat">70 × DE/EN</div><p class="meta">120 bewertete Items, Tiers A 5, T1 12, T2 16, T3 16, T4 11</p></div>
   <div class="card"><div class="label meta">Sicherheit</div><div class="stat">SELECT only</div><p class="meta">Login bench_reader, sqlglot-Guard, 30 s Timeout, 10.000 Zeilen</p></div>
   <div class="card"><div class="label meta">DuckDB-Parität (CI)</div><div class="stat">100,0 %</div><p class="meta">64/64 Intents, davon 23 nicht trivial</p></div>
+  <div class="card"><div class="label meta">Herkunft des Goldstandards</div><div class="stat">von einem Sprachmodell entworfen</div><p class="meta">Fragen, Gold-SQL und Gegenprobe-Abfragen entwarf ein Sprachmodell (Claude); geprüft durch Ausführung am Warehouse. Die Prüfung von 20 Intents durch den Eigentümer steht aus.</p></div>
   <div class="card"><div class="label meta">Replay</div><div class="stat">offline</div><p class="meta">CI berechnet jede Zahl aus den Aufzeichnungen neu, ohne Datenbank und ohne API-Schlüssel</p></div>
 </div>
 

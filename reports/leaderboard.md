@@ -1,4 +1,4 @@
-# Leaderboard Energie-SQL-Bench v0.1.0
+# Leaderboard Energie-SQL-Bench v0.1.1
 
 Erzeugt von `uv run esb report` aus den Aufzeichnungen unter `results/runs/`; CI berechnet jede Zahl offline neu.
 Datenstand: SMARD 2023-01-01 – 2026-09-30, MaStR bis 2026-09, Stichtag 2026-10-01, Monitor-Commit `b399d01`.
@@ -29,11 +29,11 @@ Fragenkatalog: 70 Intents, 140 Items (DE und EN), davon 120 bewertet (Testsplit)
 
 EX: Anteil der Items, deren Ergebnismenge der Gold-Ergebnismenge entspricht (zusätzliche Spalten erlaubt); EX-strict: gleiche Spaltenzahl. Spanne: Minimum und Maximum über Wiederholungen. Kosten in USD aus aufgezeichneten Token; EUR zum Kurs 1,1193 USD/EUR vom 2026-10-23.
 
-Wiederholungen desselben Items sind nicht unabhängig. Die Genauigkeit wird zuerst je Item über die Wiederholungen gemittelt. Bei einer Wiederholung gilt das Wilson-Intervall (95 %) über die Items, bei mehreren ein Bootstrap-Intervall (95 %, feste Saat) über die Fragen. McNemar-Tests laufen auf dem Mehrheitsergebnis je Item (mehr als die Hälfte der Wiederholungen richtig).
+Das deutsche und das englische Item eines Intents sind gepaart, Wiederholungen desselben Items sind nicht unabhängig. Die Genauigkeit wird zuerst je Item über die Wiederholungen gemittelt. Das 95 %-Intervall ist bei jeder Wiederholungszahl ein Bootstrap-Intervall über die Intents (feste Saat); die wirksame Stichprobengröße ist die Zahl der Intents (60), nicht die der Items (120). McNemar-Tests laufen auf Intents: Ein Item gilt als richtig, wenn mehr als die Hälfte seiner Wiederholungen richtig ist, ein Intent, wenn alle seine Sprachitems richtig sind.
 
 ## Gepaarte Vergleiche (exakter McNemar-Test)
 
-| A | B | Paare | nur A richtig | nur B richtig | p |
+| A | B | Intents | nur A richtig | nur B richtig | p |
 |---|---|---|---|---|---|
 | Claude Haiku 5.5 · v1 (volles Schema) | Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot) | – | – | – | ausstehend: Live-Lauf |
 | Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot) | Claude Haiku 5.5 · v4 (volles Schema + Semantik + Few-Shot) · Selbstkorrektur | – | – | – | ausstehend: Live-Lauf |

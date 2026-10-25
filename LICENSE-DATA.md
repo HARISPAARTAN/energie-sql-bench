@@ -6,7 +6,11 @@ Die Dateien unter `bench/` (Fragen, Gold-SQL, Gold-Ergebnisse, Few-Shot-Auswahl)
 Creative Commons Namensnennung 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/.
 Namensnennung: "Energie-SQL-Bench, Harithas Harikaran".
 
+Herkunft: Fragen, Gold-SQL und Gegenprobe-Abfragen hat ein Sprachmodell (Claude Sonnet 5.5, über Claude Code) nach Vorgaben des Eigentümers entworfen; sie sind durch Ausführung am Warehouse geprüft, die Prüfung von 20 Intents durch den Eigentümer steht aus (siehe `README.md`, „Herkunft des Goldstandards“).
+
 The files under `bench/` are licensed under CC BY 4.0 (link above). Attribution: "Energie-SQL-Bench, Harithas Harikaran".
+
+Provenance: the questions, gold SQL and check queries were drafted by a language model (Claude Sonnet 5.5 through Claude Code) under the owner's specification and verified by execution against the warehouse; the owner's review of 20 intents is pending (see `README.en.md`, "Provenance of the gold set").
 
 ## Quelldaten / Source data
 

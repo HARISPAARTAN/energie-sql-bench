@@ -19,9 +19,20 @@ beantwortbar (richtige Antwort: `NICHT_BEANTWORTBAR` oder ein leeres Ergebnis).
 
 ## Gold
 
-Jede beantwortbare Frage hat `gold_sql` und eine unabhängig geschriebene Gegenprobe `check_sql`. `esb gold build`
+Jede beantwortbare Frage hat `gold_sql` und eine zweite, ebenfalls modellgeschriebene Abfrage `check_sql`. `esb gold build`
 führt beide aus, verlangt Gleichheit, Reproduzierbarkeit (zweimal ausgeführt), höchstens 1.000 Zeilen und ein
 nicht leeres Ergebnis und speichert die Ergebnismenge in `bench/gold/qNNN.json` (Dezimalzahlen als Text).
+
+### Herkunft des Goldstandards
+
+Fragen (Deutsch und Englisch), Gold-SQL und `check_sql` aller 70 Intents hat ein Sprachmodell entworfen (Claude
+Sonnet 5.5, `claude-sonnet-5-5`, über Claude Code, Aufgaben 3 und 4 am 2026-10-25 und 2026-10-26) nach Vorgaben des
+Eigentümers. Ein Mensch hat sie noch nicht durchgesehen; die Prüfung von 20 Intents durch den Eigentümer steht aus.
+Geprüft ist durch Ausführung: das Gold läuft zweimal, `check_sql` ist eine zweite, ebenfalls modellgeschriebene
+Abfrage und wird per Ausführung verglichen. Für etwa 18 Intents geht sie denselben Weg wie das Gold (Sichten und
+Schlüssel statt Namen), fängt also ein gemeinsames Missverständnis der Frage nicht ab. Getrennte Prüf-Agenten
+(ebenfalls Sprachmodelle) haben für mehr als 50 Intents eigene Abfragen geschrieben und gegen die Datenbank
+verglichen; alle stimmten überein. Das ersetzt keine menschliche Prüfung.
 
 ## Varianten
 
@@ -53,16 +64,26 @@ verlangt gleiche Spaltenzahl. Abgeschnittene Ergebnisse sind falsch. Einheiten w
 EX getrennt nach Tier und Sprache; Validität (geparst, erlaubt, ausgeführt);
 blockierte Versuche; Präzision und Recall der Enthaltung; Latenz p50/p95 von Modell und Datenbank; Token nach
 Art; Kosten in USD aus aufgezeichneten Token (EUR zum datierten Kurs aus `config.toml`); Kosten pro richtiger
-Antwort. Gepaarte Vergleiche (v1 gegen v4, DE gegen EN, Einzelversuch gegen Selbstkorrektur) mit exaktem
+Antwort. Gepaarte Vergleiche (v1 gegen v4, Einzelversuch gegen Selbstkorrektur, DE gegen EN) mit exaktem
 McNemar-Test. Claude-Konfigurationen laufen dreimal; berichtet werden Mittelwert und Spanne.
 
-Wiederholungen desselben Items sind nicht unabhängig. Die Genauigkeit wird zuerst je Item über die Wiederholungen
-gemittelt. Bei einer Wiederholung gilt das Wilson-Intervall (95 %) über die Items, bei mehreren ein
-Bootstrap-Intervall (95 %, feste Saat) über die Fragen, wobei eine Frage ihre deutschen und englischen Items samt
-Wiederholungen mitnimmt. McNemar-Tests laufen auf dem Mehrheitsergebnis je Item (mehr als die Hälfte der
-Wiederholungen richtig, bei Gleichstand falsch); die Paare sind Items, nie (Item, Wiederholung). Die gepoolten
-Zähler „richtig“ und „n“ sind Summen über alle Wiederholungen und tragen kein Intervall. Der Wortlaut steht in
-`scoring.METHODOLOGY_NOTE` und wird vom Leaderboard übernommen.
+Das deutsche und das englische Item eines Intents sind gepaart, und Wiederholungen desselben Items sind nicht
+unabhängig; die wirksame Stichprobe sind die 60 Intents des Testsplits, nicht die 120 Items. Die Genauigkeit wird
+zuerst je Item über die Wiederholungen gemittelt. Das 95 %-Intervall ist bei jeder Wiederholungszahl ein
+Bootstrap-Intervall über die Intents (feste Saat): Intents werden mit Zurücklegen gezogen und nehmen ihre deutschen
+und englischen Items samt Wiederholungen mit. McNemar-Tests zwischen Konfigurationen laufen auf Intents: Ein Item
+gilt als richtig, wenn mehr als die Hälfte seiner Wiederholungen richtig ist (bei Gleichstand falsch), ein Intent,
+wenn alle seine Sprachitems richtig sind; die Paare sind Intents, nie Items und nie (Item, Wiederholung). DE gegen EN
+innerhalb eines Laufs paart die beiden Sprachitems jedes Intents. Die gepoolten Zähler „richtig“ und „n“ sind Summen
+über alle Wiederholungen und tragen kein Intervall. Der Wortlaut steht in `scoring.METHODOLOGY_NOTE` und wird vom
+Leaderboard übernommen.
+
+### Aufnahme in die Rangliste
+
+Ein aufgezeichneter Lauf wird nur dann eine veröffentlichte Zeile, wenn er zur geplanten Konfiguration passt:
+Testsplit, vollständig, ohne `--limit`, beide Sprachen, alle 120 bewerteten Items, derselbe Snapshot-Digest wie
+`snapshot/fingerprint.json` und die aktuelle Prompt-Version. Alles andere (Rauchtests, einsprachige oder teilweise
+Läufe, Läufe gegen einen älteren Snapshot) steht mit Grund unter „Nicht gewertete Läufe“ und erscheint in keiner Zeile.
 
 ## Reproduzierbarkeit
 
@@ -76,8 +97,7 @@ Leaderboard, Seite und README-Kurzfassung. Beides läuft in CI ohne Datenbank, N
 **English summary.** The benchmark measures against a frozen, fingerprinted cut of the Energiewende-Monitor
 warehouse (SMARD 2023-01-01 to 2026-09-30, MaStR to 2026-09). 70 intents in German and English; `q001` to `q060`
 are scored (120 items), `q061` to `q070` are dev and the only source of few-shot examples. Gold results are
-verified by an independent second query and stored. Six prompt variants ablate schema linking, the semantic layer
+drafted by a language model (Claude Sonnet 5.5) and verified by execution (gold run twice, a second model-written check query compared by execution; the owner's review of 20 intents is pending) and stored. Six prompt variants ablate schema linking, the semantic layer
 and few-shot examples. Predictions are guarded, executed read-only and compared as multisets with tolerance and
-best column assignment (EX allows extra columns, EX-strict does not). Accuracy carries a Wilson interval with one repeat and a question-level bootstrap interval with several (repeats are not independent); paired
-comparisons use the exact McNemar test on the per-item majority outcome; Claude runs are repeated three times. Every run is recorded so CI
+best column assignment (EX allows extra columns, EX-strict does not). The German and English item of an intent are paired and repeats are not independent, so accuracy carries an intent-level bootstrap interval for every repeat count and paired comparisons use the exact McNemar test on intents (an intent is correct when all its language items are correct by majority); Claude runs are repeated three times. Only complete, full-set runs that match the committed snapshot and prompt version become leaderboard rows. Every run is recorded so CI
 re-derives every number offline.

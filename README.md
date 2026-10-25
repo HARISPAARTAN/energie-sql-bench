@@ -26,7 +26,7 @@ v4 = volles Schema + Semantik + Few-Shot, Einzelversuch, Testsplit (120 Items).
 
 ## Ergebnisse
 
-v0.1.0 liefert Fragenkatalog, Gold-Ergebnisse, Harness, Replay und Stichprobe, aber **noch keinen Live-Lauf**:
+v0.1.1 liefert Fragenkatalog, Gold-Ergebnisse, Harness, Replay und Stichprobe, aber **noch keinen Live-Lauf**:
 jede Modellzeile steht auf „ausstehend: Live-Lauf“, Zahlen werden nie geschätzt. Die beiden Läufe
 `synthetic-v4-test` und `synthetic-v4-test-sc` sind ein Pipeline-Test ohne Sprachmodell (Antworten aus dem
 Gold-SQL mit fest eingebauten Fehlern); sie beweisen, dass Guard, Ausführung, Vergleich, Selbstkorrektur,
@@ -45,29 +45,70 @@ Danach die Testläufe, `uv run esb report`, Läufe committen und `v0.2.0` taggen
 
 Sechs Prompt-Varianten (volles Schema, mit Semantik-Schicht, mit Few-Shot-Beispielen, Orakel-Tabellen,
 abgerufene Tabellen), Bewertung über den Vergleich der Ergebnismengen mit Toleranz (EX und EX-strict),
-eine Semantik-Schicht mit 26 Kennzahlen, Wilson-Intervall bei einer Wiederholung und Bootstrap-Intervall über die
-Fragen bei mehreren (Wiederholungen desselben Items sind nicht unabhängig), exakte McNemar-Tests auf dem
-Mehrheitsergebnis je Item, drei Wiederholungen je Claude-Konfiguration. Details:
+eine Semantik-Schicht mit 26 Kennzahlen, Bootstrap-Intervall über die Intents (das deutsche und das englische Item
+eines Intents sind gepaart, Wiederholungen desselben Items nicht unabhängig), exakte McNemar-Tests auf Intents, drei
+Wiederholungen je Claude-Konfiguration. Details:
 [`docs/methodology.md`](docs/methodology.md).
 
 ## Fragenkatalog
 
 70 Intents × Deutsch und Englisch = 140 Items; `q001` bis `q060` werden bewertet (120 Items: T1 12, T2 16,
 T3 16, T4 11, nicht beantwortbar 5), `q061` bis `q070` sind Entwicklungs- und Few-Shot-Fragen. Jede
-beantwortbare Frage hat eine unabhängige Gegenprobe (`check_sql`). Dateien: `bench/questions/`, `bench/gold/`.
+beantwortbare Frage hat neben der Gold-SQL eine zweite, ebenfalls modellgeschriebene Abfrage (`check_sql`), deren
+Ergebnis per Ausführung mit dem Gold verglichen wird. Dateien: `bench/questions/`, `bench/gold/`.
+
+## Herkunft des Goldstandards
+
+Die Fragen (Deutsch und Englisch), die Gold-SQL und die Gegenprobe-Abfragen aller 70 Intents hat ein Sprachmodell
+entworfen: Claude Sonnet 5.5 (`claude-sonnet-5-5`) über Claude Code, in den Aufgaben 3 und 4 am 2026-10-25 und
+2026-10-26, nach Vorgaben des Eigentümers (Schema, Stufen, Konventionen). Ein Mensch hat sie bisher nicht
+durchgesehen; die Prüfung von 20 Intents durch den Eigentümer steht aus.
+
+Geprüft wurde durch Ausführung am Warehouse. Die Gold-SQL läuft zweimal (reproduzierbar, nicht leer, höchstens
+1.000 Zeilen). Die Gegenprobe ist eine zweite Abfrage je Intent, ebenfalls vom Modell geschrieben, und wird per
+Ausführung mit dem Gold verglichen; für etwa 18 Intents geht sie denselben Weg wie das Gold (Sichten und Schlüssel
+statt Namen) und fängt ein gemeinsames Missverständnis der Frage deshalb nicht ab. Dazu haben getrennte Prüf-Agenten,
+ebenfalls Sprachmodelle, für mehr als 50 Intents eigene Abfragen geschrieben und gegen die Datenbank verglichen
+(alle stimmten überein). Das ist keine menschliche Prüfung. Bis sie vorliegt, sind die Gold-Ergebnisse als
+modellentworfen und ausführungsgeprüft zu lesen; ein Fehler im Gold träfe alle Modelle gleich.
 
 ## Sicherheit
 
 Login `bench_reader` nur mit `SELECT` auf `dw` und `rpt`; ein Guard auf dem sqlglot-AST lässt genau eine lesende
 Anweisung durch und blockiert im Zweifel; 30 s Timeout, `SET LOCK_TIMEOUT 5000`, 10.000 Zeilen Obergrenze.
 `tests/db` schickt `DELETE`, `CREATE TABLE` und Zugriffe auf `stg` am Guard vorbei direkt an die Datenbank und
-erwartet Rechtefehler.
+erwartet Rechtefehler. Das Login erbt die Rechte der Rolle `public`: Metadaten der Systemkataloge und der
+Gastzugriff auf master, msdb und tempdb bleiben auf Datenbankebene möglich; sie zu lesen verhindert der Guard (er
+sperrt `sys.*`, `INFORMATION_SCHEMA`, die alten Kompatibilitätssichten wie `sysobjects` und Namen ohne Schema), nicht
+das Login. Eine CTE gilt nur für Abfragen nach ihrer Definition; ein Verweis auf eine später definierte CTE ist eine
+gewöhnliche Tabelle ohne Schema und wird blockiert.
 
 ## Kosten
 
-Jeder Lauf zeigt vorab eine Kostenschätzung, bricht über `--max-usd` ab und berechnet die tatsächlichen Kosten aus
-den aufgezeichneten Token (inklusive Cache-Schreib- und Lesetoken). Planungswert: ein vollständiger Durchlauf mit
-Claude Haiku 5.5 kostet etwa 1 USD, mit Sonnet 5.5 etwa 8 USD mit Prompt-Caching. Preise: [`pricing.toml`](pricing.toml).
+Jeder Lauf zeigt vorab eine Kostenschätzung, bricht über `--max-usd` ab (Standard 5 USD je Lauf) und berechnet die
+tatsächlichen Kosten aus den aufgezeichneten Token (inklusive Cache-Schreib- und Lesetoken). Preise:
+[`pricing.toml`](pricing.toml). Planungswerte für den vollen Durchlauf der 14 Claude-Konfigurationen, berechnet mit
+dem Schätzer des Codes (`uv run python tools/cost_plan.py`):
+
+| Modell | Konfigurationen | obere Grenze (USD) | mit Cache, erwartet (USD) |
+|---|---|---|---|
+| Claude Haiku 5.5 | 7 (v1 bis v6, v4 mit Selbstkorrektur) | 2,38 | 0,89 |
+| Claude Sonnet 5.5 | 6 (v1 bis v6) | 36,20 | 14,11 |
+| Claude Opus 5.5 | 1 (v4) | 15,33 | 4,27 |
+| Summe | 14 | 53,91 | 19,27 |
+
+Annahmen: Testsplit mit 120 Items, drei Wiederholungen je Konfiguration, Selbstkorrektur mit Faktor 1,5, 500
+Ausgabetoken je Aufruf, 3,5 Zeichen je Token. Der Prompt hat im Mittel etwa 4.020 (v1), 5.120 (v2), 7.050 (v3), 8.140
+(v4), 5.370 (v5) und 5.580 Token (v6), davon nur etwa 35 Token Frage; der Rest ist ein statisches Systempräfix. Die
+obere Grenze rechnet den ganzen Prompt zum normalen Eingabepreis; der erwartete Wert rechnet das Präfix einmal als
+Cache-Schreibung und danach als Cache-Lesung (bei v5 und v6 wechselt das Präfix, 16 und 29 verschiedene), die Frage
+zum Eingabepreis. Nicht enthalten sind Denk-Token (adaptives Thinking läuft ohne `thinking`-Angabe mit und wird als
+Ausgabe berechnet), zusätzliche Cache-Schreibungen nach Pausen über fünf Minuten und Wiederholungen nach Fehlern.
+
+Einzelne Läufe: Sonnet v4 mit drei Wiederholungen hat die obere Grenze 7,66 USD und braucht deshalb
+`--max-usd 8`. Das Ausgabelimit bei Anthropic wählt der Eigentümer; für den ganzen Durchlauf passt ein Monatslimit
+um 60 USD (obere Grenze 54 USD plus Denk-Token), gestuft weniger: zuerst Haiku (0,89 bis 2,38 USD), dann Sonnet v1
+und v4 (4,55 bis 12,36 USD), dann der Rest.
 
 ## Was nicht funktioniert hat
 
@@ -85,8 +126,9 @@ Claude Haiku 5.5 kostet etwa 1 USD, mit Sonnet 5.5 etwa 8 USD mit Prompt-Caching
 - Ein Warehouse, eine Gebotszone (DE-LU), Daten ab 2023; die Fragen sind auf dieses Schema zugeschnitten.
 - Der Fragenkatalog ist ab Veröffentlichung öffentlich; spätere Modelle können ihn gesehen haben. Jeder Lauf ist
   datiert.
-- Gold-Ergebnisse sind doppelt geprüft, aber von einer Person geschrieben; die Prüfung von 20 Intents durch den
-  Eigentümer steht aus.
+- Der Goldstandard (Fragen, Gold-SQL, Gegenprobe) wurde von einem Sprachmodell entworfen und durch Ausführung am
+  Warehouse geprüft, nicht von einem Menschen geschrieben; die Prüfung von 20 Intents durch den Eigentümer steht aus
+  (siehe „Herkunft des Goldstandards“).
 - Die DuckDB-Stichprobe deckt 64 von 64 (100,0 %) Intents mit Ergebnis ab, davon 23 nicht trivial (Wert ungleich
   NULL und 0); 0 Intents sind übersprungen ([`reports/parity.md`](reports/parity.md)). Triviale Treffer
   (leeres Ergebnis, nur NULL oder nur 0) zeigen nur, dass die übersetzte Abfrage läuft.
@@ -120,8 +162,8 @@ Einrichtung mit lokaler Datenbank und Nur-Lese-Login: [`docs/setup-windows.md`](
 ## Nächste Schritte für den Eigentümer
 
 1. **Anthropic-Guthaben und Ausgabelimit.** In der Anthropic Console Mindestguthaben kaufen, ein Ausgabelimit
-   (zum Beispiel 20 USD pro Monat) und einen eigenen Workspace `energie-sql-bench` mit Limit setzen, einen
-   API-Schlüssel erzeugen.
+   (Vorschlag: 60 USD pro Monat für den ganzen Durchlauf, gestuft weniger, siehe „Kosten“) und einen eigenen Workspace
+   `energie-sql-bench` mit Limit setzen, einen API-Schlüssel erzeugen.
 2. **Schlüssel in `.env`.** `ANTHROPIC_API_KEY=...` in die git-ignorierte `.env` dieses Repositorys eintragen (nie
    committen).
 3. **Optional: Ollama als kostenlose lokale Basislinie.** Ollama für Windows installieren und
