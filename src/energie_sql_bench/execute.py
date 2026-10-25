@@ -5,7 +5,9 @@ pyodbc is imported lazily so that CI, which never talks to SQL Server, does not 
 
 from __future__ import annotations
 
+import datetime as dt
 import re
+import struct
 import time
 from collections.abc import Iterator
 from contextlib import closing, contextmanager
@@ -77,12 +79,23 @@ def fetch_all(con: Any, sql: str, params: tuple = ()) -> list[tuple]:
     return rows
 
 
+SQL_SS_TIMESTAMPOFFSET = -155  # datetimeoffset: pyodbc has no built-in mapping
+
+
+def datetimeoffset_from_bytes(raw: bytes) -> dt.datetime:
+    """Decode the SQL_SS_TIMESTAMPOFFSET_STRUCT of the ODBC driver into an aware datetime (microsecond precision)."""
+    year, month, day, hour, minute, second, nanoseconds, tz_hour, tz_minute = struct.unpack("<6hI2h", raw)
+    offset = dt.timezone(dt.timedelta(hours=tz_hour, minutes=tz_minute))
+    return dt.datetime(year, month, day, hour, minute, second, nanoseconds // 1000, tzinfo=offset)
+
+
 def connect_mssql(db: DbSettings, database: str | None = None) -> Any:
     """A bench_reader connection: autocommit, query timeout and lock timeout from the settings."""
     import pyodbc
 
     con = pyodbc.connect(db.connection_string(database), autocommit=True, timeout=10)
     con.timeout = db.query_timeout_s
+    con.add_output_converter(SQL_SS_TIMESTAMPOFFSET, datetimeoffset_from_bytes)
     con.execute(f"SET LOCK_TIMEOUT {int(db.lock_timeout_ms)}")
     return con
 

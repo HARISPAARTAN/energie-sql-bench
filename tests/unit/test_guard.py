@@ -48,6 +48,58 @@ MALICIOUS = [
     "DBCC CHECKDB",
     "BACKUP DATABASE energiewende TO DISK = 'C:\\temp\\x.bak'",
     "",
+    # Review findings on Task 2: the catalog and CTE-shadow checks, each the only layer that stops its case.
+    "SELECT * FROM energiewende_sample.dw.fact_preis",
+    "SELECT * FROM otherdb.dw.t",
+    "WITH a AS (SELECT 1 x) SELECT * FROM stg.a",
+    # Statement keywords that sqlglot reads as aliases but SQL Server runs as a second statement.
+    "SELECT 1 COMMIT",
+    "SELECT * FROM dw.fact_preis COMMIT",
+    "SELECT 1 AS a CHECKPOINT",
+    "SELECT * FROM dw.fact_preis p RETURN",
+    "SELECT 1 a BREAK",
+    "SELECT 1 a CONTINUE",
+    "SELECT 1 a THROW",
+    "SELECT 1 a ROLLBACK",
+    "SELECT 1 a PRINT",
+    "SELECT 1 a RAISERROR",
+    "SELECT 1 a GOTO x",
+    "SELECT 1 a WHILE",
+    "SELECT 1 a IF",
+    # Reserved words as unquoted aliases.
+    "SELECT 1 user",
+    "SELECT 1 AS percent",
+    "SELECT * FROM dw.fact_preis AS table",
+    # Sequences, lock hints, query hints, FOR clauses.
+    "SELECT NEXT VALUE FOR dw.seq",
+    "SELECT * FROM dw.fact_preis WITH (TABLOCKX)",
+    "SELECT * FROM dw.fact_preis WITH (UPDLOCK)",
+    "SELECT * FROM dw.fact_preis WITH (NOLOCK, XLOCK)",
+    "SELECT * FROM dw.fact_preis WITH (HOLDLOCK)",
+    "SELECT * FROM dw.fact_preis (TABLOCK)",
+    "SELECT * FROM dw.fact_preis OPTION (MAXDOP 1)",
+    "SELECT * FROM dw.fact_preis FOR XML AUTO",
+    # System objects, function-valued table sources, APPLY, user-defined and unlisted functions.
+    "SELECT * FROM dw.fact_preis CROSS APPLY sys.dm_exec_sql_text(0x) x",
+    "SELECT * FROM dw.fact_preis CROSS APPLY OPENJSON(a) x",
+    "SELECT * FROM dw.fact_preis OUTER APPLY dbo.fn_x(1) x",
+    "SELECT * FROM STRING_SPLIT('a,b', ',')",
+    "SELECT * FROM GENERATE_SERIES(1, 10)",
+    "SELECT sys.fn_x(1)",
+    "SELECT dbo.fn_x(1)",
+    "SELECT dw.fn_x(1)",
+    "SELECT dw.str(1)",
+    "SELECT dbo.some_column FROM dw.fact_preis",
+    "SELECT * FROM GETUTCDATE()",
+    "SELECT * FROM dw.str(1)",
+    "SELECT * FROM dw.fact_preis CROSS APPLY ABS(1) x",
+    "SELECT OBJECT_NAME(1)",
+    "SELECT ORIGINAL_LOGIN()",
+    "SELECT APP_NAME()",
+    "SELECT DB_NAME()",
+    "SELECT NEWID()",
+    "SELECT * FROM dw.fact_preis WHERE a = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES)",
+    "SELECT * FROM dw.fact_preis WHERE a = (SELECT COUNT(*) FROM sys.tables)",
 ]
 
 BENIGN = [
@@ -84,14 +136,19 @@ BENIGN = [
     "SELECT DATETRUNC(month, ts_utc) AS monat, SUM(netzlast_mwh) AS mwh FROM dw.fact_last GROUP BY DATETRUNC(month, ts_utc)",
     "SELECT k.bestand_mw FROM dw.fact_kapazitaet AS k WHERE k.datum_key = 20260901",
     "SELECT b.name_de FROM dw.dim_bundesland b WHERE b.name_de LIKE N'%Sachsen%'",
+    "SELECT * FROM dw.fact_preis AS p WITH (READUNCOMMITTED)",
+    "SELECT * FROM dw.fact_preis (NOLOCK)",
+    "SELECT p.region_key, x.m FROM dw.fact_preis p CROSS APPLY (SELECT MAX(day_ahead_eur_mwh) AS m FROM dw.fact_preis) x",
+    "SELECT 1 AS [percent], CHOOSE(2, 'a', 'b') AS c, STDEV(day_ahead_eur_mwh) AS s FROM dw.fact_preis",
+    "SELECT * FROM dw.fact_preis WHERE tag = 'COMMIT' OR tag = 'GO' OR tag = N'sys.objects'",
     "SELECT COUNT(*) FROM dw.fact_preis p WHERE EXISTS "
     "(SELECT 1 FROM dw.dim_region r WHERE r.region_key = p.region_key AND r.smard_code = 'DE-LU')",
 ]
 
 
 def test_case_counts() -> None:
-    assert len(MALICIOUS) == 45
-    assert len(BENIGN) == 30
+    assert len(MALICIOUS) == 45 + 3 + 13 + 3 + 8 + 20 == 92
+    assert len(BENIGN) == 30 + 5
 
 
 @pytest.mark.parametrize("sql", MALICIOUS)
@@ -126,3 +183,52 @@ def test_missing_schema_reason() -> None:
 
 def test_none_is_blocked() -> None:
     assert check_sql(None).allowed is False
+
+
+def nested(open_: str, inner: str, close: str, depth: int) -> str:
+    return open_ * depth + inner + close * depth
+
+
+def test_deep_parentheses_are_blocked_not_raised() -> None:
+    result = check_sql("SELECT " + nested("(", "1", ")", 500))
+    assert result.allowed is False and result.parse_error is True
+
+
+def test_deep_subqueries_are_blocked_not_raised() -> None:
+    result = check_sql("SELECT * FROM " + nested("(SELECT * FROM ", "dw.fact_preis", ") AS s", 300))
+    assert result.allowed is False and result.parse_error is True
+
+
+def test_deep_case_is_blocked_not_raised() -> None:
+    result = check_sql("SELECT " + nested("CASE WHEN 1 = 1 THEN ", "1", " END", 1000))
+    assert result.allowed is False and result.parse_error is True
+
+
+def test_nesting_beyond_the_cap_is_blocked_before_the_parser_runs() -> None:
+    # 60 levels parse fine, so only the explicit cap stops them (not the RecursionError fallback).
+    for sql in (
+        "SELECT " + nested("(", "1", ")", 60),
+        "SELECT " + nested("CASE WHEN 1 = 1 THEN ", "1", " END", 60),
+    ):
+        result = check_sql(sql)
+        assert result.allowed is False and "verschachtelt" in result.reason
+
+
+def test_moderate_nesting_is_allowed() -> None:
+    assert check_sql("SELECT " + nested("(", "1", ")", 30)).allowed
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "SELECT * FROM dw.fact_preis WHERE " + "NOT " * 5000 + "1 = 1",
+        "SELECT " + "(" * 100_000,
+        "SELECT " + ")" * 500,
+        chr(0),
+        "SELECT '",
+    ],
+    ids=["not-chain", "unclosed-parens", "closing-parens", "nul-byte", "open-string"],
+)
+def test_check_sql_never_raises(sql: str) -> None:
+    result = check_sql(sql)
+    assert result.allowed is False

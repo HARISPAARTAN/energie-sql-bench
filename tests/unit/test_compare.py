@@ -63,7 +63,7 @@ def test_order_only_when_ordered() -> None:
 
 def test_unicode_case_and_whitespace() -> None:
     gold = rs([["Baden-Württemberg"]])
-    pred = rs([["baden-württemberg "]])
+    pred = rs([["baden-wu\u0308rttemberg "]])
     assert compare(gold, pred).match
 
 
@@ -101,3 +101,32 @@ def test_is_empty_result() -> None:
     assert is_empty_result(rs([[None]]))
     assert not is_empty_result(rs([[0]]))
     assert is_empty_result(None) is False
+
+
+def test_abs_tolerance_alone_accepts_small_differences_near_zero() -> None:
+    # 0.003 is far above the relative bound (1e-4 * 0.004), so only abs_tol can accept it.
+    assert compare(rs([[Decimal("0.001")]]), rs([[Decimal("0.004")]])).match
+    assert not compare(rs([[Decimal("0.001")]]), rs([[Decimal("0.007")]])).match
+    assert values_equal(Decimal("0.001"), Decimal("0.004"), 0.0, 0.005)
+    assert not values_equal(Decimal("0.001"), Decimal("0.004"), 0.0, 0.002)
+
+
+def test_relative_tolerance_is_measured_against_the_larger_value() -> None:
+    # diff 10.0005 is above 1e-4 * 100000 (the smaller value) but below 1e-4 * 100010.0005 (the larger).
+    assert values_equal(Decimal("100000"), Decimal("100010.0005"), 1e-4, 0.0)
+    assert values_equal(Decimal("100010.0005"), Decimal("100000"), 1e-4, 0.0)
+    assert not values_equal(Decimal("100000"), Decimal("100010.5"), 1e-4, 0.0)
+
+
+def test_a_pred_column_cannot_serve_two_gold_columns() -> None:
+    gold = rs([[1, 1], [2, 2]])
+    assert not compare(gold, rs([[1, 5], [2, 6]])).match
+    assert compare(gold, rs([[1, 1], [2, 2]])).match
+    assert compare(gold, rs([[1, 9, 1], [2, 9, 2]])).match
+
+
+def test_timezone_offsets_are_ignored_and_wall_time_compares() -> None:
+    wall = dt.datetime(2025, 10, 4, 23, 0)
+    aware = dt.datetime(2025, 10, 4, 23, 0, tzinfo=dt.timezone(dt.timedelta(hours=2)))
+    assert normalize(aware) == normalize(wall) == "2025-10-04T23:00:00"
+    assert compare(rs([[wall]]), rs([[aware]])).match
