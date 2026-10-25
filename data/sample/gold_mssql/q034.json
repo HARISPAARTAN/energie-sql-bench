@@ -1,0 +1,27 @@
+{
+  "expect": "rows",
+  "id": "q034",
+  "result": {
+    "columns": [
+      "jahreszeit",
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "Herbst",
+        "57.904674"
+      ],
+      [
+        "Sommer",
+        "53.804583"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "ce0a3ef833686a83abb784391f7673b9b227e25b37922c2130b8e07c9fd036d4"
+}

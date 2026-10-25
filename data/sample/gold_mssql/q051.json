@@ -1,0 +1,23 @@
+{
+  "expect": "rows",
+  "id": "q051",
+  "result": {
+    "columns": [
+      "monat",
+      "ee_anteil_prozent"
+    ],
+    "rows": [
+      [
+        6,
+        "76.757351"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "61fcc4a7f1d039ecbac54f2056e4a4c4cec5519e548814937e3a7aaa02a87a7c"
+}

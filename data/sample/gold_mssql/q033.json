@@ -1,0 +1,18 @@
+{
+  "expect": "rows",
+  "id": "q033",
+  "result": {
+    "columns": [
+      "ist_wochenende",
+      "avg_netzlast_mwh"
+    ],
+    "rows": [],
+    "truncated": false,
+    "types": [
+      "null",
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "eb3b8a6e9807fc3c3bc0c8fb076fb5275d10799f233ed5320f7a2837d15d1b2b"
+}

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q013",
+  "result": {
+    "columns": [
+      "netzlast_mwh"
+    ],
+    "rows": [
+      [
+        null
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "1e55f9dd3e22ce1e1f4d893e1152902193cd96f76101bf13393e9c079c31b6cc"
+}

@@ -1,0 +1,18 @@
+{
+  "expect": "rows",
+  "id": "q063",
+  "result": {
+    "columns": [
+      "monat",
+      "erzeugung_mwh"
+    ],
+    "rows": [],
+    "truncated": false,
+    "types": [
+      "null",
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "1587daf73feb30ce002f9fee54bd374b7192ab679d7967f18f1901365281c033"
+}

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q007",
+  "result": {
+    "columns": [
+      "ee_anteil_prozent"
+    ],
+    "rows": [
+      [
+        "75.520488"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "12cf7452641e7506390f0e89e552d64f94666033a29c1d55a95feb27728c23e1"
+}

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q012",
+  "result": {
+    "columns": [
+      "min_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "-38.00"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "f84f434c09eff4a93a8180ed75973ad5d4a448fa4dc02b02cfd3ca478863ef17"
+}

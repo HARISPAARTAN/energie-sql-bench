@@ -1,0 +1,23 @@
+{
+  "expect": "rows",
+  "id": "q055",
+  "result": {
+    "columns": [
+      "stunde_beginn_lokal",
+      "preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "2025-06-14T13:00:00",
+        "-38.00"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "datetime",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "0ea164ecd0bab365746fd5f66db98ee1733f19b2f407a606ba07f63abd2629c4"
+}

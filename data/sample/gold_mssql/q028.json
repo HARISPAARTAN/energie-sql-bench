@@ -1,0 +1,27 @@
+{
+  "expect": "rows",
+  "id": "q028",
+  "result": {
+    "columns": [
+      "monat",
+      "netzlast_mwh"
+    ],
+    "rows": [
+      [
+        6,
+        "8080590.740"
+      ],
+      [
+        10,
+        "9547534.080"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "59e5e5cd52259190c4e69ac6b45077baa89245ecb96ae228926a926c1e03bac8"
+}

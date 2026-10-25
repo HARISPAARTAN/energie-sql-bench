@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q017",
+  "result": {
+    "columns": [
+      "pumpspeicher_verbrauch_mwh"
+    ],
+    "rows": [
+      [
+        "592560.820"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "a6542502b3722101a629a43ec796c542da04f8f29284db8e99c9a414da3b2b41"
+}

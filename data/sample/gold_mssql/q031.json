@@ -1,0 +1,23 @@
+{
+  "expect": "rows",
+  "id": "q031",
+  "result": {
+    "columns": [
+      "bundesland",
+      "bestand_mw"
+    ],
+    "rows": [
+      [
+        "Bayern",
+        "1879.963"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "2b7afcbd1811f6ce626bcbd90bc7cef6197bf443bce60076b7a9529bb2efcf01"
+}

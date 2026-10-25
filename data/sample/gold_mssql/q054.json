@@ -1,0 +1,31 @@
+{
+  "expect": "rows",
+  "id": "q054",
+  "result": {
+    "columns": [
+      "monat",
+      "netzlast_mwh",
+      "veraenderung_prozent"
+    ],
+    "rows": [
+      [
+        6,
+        "8080590.740",
+        null
+      ],
+      [
+        10,
+        "9547534.080",
+        "18.153912"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "513788e9a8e2b95292ff5d811481978598494cc5867136b7da81a4ad0babf35f"
+}

@@ -1,0 +1,31 @@
+{
+  "expect": "rows",
+  "id": "q049",
+  "result": {
+    "columns": [
+      "datum",
+      "erzeugung_mwh"
+    ],
+    "rows": [
+      [
+        "2025-06-13",
+        "461467.500"
+      ],
+      [
+        "2025-06-12",
+        "458686.500"
+      ],
+      [
+        "2025-06-14",
+        "421401.750"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "date",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "1d2e8010e674ecab7233e87154a7cfb672c31356aaa7e4ab0efcc5ef7c9a9e9d"
+}

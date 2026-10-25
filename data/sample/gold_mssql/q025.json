@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q025",
+  "result": {
+    "columns": [
+      "anzahl_zubau"
+    ],
+    "rows": [
+      [
+        null
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "44e828f1c56ef73f450fad6e4fc299159d266d8e722a7f9336d9546b2968ec2d"
+}

@@ -263,3 +263,108 @@ def label(run_id: Annotated[str, typer.Argument(help="Laufordner unter results/r
     summary = read_json(settings.path(f"results/runs/{run_id}/summary.json"))
     added = export_label_template(settings.path("analysis/labels.csv"), run_id, summary["items"])
     typer.echo(f"{added} Zeilen zur Kategorisierung (E3 bis E9) in analysis/labels.csv ergänzt")
+
+
+sample_app = typer.Typer(help="CI-Stichprobe (SQL Server, Parquet, DuckDB)", no_args_is_help=True)
+app.add_typer(sample_app, name="sample")
+
+
+@sample_app.command("build")
+def sample_build() -> None:
+    """energiewende_sample aus dem Warehouse neu anlegen (sa-Passwort aus der Umgebung, nie ausgegeben)."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.sample import EXPECTED_ROWS, build_sample_db
+
+    settings = load_settings()
+    sa_password = settings.env.get("MSSQL_SA_PASSWORD")
+    if not sa_password:
+        typer.echo("MSSQL_SA_PASSWORD fehlt: mit uv run --env-file ../energiewende-monitor/.env starten")
+        raise typer.Exit(2)
+    counts = build_sample_db(settings, sa_password)
+    for table, n in counts.items():
+        typer.echo(
+            f"{table}: {n}" + ("" if n == EXPECTED_ROWS[table] else f" (erwartet {EXPECTED_ROWS[table]})")
+        )
+    raise typer.Exit(0 if counts == EXPECTED_ROWS else 1)
+
+
+@sample_app.command("export")
+def sample_export() -> None:
+    """Die Stichprobe als bench_reader lesen und nach data/sample/*.parquet schreiben."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.sample import export_parquet
+
+    settings = load_settings()
+    for table, n in export_parquet(settings, settings.path("data/sample")).items():
+        typer.echo(f"{table}.parquet: {n} Zeilen")
+
+
+@sample_app.command("load")
+def sample_load(
+    database: Annotated[str, typer.Option(help="DuckDB-Datei (git-ignoriert)")] = "data/sample/sample.duckdb",
+) -> None:
+    """Parquet und DuckDB-Sichten in eine lokale DuckDB-Datei laden (zum Ausprobieren)."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.sample import load_duckdb
+
+    settings = load_settings()
+    target = settings.path(database)
+    target.unlink(missing_ok=True)
+    con = load_duckdb(settings.path("data/sample"), str(target))
+    views = con.execute("SELECT COUNT(*) FROM duckdb_views() WHERE schema_name = 'rpt'").fetchone()[0]
+    con.close()
+    typer.echo(f"{target} mit {views} rpt-Sichten geladen")
+
+
+@sample_app.command("gold")
+def sample_gold() -> None:
+    """Gold-SQL auf energiewende_sample (SQL Server) ausführen und nach data/sample/gold_mssql/ schreiben."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.gold import write_gold
+    from energie_sql_bench.questions import load_questions
+    from energie_sql_bench.sample import build_sample_gold
+
+    settings = load_settings()
+    entries, errors = build_sample_gold(settings, load_questions(settings.path("bench/questions")))
+    write_gold(entries, settings.path("data/sample/gold_mssql"))
+    for line in errors:
+        typer.echo(line)
+    typer.echo(f"{len(entries)} Stichproben-Gold-Ergebnisse geschrieben, {len(errors)} Fehler")
+    raise typer.Exit(1 if errors else 0)
+
+
+@sample_app.command("parity")
+def sample_parity(
+    check: Annotated[
+        bool, typer.Option("--check", help="nur mit data/sample/parity.json vergleichen")
+    ] = False,
+) -> None:
+    """Gold-SQL auf DuckDB gegen das SQL-Server-Stichproben-Gold prüfen; schreibt parity.json und reports/parity.md."""
+    from energie_sql_bench.config import load_settings
+    from energie_sql_bench.files import dump_json, read_json, write_json, write_text
+    from energie_sql_bench.gold import load_gold
+    from energie_sql_bench.questions import load_questions
+    from energie_sql_bench.sample import load_duckdb, parity_summary, render_parity, run_parity
+
+    settings = load_settings()
+    con = load_duckdb(settings.path("data/sample"))
+    try:
+        rows = run_parity(
+            con,
+            load_questions(settings.path("bench/questions")),
+            load_gold(settings.path("data/sample/gold_mssql")),
+            settings.compare,
+        )
+    finally:
+        con.close()
+    summary = parity_summary(rows)
+    typer.echo(
+        f"Parität {summary['matched']}/{summary['intents']} ({summary['coverage'] * 100:.1f} %), "
+        f"davon nicht-trivial {summary['matched_nontrivial']}"
+    )
+    if check:
+        same = dump_json(read_json(settings.path("data/sample/parity.json"))) == dump_json(summary)
+        typer.echo("OK" if same else "ABWEICHUNG zu data/sample/parity.json")
+        raise typer.Exit(0 if same else 1)
+    write_json(settings.path("data/sample/parity.json"), summary)
+    write_text(settings.path("reports/parity.md"), render_parity(summary))

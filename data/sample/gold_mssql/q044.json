@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q044",
+  "result": {
+    "columns": [
+      "anteil_negativ_prozent"
+    ],
+    "rows": [
+      [
+        null
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "8650a6a922a7eb68bc479380250f7d459b2b634b3aec20a2d6702315f1f9af78"
+}

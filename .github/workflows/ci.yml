@@ -43,3 +43,15 @@ jobs:
       - run: uv sync --locked
       - run: uv run pytest tests/replay -q
       - run: uv run esb replay --all
+
+  sample:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.8"
+          python-version: "3.13"
+      - run: uv sync --locked
+      - run: uv run pytest tests/sample -q
+      - run: uv run esb sample parity --check

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q006",
+  "result": {
+    "columns": [
+      "leistung_mw"
+    ],
+    "rows": [
+      [
+        null
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "null"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "01ab9dcc74c7b64f03b0e7d1697c27bc4303c3a9231b198f2ff37f46ac5df348"
+}

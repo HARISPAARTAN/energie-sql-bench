@@ -1,0 +1,26 @@
+{
+  "expect": "rows",
+  "id": "q069",
+  "result": {
+    "columns": [
+      "jahr",
+      "datum",
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        2025,
+        "2025-10-22",
+        "125.070416"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "date",
+      "decimal"
+    ]
+  },
+  "snapshot": "sample",
+  "sql_sha256": "ca554a4930a1ac782d87bb8e2a7593b041584876727cc35559ff1d06e70094b5"
+}
