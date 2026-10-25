@@ -1,0 +1,23 @@
+{
+  "expect": "rows",
+  "id": "q008",
+  "result": {
+    "columns": [
+      "start_lokal",
+      "stunden"
+    ],
+    "rows": [
+      [
+        "2025-10-04T21:00:00",
+        20
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "datetime",
+      "int"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "1796017148adefeae7ea6f3f9dee038837d0d40bdccc0392812d72e5d530f7dd"
+}

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q001",
+  "result": {
+    "columns": [
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "78.512033"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "fdc81904a398ee9c79341d8ee93e0a9d70fc6d680a7c46b3a9496366c610850f"
+}

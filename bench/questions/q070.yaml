@@ -1,0 +1,8 @@
+id: q070
+split: dev
+tier: A
+tags: [enthaltung]
+de: "Wie viel Strom speisten Batteriespeicher 2025 in DE-LU ins Netz ein (MWh)?"
+en: "How much electricity did battery storage feed into the grid in DE-LU in 2025 (MWh)?"
+expect: abstain
+notes: "Batteriespeicher sind weder als SMARD-Energieträger noch im Kapazitäts-Seed enthalten."

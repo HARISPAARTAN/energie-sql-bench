@@ -1,0 +1,23 @@
+id: q002
+split: test
+tier: T1
+tags: [preis, negativ, zaehlen]
+de: "Wie viele Stunden mit negativem Day-Ahead-Preis gab es 2024 in DE-LU?"
+en: "How many hours with a negative day-ahead price were there in DE-LU in 2024?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT COUNT(*) AS stunden
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20240101 AND 20241231
+    AND p.day_ahead_eur_mwh < 0
+check_sql: |
+  SELECT COUNT(CASE WHEN v.day_ahead_eur_mwh < 0 THEN 1 END) AS n
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2024
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "dw.fact_preis hat eine Zeile je Stunde. Negativ heißt kleiner 0, nicht kleiner gleich 0. Wert 2026-10-25: 457."

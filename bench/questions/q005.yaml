@@ -1,0 +1,24 @@
+id: q005
+split: test
+tier: T3
+tags: [dst, lokalzeit, einheit]
+de: "Wie viel Strom erzeugte Wind Onshore am 26. Oktober 2025 (Ortszeit) in GWh?"
+en: "How much electricity did onshore wind generate on 26 October 2025 (local time) in GWh?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND e.name_de = N'Wind Onshore'
+    AND f.datum_key = 20251026
+check_sql: |
+  SELECT SUM(erzeugung_mwh) / 1000.0 AS gwh
+  FROM dw.fact_erzeugung
+  WHERE region_key = 1 AND energietraeger_key = 2
+    AND ts_utc >= '2025-10-25T22:00:00' AND ts_utc < '2025-10-26T23:00:00'
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Zeitumstellung: der lokale Tag hat 100 Viertelstunden (UTC 22:00 des Vortags bis 23:00). Ein UTC-Kalendertag oder MWh statt GWh ist falsch. Wert 2026-10-25: 968.505550."

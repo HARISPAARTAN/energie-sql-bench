@@ -1,0 +1,63 @@
+{
+  "expect": "rows",
+  "id": "q004",
+  "result": {
+    "columns": [
+      "name_de",
+      "erzeugung_mwh"
+    ],
+    "rows": [
+      [
+        "Erdgas",
+        "60606643.670"
+      ],
+      [
+        "Braunkohle",
+        "67166354.430"
+      ],
+      [
+        "Photovoltaik",
+        "74217707.670"
+      ],
+      [
+        "Biomasse",
+        "36103747.890"
+      ],
+      [
+        "Sonstige Konventionelle",
+        "14462963.610"
+      ],
+      [
+        "Wind Onshore",
+        "107231652.080"
+      ],
+      [
+        "Wind Offshore",
+        "26194570.690"
+      ],
+      [
+        "Pumpspeicher",
+        "9941861.770"
+      ],
+      [
+        "Sonstige Erneuerbare",
+        "953117.370"
+      ],
+      [
+        "Steinkohle",
+        "28157408.160"
+      ],
+      [
+        "Wasserkraft",
+        "14244949.910"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "113b82ba98810b2f031910575f313a6d77a4865c4c5f3a42ee9c73b8c6a625b5"
+}

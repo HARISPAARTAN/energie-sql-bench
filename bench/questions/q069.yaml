@@ -1,0 +1,40 @@
+id: q069
+split: dev
+tier: T4
+tags: [fenster, partition, ranking]
+de: "Welcher Tag (Ortszeit) hatte in den Jahren 2023, 2024 und 2025 jeweils den höchsten Tagesdurchschnitt des Day-Ahead-Preises in DE-LU? Gib Jahr, Datum und Tagesdurchschnitt (€/MWh) aus; bei Gleichstand das frühere Datum."
+en: "For each of the years 2023, 2024 and 2025, which day (local time) had the highest daily average day-ahead price in DE-LU? Return year, date and daily average (EUR/MWh); on a tie, the earlier date."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH tag AS (
+      SELECT d.jahr, d.datum, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+      FROM dw.fact_preis p
+      JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+      JOIN dw.dim_region r ON r.region_key = p.region_key
+      WHERE r.smard_code = N'DE-LU' AND d.jahr BETWEEN 2023 AND 2025
+      GROUP BY d.jahr, d.datum
+  ), rangiert AS (
+      SELECT jahr, datum, avg_preis_eur_mwh,
+             ROW_NUMBER() OVER (PARTITION BY jahr ORDER BY avg_preis_eur_mwh DESC, datum ASC) AS rn
+      FROM tag
+  )
+  SELECT jahr, datum, avg_preis_eur_mwh FROM rangiert WHERE rn = 1 ORDER BY jahr
+check_sql: |
+  WITH tag AS (
+      SELECT d.jahr, d.datum, AVG(v.day_ahead_eur_mwh) AS a
+      FROM rpt.v_preis v
+      JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+      WHERE v.region_key = 1 AND d.jahr BETWEEN 2023 AND 2025
+      GROUP BY d.jahr, d.datum
+  ), mx AS (
+      SELECT jahr, MAX(a) AS m FROM tag GROUP BY jahr
+  )
+  SELECT t.jahr, MIN(t.datum) AS datum, mx.m
+  FROM tag t
+  JOIN mx ON mx.jahr = t.jahr AND t.a = mx.m
+  GROUP BY t.jahr, mx.m
+  ORDER BY t.jahr
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Wert 2026-10-25: 2023-01-23 202.734166; 2024-12-12 395.338750; 2025-01-20 231.357916."

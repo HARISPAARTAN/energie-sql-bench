@@ -1,0 +1,30 @@
+id: q068
+split: dev
+tier: T4
+tags: [ranking, isowoche, gleichstand]
+de: "In welcher ISO-Kalenderwoche des Jahres 2024 war der durchschnittliche Day-Ahead-Preis in DE-LU am niedrigsten? Gib Woche und Durchschnittspreis (€/MWh) aus; bei Gleichstand die frühere Woche."
+en: "In which ISO calendar week of 2024 was the average day-ahead price in DE-LU lowest? Return the week and the average price (EUR/MWh); on a tie, the earlier week."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT TOP 1 d.iso_woche, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU' AND d.iso_jahr = 2024
+  GROUP BY d.iso_woche
+  ORDER BY avg_preis_eur_mwh ASC, d.iso_woche ASC
+check_sql: |
+  WITH w AS (
+      SELECT d.iso_woche, AVG(v.day_ahead_eur_mwh) AS a
+      FROM rpt.v_preis v
+      JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+      WHERE v.region_key = 1 AND d.iso_jahr = 2024
+      GROUP BY d.iso_woche
+  ), r AS (
+      SELECT iso_woche, a, RANK() OVER (ORDER BY a ASC, iso_woche ASC) AS rk FROM w
+  )
+  SELECT iso_woche, a FROM r WHERE rk = 1
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "ISO-Jahr statt Kalenderjahr. Wert 2026-10-25: Woche 14, 45.461369."

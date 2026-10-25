@@ -1,0 +1,26 @@
+id: q009
+split: test
+tier: T4
+tags: [ranking, monat, gleichstand]
+de: "In welchem Monat 2025 war der durchschnittliche Day-Ahead-Preis am höchsten? Gib die Monatsnummer (1 bis 12) und den Durchschnittspreis in €/MWh aus; bei Gleichstand der frühere Monat."
+en: "In which month of 2025 was the average day-ahead price highest? Return the month number (1 to 12) and the average price in EUR/MWh; on a tie, the earlier month."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT TOP 1 d.monat, AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU' AND d.jahr = 2025
+  GROUP BY d.monat
+  ORDER BY avg_preis_eur_mwh DESC, d.monat ASC
+check_sql: |
+  SELECT TOP 1 CAST(RIGHT(d.jahr_monat, 2) AS int) AS monat, AVG(v.day_ahead_eur_mwh) AS a
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2025
+  GROUP BY d.jahr_monat
+  ORDER BY a DESC, d.jahr_monat ASC
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Monatsnummer statt Name oder jahr_monat ist verlangt. Wert 2026-10-25: Monat 2, 128.522366."

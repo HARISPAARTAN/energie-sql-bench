@@ -1,0 +1,128 @@
+# Short bilingual descriptions and retrieval keywords for every table and view in dw and rpt.
+# Rendered into the schema context of all variants; keywords drive the deterministic retrieval of v6.
+# Keywords are lower case; a keyword of 4+ characters also matches words that start with it.
+tables:
+  dw.dim_datum:
+    de: Kalendertabelle, ein Eintrag je lokalem Tag (Europe/Berlin), 1990 bis 2030
+    en: Calendar table, one row per local day (Europe/Berlin), 1990 to 2030
+    keywords: [datum, tag, tage, monat, jahr, quartal, woche, kalenderwoche, wochentag, wochenende, werktag, saison, jahreszeit, date, day, days, month, year, quarter, week, weekday, weekend, season, iso]
+    columns:
+      datum_key: lokales Datum als Zahl yyyymmdd / local date as yyyymmdd
+      iso_jahr: ISO-Jahr der Kalenderwoche / ISO week-numbering year
+      iso_woche: ISO-Kalenderwoche 1 bis 53 / ISO week 1 to 53
+      wochentag_nr: 1 = Montag bis 7 = Sonntag / 1 = Monday to 7 = Sunday
+      ist_wochenende: 1 für Samstag und Sonntag / 1 for Saturday and Sunday
+      saison_de: Jahreszeit (Winter, Frühling, Sommer, Herbst) / season
+      viertelstunden: Viertelstunden des Tages (92 oder 100 an Zeitumstellungstagen) / quarter-hours of the day (92 or 100 on clock-change days)
+  dw.dim_zeit:
+    de: Uhrzeit-Tabelle, 96 lokale Viertelstunden eines Tages
+    en: Time-of-day table, 96 local quarter-hours
+    keywords: [uhr, uhrzeit, stunde, viertelstunde, tageszeit, nacht, mittag, morgen, abend, hour, time, quarter, night, noon]
+    columns:
+      zeit_key: lokale Viertelstunde 0 bis 95 / local quarter-hour 0 to 95
+      stunde: lokale Stunde 0 bis 23 / local hour 0 to 23
+  dw.dim_energietraeger:
+    de: Energieträger der Stromerzeugung (12 Einträge) mit Kategorie Erneuerbar oder Konventionell
+    en: Energy carriers of generation (12 rows) with category renewable or conventional
+    keywords: [energieträger, photovoltaik, solar, wind, onshore, offshore, windkraft, biomasse, wasserkraft, erdgas, steinkohle, braunkohle, kohle, kernenergie, atom, pumpspeicher, erneuerbar, konventionell, kategorie, carrier, renewable, renewables, conventional, lignite, coal, nuclear, hydro, biomass, gas]
+  dw.dim_region:
+    de: Regionen, Marktgebiet DE-LU und vier Regelzonen (Fakten nur für DE-LU)
+    en: Regions, bidding zone DE-LU and four control areas (facts only for DE-LU)
+    keywords: [region, marktgebiet, regelzone, 50hertz, amprion, tennet, transnetbw, deutschland, luxemburg, bidding, zone, control, area, germany]
+  dw.dim_bundesland:
+    de: Bundesländer (16) plus AWZ (Ausschließliche Wirtschaftszone, offshore) und UNB (unbekannt)
+    en: Federal states (16) plus AWZ (exclusive economic zone, offshore) and UNB (unknown)
+    keywords: [bundesland, bundesländer, land, länder, bayern, nrw, nordrhein, westfalen, sachsen, niedersachsen, brandenburg, schleswig, holstein, hessen, baden, württemberg, thüringen, berlin, hamburg, bremen, saarland, rheinland, pfalz, mecklenburg, vorpommern, state, states, bavaria]
+    columns:
+      kuerzel: Kürzel char(3), zum Beispiel BY oder NW, rechts mit Leerzeichen aufgefüllt / code char(3) such as BY or NW, right-padded
+  dw.fact_erzeugung:
+    de: Stromerzeugung je Energieträger und Viertelstunde in MWh je Intervall (nur DE-LU)
+    en: Electricity generation per energy carrier and quarter-hour in MWh per interval (DE-LU only)
+    keywords: [erzeugung, erzeugte, erzeugt, stromerzeugung, produktion, einspeisung, lieferte, geliefert, solarstrom, windstrom, generation, generated, produced, deliver, delivered, gwh, twh, leistung, power, anteil, share, volllaststunden]
+    columns:
+      ts_utc: Intervallbeginn in UTC / interval start in UTC
+      datum_key: lokales Datum (Europe/Berlin) / local date
+      zeit_key: lokale Viertelstunde / local quarter-hour
+      aufloesung_min: Intervalllänge in Minuten (15) / interval length in minutes
+      erzeugung_mwh: Energie im Intervall in MWh, NULL wenn kein Wert / energy in the interval in MWh, NULL if missing
+  dw.fact_last:
+    de: Netzlast, Residuallast und Pumpspeicher-Verbrauch je Viertelstunde in MWh (nur DE-LU)
+    en: Grid load, residual load and pumped-storage consumption per quarter-hour in MWh (DE-LU only)
+    keywords: [last, netzlast, residuallast, verbrauch, verbrauchten, stromverbrauch, strombedarf, bedarf, pumpspeicher, load, consumption, consume, demand, residual]
+    columns:
+      ts_utc: Intervallbeginn in UTC / interval start in UTC
+      datum_key: lokales Datum / local date
+      netzlast_mwh: Netzlast im Intervall in MWh / grid load in the interval in MWh
+      residuallast_mwh: Netzlast minus Wind- und PV-Erzeugung in MWh / grid load minus wind and PV in MWh
+      pumpspeicher_verbrauch_mwh: Strombezug der Pumpspeicher in MWh / pumped-storage consumption in MWh
+  dw.fact_preis:
+    de: Day-Ahead-Großhandelspreis je Stunde in €/MWh (nur DE-LU)
+    en: Day-ahead wholesale price per hour in EUR/MWh (DE-LU only)
+    keywords: [preis, preise, strompreis, börsenstrompreis, großhandelspreis, ahead, negativ, negative, euro, price, prices, eur]
+    columns:
+      ts_utc: Beginn der Stunde in UTC / start of the hour in UTC
+      datum_key: lokales Datum / local date
+      zeit_key: lokale Viertelstunde des Stundenbeginns / local quarter-hour of the hour start
+  dw.fact_kapazitaet:
+    de: Installierte Leistung laut Marktstammdatenregister je Monat, Bundesland und Energieträger (datum_key = Monatserster)
+    en: Installed capacity from the MaStR register per month, federal state and carrier (datum_key = first day of month)
+    keywords: [kapazität, installiert, installierte, bestand, zubau, zugebaut, ausbau, abgang, anlagen, einheiten, inbetriebnahme, inbetrieb, volllaststunden, capacity, installed, units, commissioned, additions, added]
+    columns:
+      zubau_mw: im Monat neu in Betrieb genommene Leistung in MW / capacity commissioned in the month in MW
+      anzahl_zubau: im Monat neu in Betrieb genommene Einheiten / units commissioned in the month
+      abgang_mw: im Monat stillgelegte Leistung in MW / capacity decommissioned in the month in MW
+      anfangsbestand_mw: Bestand vor Beginn der Zeitreihe, nur im ersten Monat / opening stock, first month only
+      bestand_mw: Bestand am Monatsende in MW / stock at month end in MW
+      bestand_anzahl: Einheiten am Monatsende / units at month end
+  rpt.v_dim_datum:
+    de: Sicht auf dw.dim_datum
+    en: View on dw.dim_datum
+    keywords: [kalender, calendar]
+  rpt.v_dim_zeit:
+    de: Sicht auf dw.dim_zeit
+    en: View on dw.dim_zeit
+    keywords: [uhrzeit]
+  rpt.v_dim_energietraeger:
+    de: Sicht auf dw.dim_energietraeger
+    en: View on dw.dim_energietraeger
+    keywords: [energieträger]
+  rpt.v_dim_region:
+    de: Sicht auf dw.dim_region
+    en: View on dw.dim_region
+    keywords: [regelzone]
+  rpt.v_dim_bundesland:
+    de: Sicht auf dw.dim_bundesland mit gekürztem Kürzel (RTRIM)
+    en: View on dw.dim_bundesland with trimmed code (RTRIM)
+    keywords: [kürzel, kuerzel]
+  rpt.v_erzeugung:
+    de: Sicht auf dw.fact_erzeugung
+    en: View on dw.fact_erzeugung
+    keywords: [erzeugung]
+  rpt.v_last:
+    de: Sicht auf dw.fact_last
+    en: View on dw.fact_last
+    keywords: [netzlast]
+  rpt.v_preis:
+    de: Sicht auf dw.fact_preis
+    en: View on dw.fact_preis
+    keywords: [preis]
+  rpt.v_last_stunde:
+    de: Last je UTC-Stunde (Summe von vier Viertelstunden, NULL wenn eine fehlt)
+    en: Load per UTC hour (sum of four quarter-hours, NULL if one is missing)
+    keywords: [stündlich, hourly]
+  rpt.v_preis_last_stunde:
+    de: Day-Ahead-Preis je Stunde mit Netzlast und Residuallast derselben Stunde (für lastgewichtete Preise)
+    en: Hourly day-ahead price with grid and residual load of the same hour (for load-weighted prices)
+    keywords: [gewichtet, gewichtete, lastgewichtet, weighted]
+  rpt.v_negative_preisphasen:
+    de: Phasen aufeinanderfolgender Stunden mit negativem Preis; ende_utc exklusiv; start_lokal und ende_lokal in Ortszeit
+    en: Runs of consecutive hours with negative prices; ende_utc exclusive; start_lokal and ende_lokal in local time
+    keywords: [phase, phasen, ununterbrochen, längste, dauer, dauerte, run, runs, longest, uninterrupted]
+  rpt.v_dq_luecken:
+    de: Datenqualität, erwartete und vorhandene Viertelstunden je Energieträger und Monat
+    en: Data quality, expected and present quarter-hours per carrier and month
+    keywords: [lücken, fehlend, fehlende, datenqualität, gaps, missing, quality]
+  rpt.v_kapazitaet:
+    de: Kapazität je Monat mit jahr_monat (Sicht auf dw.fact_kapazitaet)
+    en: Capacity per month with jahr_monat (view on dw.fact_kapazitaet)
+    keywords: [kapazität, capacity]

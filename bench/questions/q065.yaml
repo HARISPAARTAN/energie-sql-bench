@@ -1,0 +1,22 @@
+id: q065
+split: dev
+tier: T3
+tags: [dst, lokalzeit, einheit]
+de: "Welche Energiemenge in GWh lieferten Offshore-Windparks in DE-LU am Tag der Zeitumstellung im Frühjahr 2025 (30. März, deutsche Ortszeit)?"
+en: "How much energy in GWh did offshore wind farms deliver in DE-LU on the day of the spring clock change 2025 (30 March, German local time)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(f.erzeugung_mwh) / 1000.0 AS erzeugung_gwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU' AND e.name_de = N'Wind Offshore' AND f.datum_key = 20250330
+check_sql: |
+  SELECT SUM(erzeugung_mwh) / 1000.0 AS gwh
+  FROM dw.fact_erzeugung
+  WHERE region_key = 1 AND energietraeger_key = 3
+    AND ts_utc >= '2025-03-29T23:00:00' AND ts_utc < '2025-03-30T22:00:00'
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Der lokale Tag hat 92 Viertelstunden. Wert 2026-10-25: 72.105500."

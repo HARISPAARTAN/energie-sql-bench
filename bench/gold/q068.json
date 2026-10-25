@@ -1,0 +1,23 @@
+{
+  "expect": "rows",
+  "id": "q068",
+  "result": {
+    "columns": [
+      "iso_woche",
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        14,
+        "45.461369"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "0f0fdaabc8eac625d1a77d9407bbc9e53caf86587c52798314066ea76a481b89"
+}

@@ -1,0 +1,24 @@
+id: q067
+split: dev
+tier: T3
+tags: [anteil, prozent, energietraeger]
+de: "Welchen Anteil in Prozent hatte Braunkohle an der gesamten Stromerzeugung in DE-LU im Jahr 2024?"
+en: "What share in percent did lignite have in total electricity generation in DE-LU in 2024?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT 100.0 * SUM(CASE WHEN e.name_de = N'Braunkohle' THEN f.erzeugung_mwh END)
+         / SUM(f.erzeugung_mwh) AS anteil_prozent
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU' AND f.datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  SELECT 100.0 * SUM(CASE WHEN v.energietraeger_key = 9 THEN v.erzeugung_mwh ELSE 0 END)
+         / SUM(v.erzeugung_mwh) AS p
+  FROM rpt.v_erzeugung v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2024
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Wert 2026-10-25: 16.172530."

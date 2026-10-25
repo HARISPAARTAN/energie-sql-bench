@@ -1,0 +1,31 @@
+{
+  "expect": "rows",
+  "id": "q064",
+  "result": {
+    "columns": [
+      "name_de",
+      "bestand_mw"
+    ],
+    "rows": [
+      [
+        "Niedersachsen",
+        "13940.636"
+      ],
+      [
+        "Schleswig-Holstein",
+        "9630.511"
+      ],
+      [
+        "Brandenburg",
+        "9542.746"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "3e03c2baed19de56d47bd3641ae44189dad8666e91ad795e3388345f0743aa42"
+}

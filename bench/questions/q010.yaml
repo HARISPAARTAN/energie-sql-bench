@@ -1,0 +1,8 @@
+id: q010
+split: test
+tier: A
+tags: [enthaltung]
+de: "Wie viel Redispatch wurde 2025 in Deutschland abgerufen (MWh)?"
+en: "How much redispatch was called in Germany in 2025 (MWh)?"
+expect: abstain
+notes: "Das Warehouse enthält keine Redispatch-Daten. Richtig ist NICHT_BEANTWORTBAR oder ein leeres Ergebnis."

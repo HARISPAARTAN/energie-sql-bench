@@ -1,0 +1,26 @@
+id: q063
+split: dev
+tier: T2
+tags: [erzeugung, monat, energietraeger]
+de: "Gib für 2024 die monatliche Stromerzeugung aus Wasserkraft in DE-LU an (Monatsnummer und MWh), aufsteigend nach Monat."
+en: "List the monthly electricity generation from hydro power in DE-LU for 2024 (month number and MWh), in ascending month order."
+expect: rows
+ordered: true
+gold_sql: |
+  SELECT d.monat, SUM(f.erzeugung_mwh) AS erzeugung_mwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_datum d ON d.datum_key = f.datum_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU' AND e.name_de = N'Wasserkraft' AND d.jahr = 2024
+  GROUP BY d.monat
+  ORDER BY d.monat
+check_sql: |
+  SELECT (v.datum_key / 100) % 100 AS monat, SUM(v.erzeugung_mwh) AS s
+  FROM rpt.v_erzeugung v
+  WHERE v.region_key = 1 AND v.energietraeger_key = 5 AND v.datum_key BETWEEN 20240101 AND 20241231
+  GROUP BY (v.datum_key / 100) % 100
+  ORDER BY monat
+tables: [dw.dim_datum, dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "12 Zeilen. Wert 2026-10-25 für Januar: 1538664.750."

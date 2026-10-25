@@ -1,0 +1,21 @@
+id: q066
+split: dev
+tier: T3
+tags: [leistung, einheit, last]
+de: "Wie hoch war die mittlere Netzlast in DE-LU im Juli 2025 in GW?"
+en: "What was the average grid load in DE-LU in July 2025 in GW?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(l.netzlast_mwh) * 4 / 1000.0 AS netzlast_gw
+  FROM dw.fact_last l
+  JOIN dw.dim_region r ON r.region_key = l.region_key
+  WHERE r.smard_code = N'DE-LU' AND l.datum_key BETWEEN 20250701 AND 20250731
+check_sql: |
+  SELECT SUM(v.netzlast_mwh) / COUNT(v.netzlast_mwh) * 4 / 1000.0 AS gw
+  FROM rpt.v_last v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr_monat = '2025-07'
+tables: [dw.dim_region, dw.fact_last]
+duckdb: ok
+notes: "Mittlere Leistung = Durchschnitt der Viertelstundenwerte mal 4, geteilt durch 1000 für GW. Wert 2026-10-25: 50.303285."

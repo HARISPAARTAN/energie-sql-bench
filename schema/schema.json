@@ -1,0 +1,1326 @@
+{
+  "database": "energiewende",
+  "tables": {
+    "dw.dim_bundesland": {
+      "columns": [
+        {
+          "name": "bundesland_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "kuerzel",
+          "nullable": false,
+          "type": "char(3)"
+        },
+        {
+          "name": "ist_awz",
+          "nullable": false,
+          "type": "bit"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [
+        "bundesland_key"
+      ],
+      "type": "table",
+      "values": {
+        "columns": [
+          "name_de",
+          "kuerzel"
+        ],
+        "rows": [
+          [
+            "Baden-Württemberg",
+            "BW"
+          ],
+          [
+            "Bayern",
+            "BY"
+          ],
+          [
+            "Berlin",
+            "BE"
+          ],
+          [
+            "Brandenburg",
+            "BB"
+          ],
+          [
+            "Bremen",
+            "HB"
+          ],
+          [
+            "Hamburg",
+            "HH"
+          ],
+          [
+            "Hessen",
+            "HE"
+          ],
+          [
+            "Mecklenburg-Vorpommern",
+            "MV"
+          ],
+          [
+            "Niedersachsen",
+            "NI"
+          ],
+          [
+            "Nordrhein-Westfalen",
+            "NW"
+          ],
+          [
+            "Rheinland-Pfalz",
+            "RP"
+          ],
+          [
+            "Saarland",
+            "SL"
+          ],
+          [
+            "Sachsen",
+            "SN"
+          ],
+          [
+            "Sachsen-Anhalt",
+            "ST"
+          ],
+          [
+            "Schleswig-Holstein",
+            "SH"
+          ],
+          [
+            "Thüringen",
+            "TH"
+          ],
+          [
+            "Ausschließliche Wirtschaftszone",
+            "AWZ"
+          ],
+          [
+            "Unbekannt",
+            "UNB"
+          ]
+        ]
+      }
+    },
+    "dw.dim_datum": {
+      "columns": [
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "datum",
+          "nullable": false,
+          "type": "date"
+        },
+        {
+          "name": "jahr",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "quartal",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "monat",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "monat_name_de",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "monat_name_en",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "jahr_monat",
+          "nullable": false,
+          "type": "char(7)"
+        },
+        {
+          "name": "iso_jahr",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "iso_woche",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "tag",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "wochentag_nr",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "wochentag_de",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "wochentag_en",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "ist_wochenende",
+          "nullable": false,
+          "type": "bit"
+        },
+        {
+          "name": "saison_de",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        },
+        {
+          "name": "viertelstunden",
+          "nullable": false,
+          "type": "tinyint"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [
+        "datum_key"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "dw.dim_energietraeger": {
+      "columns": [
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "smard_filter_id",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "name_en",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "kategorie_de",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "kategorie_en",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "sortierung",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "farbe_hex",
+          "nullable": false,
+          "type": "char(7)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [
+        "energietraeger_key"
+      ],
+      "type": "table",
+      "values": {
+        "columns": [
+          "name_de",
+          "name_en",
+          "kategorie_de"
+        ],
+        "rows": [
+          [
+            "Photovoltaik",
+            "Solar PV",
+            "Erneuerbar"
+          ],
+          [
+            "Wind Onshore",
+            "Wind onshore",
+            "Erneuerbar"
+          ],
+          [
+            "Wind Offshore",
+            "Wind offshore",
+            "Erneuerbar"
+          ],
+          [
+            "Biomasse",
+            "Biomass",
+            "Erneuerbar"
+          ],
+          [
+            "Wasserkraft",
+            "Hydro",
+            "Erneuerbar"
+          ],
+          [
+            "Sonstige Erneuerbare",
+            "Other renewables",
+            "Erneuerbar"
+          ],
+          [
+            "Erdgas",
+            "Natural gas",
+            "Konventionell"
+          ],
+          [
+            "Steinkohle",
+            "Hard coal",
+            "Konventionell"
+          ],
+          [
+            "Braunkohle",
+            "Lignite",
+            "Konventionell"
+          ],
+          [
+            "Kernenergie",
+            "Nuclear",
+            "Konventionell"
+          ],
+          [
+            "Pumpspeicher",
+            "Pumped storage",
+            "Konventionell"
+          ],
+          [
+            "Sonstige Konventionelle",
+            "Other conventional",
+            "Konventionell"
+          ]
+        ]
+      }
+    },
+    "dw.dim_region": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "smard_code",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(60)"
+        },
+        {
+          "name": "name_en",
+          "nullable": false,
+          "type": "nvarchar(60)"
+        },
+        {
+          "name": "typ_de",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "typ_en",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [
+        "region_key"
+      ],
+      "type": "table",
+      "values": {
+        "columns": [
+          "smard_code",
+          "name_de",
+          "typ_de"
+        ],
+        "rows": [
+          [
+            "DE-LU",
+            "Marktgebiet Deutschland/Luxemburg",
+            "Marktgebiet"
+          ],
+          [
+            "50Hertz",
+            "Regelzone 50Hertz",
+            "Regelzone"
+          ],
+          [
+            "Amprion",
+            "Regelzone Amprion",
+            "Regelzone"
+          ],
+          [
+            "TenneT",
+            "Regelzone TenneT",
+            "Regelzone"
+          ],
+          [
+            "TransnetBW",
+            "Regelzone TransnetBW",
+            "Regelzone"
+          ]
+        ]
+      }
+    },
+    "dw.dim_zeit": {
+      "columns": [
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "uhrzeit",
+          "nullable": false,
+          "type": "time(0)"
+        },
+        {
+          "name": "stunde",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "viertelstunde",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "tageszeit_de",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        },
+        {
+          "name": "tageszeit_en",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [
+        "zeit_key"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "dw.fact_erzeugung": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "aufloesung_min",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "erzeugung_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "datum_key",
+          "references": "dw.dim_datum.datum_key"
+        },
+        {
+          "column": "energietraeger_key",
+          "references": "dw.dim_energietraeger.energietraeger_key"
+        },
+        {
+          "column": "region_key",
+          "references": "dw.dim_region.region_key"
+        },
+        {
+          "column": "zeit_key",
+          "references": "dw.dim_zeit.zeit_key"
+        }
+      ],
+      "primary_key": [
+        "region_key",
+        "energietraeger_key",
+        "ts_utc"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "dw.fact_kapazitaet": {
+      "columns": [
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "bundesland_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "zubau_mw",
+          "nullable": false,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "anzahl_zubau",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "abgang_mw",
+          "nullable": false,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "anzahl_abgang",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "anfangsbestand_mw",
+          "nullable": false,
+          "type": "decimal(14,3)"
+        },
+        {
+          "name": "anfangsbestand_anzahl",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "bestand_mw",
+          "nullable": false,
+          "type": "decimal(14,3)"
+        },
+        {
+          "name": "bestand_anzahl",
+          "nullable": false,
+          "type": "int"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "bundesland_key",
+          "references": "dw.dim_bundesland.bundesland_key"
+        },
+        {
+          "column": "datum_key",
+          "references": "dw.dim_datum.datum_key"
+        },
+        {
+          "column": "energietraeger_key",
+          "references": "dw.dim_energietraeger.energietraeger_key"
+        }
+      ],
+      "primary_key": [
+        "datum_key",
+        "bundesland_key",
+        "energietraeger_key"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "dw.fact_last": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "aufloesung_min",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "netzlast_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "residuallast_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "pumpspeicher_verbrauch_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "datum_key",
+          "references": "dw.dim_datum.datum_key"
+        },
+        {
+          "column": "region_key",
+          "references": "dw.dim_region.region_key"
+        },
+        {
+          "column": "zeit_key",
+          "references": "dw.dim_zeit.zeit_key"
+        }
+      ],
+      "primary_key": [
+        "region_key",
+        "ts_utc"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "dw.fact_preis": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "day_ahead_eur_mwh",
+          "nullable": true,
+          "type": "decimal(9,2)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "datum_key",
+          "references": "dw.dim_datum.datum_key"
+        },
+        {
+          "column": "region_key",
+          "references": "dw.dim_region.region_key"
+        },
+        {
+          "column": "zeit_key",
+          "references": "dw.dim_zeit.zeit_key"
+        }
+      ],
+      "primary_key": [
+        "region_key",
+        "ts_utc"
+      ],
+      "type": "table",
+      "values": null
+    },
+    "rpt.v_dim_bundesland": {
+      "columns": [
+        {
+          "name": "bundesland_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "kuerzel",
+          "nullable": true,
+          "type": "varchar(3)"
+        },
+        {
+          "name": "ist_awz",
+          "nullable": false,
+          "type": "bit"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_dim_datum": {
+      "columns": [
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "datum",
+          "nullable": false,
+          "type": "date"
+        },
+        {
+          "name": "jahr",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "quartal",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "monat",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "monat_name_de",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "monat_name_en",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "jahr_monat",
+          "nullable": false,
+          "type": "char(7)"
+        },
+        {
+          "name": "iso_jahr",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "iso_woche",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "tag",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "wochentag_nr",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "wochentag_de",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "wochentag_en",
+          "nullable": false,
+          "type": "nvarchar(12)"
+        },
+        {
+          "name": "ist_wochenende",
+          "nullable": false,
+          "type": "bit"
+        },
+        {
+          "name": "saison_de",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        },
+        {
+          "name": "viertelstunden",
+          "nullable": false,
+          "type": "tinyint"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_dim_energietraeger": {
+      "columns": [
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "smard_filter_id",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "name_en",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "kategorie_de",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "kategorie_en",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "sortierung",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "farbe_hex",
+          "nullable": false,
+          "type": "char(7)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_dim_region": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "smard_code",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "name_de",
+          "nullable": false,
+          "type": "nvarchar(60)"
+        },
+        {
+          "name": "name_en",
+          "nullable": false,
+          "type": "nvarchar(60)"
+        },
+        {
+          "name": "typ_de",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "typ_en",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_dim_zeit": {
+      "columns": [
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "uhrzeit",
+          "nullable": false,
+          "type": "time(0)"
+        },
+        {
+          "name": "stunde",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "viertelstunde",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "tageszeit_de",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        },
+        {
+          "name": "tageszeit_en",
+          "nullable": false,
+          "type": "nvarchar(10)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_dq_luecken": {
+      "columns": [
+        {
+          "name": "region",
+          "nullable": false,
+          "type": "nvarchar(20)"
+        },
+        {
+          "name": "energietraeger",
+          "nullable": false,
+          "type": "nvarchar(40)"
+        },
+        {
+          "name": "jahr_monat",
+          "nullable": false,
+          "type": "char(7)"
+        },
+        {
+          "name": "erwartet",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "vorhanden",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "fehlend",
+          "nullable": true,
+          "type": "int"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_erzeugung": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "aufloesung_min",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "erzeugung_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_kapazitaet": {
+      "columns": [
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "jahr_monat",
+          "nullable": false,
+          "type": "char(7)"
+        },
+        {
+          "name": "bundesland_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "energietraeger_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "zubau_mw",
+          "nullable": false,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "anzahl_zubau",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "abgang_mw",
+          "nullable": false,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "anzahl_abgang",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "anfangsbestand_mw",
+          "nullable": false,
+          "type": "decimal(14,3)"
+        },
+        {
+          "name": "anfangsbestand_anzahl",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "bestand_mw",
+          "nullable": false,
+          "type": "decimal(14,3)"
+        },
+        {
+          "name": "bestand_anzahl",
+          "nullable": false,
+          "type": "int"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_last": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "aufloesung_min",
+          "nullable": false,
+          "type": "tinyint"
+        },
+        {
+          "name": "netzlast_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "residuallast_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        },
+        {
+          "name": "pumpspeicher_verbrauch_mwh",
+          "nullable": true,
+          "type": "decimal(12,3)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_last_stunde": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "stunde_utc",
+          "nullable": true,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": true,
+          "type": "smallint"
+        },
+        {
+          "name": "viertelstunden_netzlast_mwh",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "viertelstunden_residuallast_mwh",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "viertelstunden_pumpspeicher_verbrauch_mwh",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "netzlast_mwh",
+          "nullable": true,
+          "type": "decimal(38,3)"
+        },
+        {
+          "name": "residuallast_mwh",
+          "nullable": true,
+          "type": "decimal(38,3)"
+        },
+        {
+          "name": "pumpspeicher_verbrauch_mwh",
+          "nullable": true,
+          "type": "decimal(38,3)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_negative_preisphasen": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "start_datum_key",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "start_utc",
+          "nullable": true,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "ende_utc",
+          "nullable": true,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "start_lokal",
+          "nullable": true,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "ende_lokal",
+          "nullable": true,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "stunden",
+          "nullable": true,
+          "type": "int"
+        },
+        {
+          "name": "min_preis_eur_mwh",
+          "nullable": true,
+          "type": "decimal(9,2)"
+        },
+        {
+          "name": "avg_preis_eur_mwh",
+          "nullable": true,
+          "type": "decimal(38,6)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_preis": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "ts_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "day_ahead_eur_mwh",
+          "nullable": true,
+          "type": "decimal(9,2)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    },
+    "rpt.v_preis_last_stunde": {
+      "columns": [
+        {
+          "name": "region_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "stunde_utc",
+          "nullable": false,
+          "type": "datetime2(0)"
+        },
+        {
+          "name": "datum_key",
+          "nullable": false,
+          "type": "int"
+        },
+        {
+          "name": "zeit_key",
+          "nullable": false,
+          "type": "smallint"
+        },
+        {
+          "name": "day_ahead_eur_mwh",
+          "nullable": true,
+          "type": "decimal(9,2)"
+        },
+        {
+          "name": "netzlast_mwh",
+          "nullable": true,
+          "type": "decimal(38,3)"
+        },
+        {
+          "name": "residuallast_mwh",
+          "nullable": true,
+          "type": "decimal(38,3)"
+        }
+      ],
+      "foreign_keys": [],
+      "primary_key": [],
+      "type": "view",
+      "values": null
+    }
+  }
+}

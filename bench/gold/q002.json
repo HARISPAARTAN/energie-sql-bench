@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q002",
+  "result": {
+    "columns": [
+      "stunden"
+    ],
+    "rows": [
+      [
+        457
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "6807c3906c8fa0361e9351ba083136fc8cf15df9d265bc4800d8c7a2a9bf5a7e"
+}

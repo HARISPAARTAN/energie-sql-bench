@@ -1,0 +1,25 @@
+id: q004
+split: test
+tier: T2
+tags: [erzeugung, energietraeger, gruppierung]
+de: "Wie viel Strom erzeugte jeder Energieträger 2025 in DE-LU (MWh)? Gib den deutschen Namen des Energieträgers und die Erzeugung aus, nur Energieträger mit Erzeugungsdaten."
+en: "How much electricity did each energy carrier generate in DE-LU in 2025 (MWh)? Return the carrier's German name and the generation, only carriers with generation data."
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT e.name_de, SUM(f.erzeugung_mwh) AS erzeugung_mwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND f.datum_key BETWEEN 20250101 AND 20251231
+  GROUP BY e.name_de
+check_sql: |
+  SELECT e.name_de, SUM(v.erzeugung_mwh) AS s
+  FROM rpt.v_erzeugung v
+  JOIN rpt.v_dim_energietraeger e ON e.energietraeger_key = v.energietraeger_key
+  WHERE v.region_key = 1 AND v.datum_key / 10000 = 2025
+  GROUP BY e.name_de
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "11 Zeilen: Kernenergie hat 2025 keine Zeilen. Ein LEFT JOIN von der Dimension liefert eine zwölfte Zeile mit NULL und ist falsch. 2026-10-25: Wind Onshore 107231652.080 MWh als größter Wert."

@@ -1,0 +1,36 @@
+{
+  "expect": "rows",
+  "id": "q069",
+  "result": {
+    "columns": [
+      "jahr",
+      "datum",
+      "avg_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        2023,
+        "2023-01-23",
+        "202.734166"
+      ],
+      [
+        2024,
+        "2024-12-12",
+        "395.338750"
+      ],
+      [
+        2025,
+        "2025-01-20",
+        "231.357916"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "date",
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "ca554a4930a1ac782d87bb8e2a7593b041584876727cc35559ff1d06e70094b5"
+}

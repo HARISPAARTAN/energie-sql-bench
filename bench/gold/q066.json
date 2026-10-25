@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q066",
+  "result": {
+    "columns": [
+      "netzlast_gw"
+    ],
+    "rows": [
+      [
+        "50.303285"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "82d2ef371a474f78396e701c2ec170e00bcef725395b29791c349e9905126a01"
+}

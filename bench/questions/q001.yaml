@@ -1,0 +1,23 @@
+id: q001
+split: test
+tier: T1
+tags: [preis, jahr]
+de: "Wie hoch war der durchschnittliche Day-Ahead-Preis in DE-LU im Jahr 2024 (€/MWh)?"
+en: "What was the average day-ahead price in DE-LU in 2024 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  SELECT AVG(v.day_ahead_eur_mwh) AS avg_preis
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  JOIN rpt.v_dim_region g ON g.region_key = v.region_key
+  WHERE g.smard_code = N'DE-LU' AND d.jahr = 2024
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Jahr nach lokalem Datum (datum_key). Ein Filter auf ts_utc verschiebt die Jahresgrenzen um eine Stunde. Wert 2026-10-25: 78.512033."

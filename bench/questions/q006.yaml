@@ -1,0 +1,26 @@
+id: q006
+split: test
+tier: T3
+tags: [leistung, einheit, lokalzeit]
+de: "Welche mittlere Photovoltaik-Leistung in MW gab es am 21. Juni 2025 zwischen 13 und 14 Uhr Ortszeit?"
+en: "What was the average solar PV power in MW on 21 June 2025 between 13:00 and 14:00 local time?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(f.erzeugung_mwh) * 4 AS leistung_mw
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_zeit z ON z.zeit_key = f.zeit_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND e.name_de = N'Photovoltaik'
+    AND f.datum_key = 20250621
+    AND z.stunde = 13
+check_sql: |
+  SELECT SUM(erzeugung_mwh) AS mw
+  FROM dw.fact_erzeugung
+  WHERE region_key = 1 AND energietraeger_key = 1
+    AND ts_utc >= '2025-06-21T11:00:00' AND ts_utc < '2025-06-21T12:00:00'
+tables: [dw.dim_energietraeger, dw.dim_region, dw.dim_zeit, dw.fact_erzeugung]
+duckdb: ok
+notes: "Leistung in MW = MWh je Viertelstunde mal 4 (gemittelt); die Summe der vier Viertelstunden einer Stunde ist dasselbe. Sommerzeit: 13 Uhr lokal = 11 Uhr UTC. Wert 2026-10-25: 45415.75."

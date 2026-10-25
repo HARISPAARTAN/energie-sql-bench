@@ -1,0 +1,25 @@
+id: q007
+split: test
+tier: T3
+tags: [anteil, kategorie, prozent]
+de: "Wie hoch war der Anteil erneuerbarer Energien an der gesamten Stromerzeugung in DE-LU im Jahr 2025 in Prozent?"
+en: "What was the share of renewables in total electricity generation in DE-LU in 2025, in percent?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT 100.0 * SUM(CASE WHEN e.kategorie_de = N'Erneuerbar' THEN f.erzeugung_mwh END)
+         / SUM(f.erzeugung_mwh) AS ee_anteil_prozent
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND f.datum_key BETWEEN 20250101 AND 20251231
+check_sql: |
+  SELECT 100.0 * SUM(CASE WHEN v.energietraeger_key BETWEEN 1 AND 6 THEN v.erzeugung_mwh ELSE 0 END)
+         / SUM(v.erzeugung_mwh) AS p
+  FROM rpt.v_erzeugung v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2025
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Pumpspeicher zählt als Konventionell. Anteil als Bruch (0.59) statt Prozent ist falsch. Wert 2026-10-25: 58.947634."

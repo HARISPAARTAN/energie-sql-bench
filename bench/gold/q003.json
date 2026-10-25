@@ -1,0 +1,39 @@
+{
+  "expect": "rows",
+  "id": "q003",
+  "result": {
+    "columns": [
+      "name_de",
+      "bestand_mw"
+    ],
+    "rows": [
+      [
+        "Bayern",
+        "31080.548"
+      ],
+      [
+        "Baden-Württemberg",
+        "14581.737"
+      ],
+      [
+        "Nordrhein-Westfalen",
+        "14089.921"
+      ],
+      [
+        "Niedersachsen",
+        "10574.689"
+      ],
+      [
+        "Brandenburg",
+        "8924.766"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "str",
+      "decimal"
+    ]
+  },
+  "snapshot": "44b27e3cfa841c31",
+  "sql_sha256": "ebe17b919d97ccbb4d61f70d10b036fc08323725f86047f4e289d177998046bc"
+}

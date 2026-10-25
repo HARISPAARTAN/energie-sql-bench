@@ -1,0 +1,26 @@
+id: q003
+split: test
+tier: T2
+tags: [kapazitaet, bundesland, ranking]
+de: "Welche fünf Bundesländer hatten Ende September 2026 die größte installierte Photovoltaik-Leistung? Gib den Namen des Bundeslands und die Leistung in MW aus, absteigend sortiert."
+en: "Which five federal states had the largest installed solar PV capacity at the end of September 2026? Return the state name and the capacity in MW, in descending order."
+expect: rows
+ordered: true
+gold_sql: |
+  SELECT TOP 5 b.name_de, k.bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Photovoltaik'
+    AND k.datum_key = 20260901
+  ORDER BY k.bestand_mw DESC
+check_sql: |
+  SELECT TOP 5 b.name_de, SUM(k.anfangsbestand_mw + k.zubau_mw - k.abgang_mw) AS bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  WHERE k.energietraeger_key = 1 AND k.datum_key <= 20260901
+  GROUP BY b.name_de
+  ORDER BY bestand_mw DESC
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Bestand am Monatsende steht im Monatsersten (datum_key 20260901). Gegenprobe als kumulierte Summe aus Anfangsbestand, Zubau und Abgang. 2026-10-25: Bayern 31080.548, Baden-Württemberg 14581.737, Nordrhein-Westfalen 14089.921, Niedersachsen 10574.689, Brandenburg 8924.766."

@@ -1,0 +1,25 @@
+id: q064
+split: dev
+tier: T2
+tags: [kapazitaet, bundesland, ranking]
+de: "Nenne die drei Bundesländer mit dem größten Wind-Onshore-Bestand Ende Dezember 2025 (Name und MW), größter zuerst."
+en: "Name the three federal states with the largest onshore wind capacity at the end of December 2025 (name and MW), largest first."
+expect: rows
+ordered: true
+gold_sql: |
+  SELECT TOP 3 b.name_de, k.bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+  WHERE e.name_de = N'Wind Onshore' AND k.datum_key = 20251201
+  ORDER BY k.bestand_mw DESC
+check_sql: |
+  SELECT TOP 3 b.name_de, SUM(k.anfangsbestand_mw + k.zubau_mw - k.abgang_mw) AS bestand_mw
+  FROM dw.fact_kapazitaet k
+  JOIN dw.dim_bundesland b ON b.bundesland_key = k.bundesland_key
+  WHERE k.energietraeger_key = 2 AND k.datum_key <= 20251201
+  GROUP BY b.name_de
+  ORDER BY bestand_mw DESC
+tables: [dw.dim_bundesland, dw.dim_energietraeger, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Wert 2026-10-25: Niedersachsen 13940.636, Schleswig-Holstein 9630.511, Brandenburg 9542.746."

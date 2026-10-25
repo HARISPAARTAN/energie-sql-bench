@@ -1,0 +1,22 @@
+id: q062
+split: dev
+tier: T1
+tags: [preis, monat]
+de: "Wie hoch war der durchschnittliche Day-Ahead-Preis in DE-LU im Dezember 2024 (€/MWh)?"
+en: "What was the average day-ahead price in DE-LU in December 2024 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20241201 AND 20241231
+check_sql: |
+  SELECT AVG(v.day_ahead_eur_mwh) AS a
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr_monat = '2024-12'
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Wert 2026-10-25: 108.315591."
