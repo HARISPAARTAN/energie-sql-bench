@@ -1,0 +1,22 @@
+id: q020
+split: test
+tier: T1
+tags: [last, residuallast, mittelwert]
+de: "Wie hoch war die Residuallast in DE-LU im Jahr 2025 im Mittel je Viertelstunde (MWh)?"
+en: "What was the average residual load per quarter-hour in DE-LU in 2025 (MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(l.residuallast_mwh) AS avg_residuallast_mwh
+  FROM dw.fact_last l
+  JOIN dw.dim_region r ON r.region_key = l.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND l.datum_key BETWEEN 20250101 AND 20251231
+check_sql: |
+  SELECT SUM(v.residuallast_mwh) / COUNT(v.residuallast_mwh) AS mittel
+  FROM rpt.v_last v
+  WHERE v.region_key = 1
+    AND v.ts_utc >= '2024-12-31T23:00:00' AND v.ts_utc < '2025-12-31T23:00:00'
+tables: [dw.dim_region, dw.fact_last]
+duckdb: ok
+notes: "AVG über Viertelstunden mit Wert (2025 fehlt ein Wert). Wert 2026-10-25: 7506.020795."

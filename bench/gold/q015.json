@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q015",
+  "result": {
+    "columns": [
+      "residuallast_mwh"
+    ],
+    "rows": [
+      [
+        "264264789.500"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "2a3046e9da6a27c56f1387d5dac5f8a06919e2d401272372018a9e88d91b0e05"
+}

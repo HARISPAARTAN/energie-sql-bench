@@ -160,3 +160,26 @@ def retrieve_tables(
         for fk in schema["tables"][table]["foreign_keys"]:
             selected.add(fk["references"].rsplit(".", 1)[0])
     return sorted(selected) if selected else sorted(schema["tables"])
+
+
+def unknown_columns(sql: str, schema: dict[str, Any]) -> list[str]:
+    """Schema binding check with sqlglot's qualifier: [] when every table and column resolves, else the error."""
+    import sqlglot
+    from sqlglot.errors import SqlglotError
+    from sqlglot.optimizer.qualify import qualify
+
+    mapping: dict[str, dict[str, dict[str, str]]] = {}
+    for name, meta in schema["tables"].items():
+        db, table = name.split(".")
+        mapping.setdefault(db, {})[table] = {col["name"]: "TEXT" for col in meta["columns"]}
+    try:
+        qualify(
+            sqlglot.parse_one(sql, read="tsql"),
+            schema=mapping,
+            dialect="tsql",
+            validate_qualify_columns=True,
+            identify=False,
+        )
+    except SqlglotError as exc:
+        return [str(exc).splitlines()[0]]
+    return []

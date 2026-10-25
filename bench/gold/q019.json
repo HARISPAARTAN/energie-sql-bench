@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q019",
+  "result": {
+    "columns": [
+      "max_netzlast_mwh"
+    ],
+    "rows": [
+      [
+        "19140.000"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "4612985da5c2e4198547e5cb413b3e302f5f935e41cc9f18545838dcba2397d5"
+}

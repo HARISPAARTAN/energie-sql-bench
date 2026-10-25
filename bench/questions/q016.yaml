@@ -1,0 +1,23 @@
+id: q016
+split: test
+tier: T1
+tags: [preis, synonym, quartal]
+de: "Wie hoch war der durchschnittliche Börsenstrompreis im ersten Quartal 2026 (€/MWh)?"
+en: "What was the average exchange electricity price in the first quarter of 2026 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  JOIN dw.dim_datum d ON d.datum_key = p.datum_key
+  WHERE r.smard_code = N'DE-LU'
+    AND d.jahr = 2026 AND d.quartal = 1
+check_sql: |
+  SELECT AVG(v.day_ahead_eur_mwh) AS durchschnitt
+  FROM rpt.v_preis v
+  WHERE v.region_key = 1
+    AND v.datum_key BETWEEN 20260101 AND 20260331
+tables: [dw.dim_datum, dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Synonym: Börsenstrompreis = Day-Ahead-Preis; Region DE-LU ist implizit. Wert 2026-10-25: 102.167207."

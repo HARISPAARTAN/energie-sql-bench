@@ -1,0 +1,22 @@
+id: q011
+split: test
+tier: T1
+tags: [preis, maximum]
+de: "Wie hoch war der höchste Day-Ahead-Preis in DE-LU im Jahr 2023 (€/MWh)?"
+en: "What was the highest day-ahead price in DE-LU in 2023 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT MAX(p.day_ahead_eur_mwh) AS max_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20230101 AND 20231231
+check_sql: |
+  SELECT MAX(v.day_ahead_eur_mwh) AS hoechstpreis
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr = 2023
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Lokales Jahr über datum_key. Wert 2026-10-25: 524.27."

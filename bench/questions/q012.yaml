@@ -1,0 +1,23 @@
+id: q012
+split: test
+tier: T1
+tags: [preis, minimum, negativ]
+de: "Wie niedrig war der niedrigste Day-Ahead-Preis in DE-LU im Jahr 2025 (€/MWh)?"
+en: "What was the lowest day-ahead price in DE-LU in 2025 (EUR/MWh)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT MIN(p.day_ahead_eur_mwh) AS min_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20250101 AND 20251231
+check_sql: |
+  SELECT TOP 1 v.day_ahead_eur_mwh AS tiefstpreis
+  FROM rpt.v_preis v
+  WHERE v.region_key = 1
+    AND v.ts_utc >= '2024-12-31T23:00:00' AND v.ts_utc < '2025-12-31T23:00:00'
+  ORDER BY v.day_ahead_eur_mwh ASC
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Der Wert ist negativ; ein Filter auf positive Preise ist falsch. Wert 2026-10-25: -250.32."

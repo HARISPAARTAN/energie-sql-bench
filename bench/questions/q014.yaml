@@ -1,0 +1,23 @@
+id: q014
+split: test
+tier: T1
+tags: [preis, zaehlen, grenze]
+de: "In wie vielen Stunden lag der Day-Ahead-Preis in DE-LU im Mai 2025 bei 0 €/MWh oder darunter?"
+en: "In how many hours was the day-ahead price in DE-LU at or below 0 EUR/MWh in May 2025?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT COUNT(*) AS stunden
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20250501 AND 20250531
+    AND p.day_ahead_eur_mwh <= 0
+check_sql: |
+  SELECT SUM(CASE WHEN v.day_ahead_eur_mwh <= 0 THEN 1 ELSE 0 END) AS n
+  FROM rpt.v_preis v
+  JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+  WHERE v.region_key = 1 AND d.jahr_monat = '2025-05'
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Kleiner gleich 0, nicht kleiner 0. Wert 2026-10-25: 138."

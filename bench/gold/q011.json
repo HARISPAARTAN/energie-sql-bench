@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q011",
+  "result": {
+    "columns": [
+      "max_preis_eur_mwh"
+    ],
+    "rows": [
+      [
+        "524.27"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "bca1067713ce90088c8ae45a00ca5e85c0c33728e393ce90ddc4919ec9cc154c"
+}
