@@ -1,0 +1,46 @@
+[project]
+name = "energie-sql-bench"
+version = "0.1.0"
+description = "Text-to-SQL-Benchmark auf Deutsch und Englisch auf einem echten SQL-Server-Warehouse der Energiewende."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Harithas Harikaran" }]
+dependencies = [
+  "anthropic>=1.17,<2",
+  "duckdb>=1.5.6,<2",
+  "httpx>=0.28,<0.29",
+  "jinja2>=3.1.6,<4",
+  "pydantic>=2.14,<3",
+  "pyodbc>=5.3,<6",
+  "pyyaml>=6.0.3,<7",
+  "sqlglot>=30.24,<31",
+  "typer>=0.15,<1",
+]
+
+[project.scripts]
+esb = "energie_sql_bench.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8.3,<10", "ruff>=0.9,<1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/energie_sql_bench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["db: needs the local SQL Server with the bench_reader login (ESB_DB_PASSWORD in .env)"]
+addopts = "-m 'not db'"
+
+[tool.ruff]
+line-length = 110
+target-version = "py313"
+extend-exclude = ["results", "site"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]

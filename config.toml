@@ -1,0 +1,106 @@
+# Energie-SQL-Bench settings. Secrets never go here: ESB_DB_PASSWORD and ANTHROPIC_API_KEY come from .env.
+
+[database]
+server = "127.0.0.1,1433"
+name = "energiewende"
+sample_name = "energiewende_sample"
+driver = "ODBC Driver 18 for SQL Server"
+user = "bench_reader"
+query_timeout_s = 30
+lock_timeout_ms = 5000
+max_rows = 10000
+
+[snapshot]
+as_of = "2026-10-01"
+smard_start = "2023-01-01"
+smard_end = "2026-09-30"
+mastr_end = "2026-09"
+mastr_export = "2026-10-25"
+monitor_commit = "b399d0144c22c355cf56e2284d61aac158ed0b5a"
+
+[bench]
+languages = ["de", "en"]
+default_split = "test"
+gold_max_rows = 1000
+
+[variants.v1]
+schema = "full"
+semantic = false
+fewshot = false
+
+[variants.v2]
+schema = "full"
+semantic = false
+fewshot = true
+
+[variants.v3]
+schema = "full"
+semantic = true
+fewshot = false
+
+[variants.v4]
+schema = "full"
+semantic = true
+fewshot = true
+
+[variants.v5]
+schema = "oracle"
+semantic = true
+fewshot = true
+
+[variants.v6]
+schema = "retrieved"
+semantic = true
+fewshot = true
+
+[compare]
+rel_tol = 1e-4
+abs_tol = 0.005
+
+[providers.anthropic]
+models = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
+effort = "low"
+max_tokens = 2000
+cache = true
+
+[providers.ollama]
+host = "http://127.0.0.1:11434"
+model = "qwen2.5-coder:7b"
+num_ctx = 8192
+seed = 42
+
+[cost]
+# ECB euro reference rate: USD per 1 EUR, https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
+eur_usd = 1.1193
+rate_date = "2026-10-23"
+max_run_usd = 5.0
+
+[report]
+leaderboard_de = "reports/leaderboard.md"
+leaderboard_en = "reports/leaderboard.en.md"
+site_dir = "site"
+# provider|model|variant|self_correct(0/1): the configurations the leaderboard promises (spec section 8)
+planned = [
+  "anthropic|claude-haiku-5-5|v1|0",
+  "anthropic|claude-haiku-5-5|v2|0",
+  "anthropic|claude-haiku-5-5|v3|0",
+  "anthropic|claude-haiku-5-5|v4|0",
+  "anthropic|claude-haiku-5-5|v5|0",
+  "anthropic|claude-haiku-5-5|v6|0",
+  "anthropic|claude-haiku-5-5|v4|1",
+  "anthropic|claude-sonnet-5-5|v1|0",
+  "anthropic|claude-sonnet-5-5|v2|0",
+  "anthropic|claude-sonnet-5-5|v3|0",
+  "anthropic|claude-sonnet-5-5|v4|0",
+  "anthropic|claude-sonnet-5-5|v5|0",
+  "anthropic|claude-sonnet-5-5|v6|0",
+  "anthropic|claude-opus-5-5|v4|0",
+  "ollama|qwen2.5-coder:7b|v4|0",
+  "ollama|qwen2.5-coder:7b|v5|0",
+]
+# paired McNemar comparisons shown in the report: "A vs B"
+comparisons = [
+  "anthropic|claude-haiku-5-5|v1|0 vs anthropic|claude-haiku-5-5|v4|0",
+  "anthropic|claude-haiku-5-5|v4|0 vs anthropic|claude-haiku-5-5|v4|1",
+  "anthropic|claude-sonnet-5-5|v1|0 vs anthropic|claude-sonnet-5-5|v4|0",
+]
