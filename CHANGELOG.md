@@ -7,7 +7,7 @@ live run.
 
 - **Honesty (C1).** Both READMEs, `docs/methodology.md`, `LICENSE-DATA.md` and the results site no longer say the
   gold set was written by one person. Questions, gold SQL and check queries were drafted by a language model
-  (`claude-sonnet-5-5` through Claude Code, tasks 3 and 4 on 2026-10-25 and 2026-10-26) and verified by execution
+  (`claude-sonnet-5-5` through Claude Code, tasks 3 and 4 on 2026-10-25) and verified by execution
   against the warehouse; the owner's review of 20 intents is pending. `check_sql` is described as a second,
   model-written query compared by execution, not as an independent check. New section "Herkunft des Goldstandards"
   / "Provenance of the gold set".

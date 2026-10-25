@@ -26,7 +26,7 @@ nicht leeres Ergebnis und speichert die Ergebnismenge in `bench/gold/qNNN.json` 
 ### Herkunft des Goldstandards
 
 Fragen (Deutsch und Englisch), Gold-SQL und `check_sql` aller 70 Intents hat ein Sprachmodell entworfen (Claude
-Sonnet 5.5, `claude-sonnet-5-5`, über Claude Code, Aufgaben 3 und 4 am 2026-10-25 und 2026-10-26) nach Vorgaben des
+Sonnet 5.5, `claude-sonnet-5-5`, über Claude Code, Aufgaben 3 und 4 am 2026-10-25) nach Vorgaben des
 Eigentümers. Ein Mensch hat sie noch nicht durchgesehen; die Prüfung von 20 Intents durch den Eigentümer steht aus.
 Geprüft ist durch Ausführung: das Gold läuft zweimal, `check_sql` ist eine zweite, ebenfalls modellgeschriebene
 Abfrage und wird per Ausführung verglichen. Für etwa 18 Intents geht sie denselben Weg wie das Gold (Sichten und

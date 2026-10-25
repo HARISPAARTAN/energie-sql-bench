@@ -60,8 +60,8 @@ Ergebnis per Ausführung mit dem Gold verglichen wird. Dateien: `bench/questions
 ## Herkunft des Goldstandards
 
 Die Fragen (Deutsch und Englisch), die Gold-SQL und die Gegenprobe-Abfragen aller 70 Intents hat ein Sprachmodell
-entworfen: Claude Sonnet 5.5 (`claude-sonnet-5-5`) über Claude Code, in den Aufgaben 3 und 4 am 2026-10-25 und
-2026-10-26, nach Vorgaben des Eigentümers (Schema, Stufen, Konventionen). Ein Mensch hat sie bisher nicht
+entworfen: Claude Sonnet 5.5 (`claude-sonnet-5-5`) über Claude Code, in den Aufgaben 3 und 4 am 2026-10-25,
+nach Vorgaben des Eigentümers (Schema, Stufen, Konventionen). Ein Mensch hat sie bisher nicht
 durchgesehen; die Prüfung von 20 Intents durch den Eigentümer steht aus.
 
 Geprüft wurde durch Ausführung am Warehouse. Die Gold-SQL läuft zweimal (reproduzierbar, nicht leer, höchstens

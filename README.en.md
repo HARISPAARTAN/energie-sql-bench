@@ -57,7 +57,7 @@ gold by execution. Files: `bench/questions/`, `bench/gold/`.
 ## Provenance of the gold set
 
 The questions (German and English), the gold SQL and the check queries of all 70 intents were drafted by a language
-model: Claude Sonnet 5.5 (`claude-sonnet-5-5`) through Claude Code, in tasks 3 and 4 on 2026-10-25 and 2026-10-26,
+model: Claude Sonnet 5.5 (`claude-sonnet-5-5`) through Claude Code, in tasks 3 and 4 on 2026-10-25,
 under the owner's specification (schema, tiers, conventions). No human has reviewed them yet; the owner's review of
 20 intents is pending.
 
