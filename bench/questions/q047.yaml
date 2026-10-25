@@ -1,0 +1,24 @@
+id: q047
+split: test
+tier: T3
+tags: [utc, erzeugung, summe]
+de: "Wie viel Strom (MWh) wurde in DE-LU insgesamt am UTC-Kalendertag 1. Januar 2024 erzeugt (00:00 bis 24:00 UTC)?"
+en: "How much electricity (MWh) was generated in DE-LU in total on the UTC calendar day 1 January 2024 (00:00 to 24:00 UTC)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh
+  FROM dw.fact_erzeugung f
+  JOIN dw.dim_region r ON r.region_key = f.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND f.ts_utc >= '2024-01-01T00:00:00' AND f.ts_utc < '2024-01-02T00:00:00'
+check_sql: |
+  SELECT SUM(v.erzeugung_mwh) AS summe
+  FROM rpt.v_erzeugung v
+  JOIN rpt.v_dim_zeit z ON z.zeit_key = v.zeit_key
+  WHERE v.region_key = 1
+    AND ((v.datum_key = 20240101 AND z.stunde >= 1)
+      OR (v.datum_key = 20240102 AND z.stunde < 1))
+tables: [dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "Hier ausdrücklich UTC; datum_key ist lokal und daher falsch. Wert 2026-10-25: 1217773.000."

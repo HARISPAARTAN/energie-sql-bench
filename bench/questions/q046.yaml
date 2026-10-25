@@ -1,0 +1,22 @@
+id: q046
+split: test
+tier: T3
+tags: [preis, feiertag, lokalzeit]
+de: "Wie hoch war der durchschnittliche Day-Ahead-Preis am 25. Dezember 2025 (Ortszeit) in DE-LU?"
+en: "What was the average day-ahead price on 25 December 2025 (local time) in DE-LU?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT AVG(p.day_ahead_eur_mwh) AS avg_preis_eur_mwh
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key = 20251225
+check_sql: |
+  SELECT AVG(v.day_ahead_eur_mwh) AS mittel
+  FROM rpt.v_preis v
+  WHERE v.region_key = 1
+    AND v.ts_utc >= '2025-12-24T23:00:00' AND v.ts_utc < '2025-12-25T23:00:00'
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Lokaler Tag = UTC 24.12. 23:00 bis 25.12. 23:00. Wert 2026-10-25: 69.752916."

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q042",
+  "result": {
+    "columns": [
+      "volllaststunden"
+    ],
+    "rows": [
+      [
+        "757.967344"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "1feed2d5e59f00a8d652fcdb0e409abdba0269fd113d015942e1421d20170485"
+}

@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q043",
+  "result": {
+    "columns": [
+      "erzeugung_mwh"
+    ],
+    "rows": [
+      [
+        "3302234.000"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "3f7fb160c6314e709959c9d26ad1809650715f0ca16147b632c88e1ca25d63ed"
+}

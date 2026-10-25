@@ -1,0 +1,23 @@
+id: q044
+split: test
+tier: T3
+tags: [preis, prozent, negativ]
+de: "Wie viel Prozent der Stunden des Jahres 2024 hatten in DE-LU einen negativen Day-Ahead-Preis?"
+en: "What percentage of the hours of 2024 had a negative day-ahead price in DE-LU?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT 100.0 * SUM(CASE WHEN p.day_ahead_eur_mwh < 0 THEN 1 ELSE 0 END) / COUNT(*) AS anteil_negativ_prozent
+  FROM dw.fact_preis p
+  JOIN dw.dim_region r ON r.region_key = p.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND p.datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  SELECT 100.0
+         * (SELECT COUNT(*) FROM rpt.v_preis v
+            WHERE v.region_key = 1 AND v.datum_key BETWEEN 20240101 AND 20241231 AND v.day_ahead_eur_mwh < 0)
+         / (SELECT COUNT(*) FROM rpt.v_preis v
+            WHERE v.region_key = 1 AND v.datum_key BETWEEN 20240101 AND 20241231) AS prozent
+tables: [dw.dim_region, dw.fact_preis]
+duckdb: ok
+notes: "Prozent, nicht Anteil; Nenner = Stunden mit Preis (8784). Wert 2026-10-25: 5.202641165755."

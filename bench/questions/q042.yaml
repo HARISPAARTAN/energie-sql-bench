@@ -1,0 +1,38 @@
+id: q042
+split: test
+tier: T3
+tags: [volllaststunden, kapazitaet, einheit]
+de: "Wie viele Volllaststunden erreichte die Photovoltaik 2025 in Deutschland? Rechne mit der Erzeugung in DE-LU geteilt durch den durchschnittlichen installierten Bestand an den Monatsenden 2025 (MW)."
+en: "How many full-load hours did solar PV reach in Germany in 2025? Use the generation in DE-LU divided by the average installed capacity at the 2025 month ends (MW)."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH erz AS (
+      SELECT SUM(f.erzeugung_mwh) AS erzeugung_mwh
+      FROM dw.fact_erzeugung f
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+      JOIN dw.dim_region r ON r.region_key = f.region_key
+      WHERE r.smard_code = N'DE-LU'
+        AND e.name_de = N'Photovoltaik'
+        AND f.datum_key BETWEEN 20250101 AND 20251231
+  ), monat AS (
+      SELECT k.datum_key, SUM(k.bestand_mw) AS bestand_mw
+      FROM dw.fact_kapazitaet k
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = k.energietraeger_key
+      WHERE e.name_de = N'Photovoltaik'
+        AND k.datum_key BETWEEN 20250101 AND 20251201
+      GROUP BY k.datum_key
+  ), kap AS (
+      SELECT AVG(bestand_mw) AS avg_bestand_mw FROM monat
+  )
+  SELECT erz.erzeugung_mwh / kap.avg_bestand_mw AS volllaststunden
+  FROM erz CROSS JOIN kap
+check_sql: |
+  SELECT (SELECT SUM(v.erzeugung_mwh) FROM rpt.v_erzeugung v
+          WHERE v.region_key = 1 AND v.energietraeger_key = 1
+            AND v.ts_utc >= '2024-12-31T23:00:00' AND v.ts_utc < '2025-12-31T23:00:00')
+       / (SELECT SUM(k.bestand_mw) / 12.0 FROM rpt.v_kapazitaet k
+          WHERE k.energietraeger_key = 1 AND k.jahr_monat LIKE '2025-%') AS stunden
+tables: [dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung, dw.fact_kapazitaet]
+duckdb: ok
+notes: "Erzeugung 2025 (MWh) geteilt durch das Mittel der zwölf Monatsend-Bestände (Summe über Bundesländer). Wert 2026-10-25: 757.967344."

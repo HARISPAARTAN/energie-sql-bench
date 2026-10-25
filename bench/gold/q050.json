@@ -1,0 +1,20 @@
+{
+  "expect": "rows",
+  "id": "q050",
+  "result": {
+    "columns": [
+      "anzahl_phasen"
+    ],
+    "rows": [
+      [
+        34
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "e3a616bf84480d068b291f2db95ba9d4914f4a0728b17feac7ce4a494ad3c199"
+}

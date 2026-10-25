@@ -1,0 +1,39 @@
+id: q048
+split: test
+tier: T4
+tags: [vorjahr, lag, prozent]
+de: "Wie viel Solarstrom wurde in DE-LU in den Jahren 2023, 2024 und 2025 erzeugt, und um wie viel Prozent änderte sich die Erzeugung jeweils gegenüber dem Vorjahr? Gib Jahr, MWh und Veränderung in Prozent aus (für 2023 NULL)."
+en: "How much solar power was generated in DE-LU in 2023, 2024 and 2025, and by what percentage did generation change against the previous year each time? Return year, MWh and change in percent (NULL for 2023)."
+expect: rows
+ordered: false
+gold_sql: |
+  WITH jahr_summe AS (
+      SELECT d.jahr, SUM(f.erzeugung_mwh) AS erzeugung_mwh
+      FROM dw.fact_erzeugung f
+      JOIN dw.dim_energietraeger e ON e.energietraeger_key = f.energietraeger_key
+      JOIN dw.dim_region r ON r.region_key = f.region_key
+      JOIN dw.dim_datum d ON d.datum_key = f.datum_key
+      WHERE r.smard_code = N'DE-LU'
+        AND e.name_de = N'Photovoltaik'
+        AND d.jahr BETWEEN 2023 AND 2025
+      GROUP BY d.jahr
+  )
+  SELECT jahr, erzeugung_mwh,
+         100.0 * (erzeugung_mwh - LAG(erzeugung_mwh) OVER (ORDER BY jahr))
+               / LAG(erzeugung_mwh) OVER (ORDER BY jahr) AS veraenderung_prozent
+  FROM jahr_summe
+check_sql: |
+  WITH y AS (
+      SELECT d.jahr AS j, SUM(v.erzeugung_mwh) AS s
+      FROM rpt.v_erzeugung v
+      JOIN rpt.v_dim_datum d ON d.datum_key = v.datum_key
+      WHERE v.region_key = 1 AND v.energietraeger_key = 1
+      GROUP BY d.jahr
+  )
+  SELECT a.j, a.s, 100.0 * (a.s - b.s) / b.s AS pct
+  FROM y a
+  LEFT JOIN y b ON b.j = a.j - 1
+  WHERE a.j BETWEEN 2023 AND 2025
+tables: [dw.dim_datum, dw.dim_energietraeger, dw.dim_region, dw.fact_erzeugung]
+duckdb: ok
+notes: "2022 liegt nicht im Datenschnitt, daher NULL für 2023. Wert 2026-10-25: 2023: 55798782.000 MWh, NULL; 2024: 63444102.750 MWh, 13.701590 %; 2025: 74217707.670 MWh, 16.981255 %."

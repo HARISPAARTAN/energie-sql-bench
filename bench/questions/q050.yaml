@@ -1,0 +1,33 @@
+id: q050
+split: test
+tier: T4
+tags: [inseln, negativ, zaehlen]
+de: "Wie viele Phasen mit mindestens sechs aufeinanderfolgenden Stunden negativer Day-Ahead-Preise begannen 2024 in DE-LU (Beginn nach Ortszeit)?"
+en: "How many runs of at least six consecutive hours of negative day-ahead prices started in DE-LU in 2024 (start in local time)?"
+expect: rows
+ordered: false
+gold_sql: |
+  SELECT COUNT(*) AS anzahl_phasen
+  FROM rpt.v_negative_preisphasen v
+  JOIN dw.dim_region r ON r.region_key = v.region_key
+  WHERE r.smard_code = N'DE-LU'
+    AND v.stunden >= 6
+    AND v.start_datum_key BETWEEN 20240101 AND 20241231
+check_sql: |
+  WITH neg AS (
+      SELECT ts_utc,
+             CASE WHEN LAG(ts_utc) OVER (ORDER BY ts_utc) = DATEADD(hour, -1, ts_utc) THEN 0 ELSE 1 END AS neu
+      FROM dw.fact_preis
+      WHERE region_key = 1 AND day_ahead_eur_mwh < 0
+  ), grp AS (
+      SELECT ts_utc, SUM(neu) OVER (ORDER BY ts_utc ROWS UNBOUNDED PRECEDING) AS g FROM neg
+  ), ph AS (
+      SELECT MIN(ts_utc) AS start_utc, COUNT(*) AS stunden FROM grp GROUP BY g
+  )
+  SELECT COUNT(*) AS n
+  FROM ph
+  WHERE stunden >= 6
+    AND CAST(start_utc AT TIME ZONE 'UTC' AT TIME ZONE 'W. Europe Standard Time' AS date) BETWEEN '2024-01-01' AND '2024-12-31'
+tables: [dw.dim_region, rpt.v_negative_preisphasen]
+duckdb: ok
+notes: "Gaps and islands; Beginn nach lokalem Datum (start_datum_key). Wert 2026-10-25: 34."

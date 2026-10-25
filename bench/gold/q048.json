@@ -1,0 +1,36 @@
+{
+  "expect": "rows",
+  "id": "q048",
+  "result": {
+    "columns": [
+      "jahr",
+      "erzeugung_mwh",
+      "veraenderung_prozent"
+    ],
+    "rows": [
+      [
+        2023,
+        "55798782.000",
+        null
+      ],
+      [
+        2024,
+        "63444102.750",
+        "13.701590"
+      ],
+      [
+        2025,
+        "74217707.670",
+        "16.981255"
+      ]
+    ],
+    "truncated": false,
+    "types": [
+      "int",
+      "decimal",
+      "decimal"
+    ]
+  },
+  "snapshot": "fef9ef3543551538",
+  "sql_sha256": "1915b07ce91b5e791363f1b251ab2d325093b98e051c5d1867363f91d641677c"
+}
