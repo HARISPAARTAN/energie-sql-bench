@@ -38,7 +38,7 @@ def read_dotenv(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.is_file():
         return values
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    for raw in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -207,7 +207,7 @@ def load_settings(root: Path | None = None, environ: Mapping[str, str] | None = 
     root = (root or find_root()).resolve()
     cfg = tomllib.loads((root / "config.toml").read_text(encoding="utf-8"))
     prices = tomllib.loads((root / "pricing.toml").read_text(encoding="utf-8"))
-    env = read_dotenv(root / ".env")
+    env = {k: v for k, v in read_dotenv(root / ".env").items() if v}  # blank values keep the defaults
     source = os.environ if environ is None else environ
     env.update({k: v for k, v in source.items() if k in ENV_KEYS and v})
     d = cfg["database"]

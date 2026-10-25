@@ -78,3 +78,18 @@ def test_planned_comparisons_and_pricing(tmp_root: Path) -> None:
 
 def test_read_dotenv_missing(tmp_path: Path) -> None:
     assert read_dotenv(tmp_path / ".env") == {}
+
+
+def test_blank_dotenv_values_do_not_override_defaults(tmp_root: Path) -> None:
+    (tmp_root / ".env").write_text("OLLAMA_HOST=\nESB_DB_NAME=  \nESB_DB_PASSWORD=\n", encoding="utf-8")
+    s = load_settings(tmp_root, environ={})
+    assert s.ollama.host == "http://127.0.0.1:11434"
+    assert s.db.name == "energiewende"
+    assert s.db.password == ""
+    assert "OLLAMA_HOST" not in s.env
+
+
+def test_dotenv_with_utf8_bom_is_read(tmp_path: Path) -> None:
+    path = tmp_path / ".env"
+    path.write_bytes(b"\xef\xbb\xbfESB_DB_PASSWORD=abc\nESB_DB_NAME=x\n")
+    assert read_dotenv(path) == {"ESB_DB_PASSWORD": "abc", "ESB_DB_NAME": "x"}
